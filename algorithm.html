@@ -326,7 +326,7 @@
             i += chunk.length; continue;
           }
           // String literal
-          if (code[i]==='\'||code[i]==='"'||code[i]==='`') {
+          if (["'", '"', '`'].includes(code[i])) {
             const q=code[i]; let j=i+1;
             while(j<n && code[j]!==q){if(code[j]==='\\')j++;j++;}
             out += `<span class="str">${esc(code.slice(i,j+1))}</span>`;
