@@ -639,7 +639,119 @@ const DPGenerators = {
     }
     steps.push({ array: dp[n].slice(), sorted: Array.from({length:W+1},(_,k)=>k), desc: `Knapsack Complete! Maximum value = ${dp[n][W]} 🎉` });
     return steps;
+  },
+
+  coinChange(coins = [1, 3, 4], amount = 12) {
+    const steps = [];
+    const dp = Array(amount + 1).fill(Infinity); dp[0] = 0;
+    steps.push({ array: dp.map(v=>v===Infinity?0:v).slice(0,13), desc: `Coin Change: coins=[${coins}], amount=${amount}. dp[0]=0, rest=∞` });
+    for (let i = 1; i <= amount; i++) {
+      for (const c of coins) {
+        if (c <= i && dp[i-c] + 1 < dp[i]) {
+          dp[i] = dp[i-c] + 1;
+        }
+      }
+      const disp = dp.slice(0, 13).map(v=>v===Infinity?0:v);
+      steps.push({ array: disp, active: [i], sorted: disp.map((_,k)=>k).filter(k=>disp[k]>0), desc: `Amount ${i}: min coins = ${dp[i]===Infinity?'∞':dp[i]}. dp=[${dp.slice(0,i+1).map(v=>v===Infinity?'∞':v).join(',')}]` });
+    }
+    steps.push({ array: dp.slice(0,13).map(v=>v===Infinity?0:v), sorted: Array.from({length:13},(_,k)=>k), desc: `Coin Change Complete! Minimum coins for ${amount} = ${dp[amount]} 🎉` });
+    return steps;
   }
+};
+
+// ===== Shell Sort Step Generator =====
+SortingGenerators.shellSort = function(arr) {
+  const steps = [];
+  const a = [...arr]; const sorted = [];
+  let gap = Math.floor(a.length / 2);
+  steps.push({ array: [...a], desc: `Starting Shell Sort. Initial gap = ${gap}` });
+  while (gap > 0) {
+    for (let i = gap; i < a.length; i++) {
+      const temp = a[i]; let j = i;
+      steps.push({ array: [...a], comparing: [j, j-gap], desc: `gap=${gap}: Comparing a[${j}]=${a[j]} with a[${j-gap}]=${a[j-gap]}` });
+      while (j >= gap && a[j-gap] > temp) {
+        a[j] = a[j-gap];
+        steps.push({ array: [...a], swapping: [j, j-gap], desc: `Shifting ${a[j]} right. gap=${gap}` });
+        j -= gap;
+      }
+      a[j] = temp;
+    }
+    gap = Math.floor(gap / 2);
+    if (gap === 0) { for(let k=0;k<a.length;k++) sorted.push(k); }
+    steps.push({ array: [...a], sorted: gap===0?[...sorted]:[], desc: gap>0 ? `Pass complete. New gap = ${gap}` : `Final pass (gap=1) complete! Sorted! 🎉` });
+  }
+  return steps;
+};
+
+// ===== Counting Sort Step Generator =====
+SortingGenerators.countingSort = function(arr) {
+  const steps = [];
+  const a = arr.map(v => Math.min(v, 20)); // cap at 20 for display
+  const max = Math.max(...a);
+  const count = new Array(max + 1).fill(0);
+  steps.push({ array: [...a], desc: `Counting Sort: Count occurrences of each value (0 to ${max}).` });
+  a.forEach((v, i) => {
+    count[v]++;
+    steps.push({ array: [...a], active: [i], desc: `count[${v}] = ${count[v]}. Counted element ${v} at index ${i}.` });
+  });
+  // Prefix sum
+  for (let i = 1; i <= max; i++) count[i] += count[i-1];
+  steps.push({ array: [...count.slice(0, Math.min(max+1, a.length))], desc: `Prefix sums computed. Output positions determined.` });
+  const out = new Array(a.length).fill(0);
+  for (let i = a.length-1; i >= 0; i--) {
+    out[--count[a[i]]] = a[i];
+    steps.push({ array: [...out], active: [count[a[i]]], desc: `Placed ${a[i]} at position ${count[a[i]]}. Output: [${out.join(',')}]` });
+  }
+  steps.push({ array: out, sorted: Array.from({length:out.length},(_,k)=>k), desc: 'Counting Sort Complete! 🎉' });
+  return steps;
+};
+
+// ===== Jump Search Step Generator =====
+SearchingGenerators.jumpSearch = function(arr, target) {
+  const sorted = [...arr].sort((a,b)=>a-b);
+  const steps = [];
+  const n = sorted.length;
+  const step = Math.floor(Math.sqrt(n));
+  steps.push({ array: sorted, desc: `Jump Search for ${target}. Step size = √${n} ≈ ${step}` });
+  let prev = 0, curr = step;
+  while (curr < n && sorted[curr] < target) {
+    steps.push({ array: sorted, active: [prev, Math.min(curr,n-1)], comparing: [curr], desc: `Jump! a[${curr}]=${sorted[curr]} < ${target}. Move to block [${curr}, ${Math.min(curr+step,n-1)}]` });
+    prev = curr; curr += step;
+  }
+  steps.push({ array: sorted, active: Array.from({length:Math.min(curr,n)-prev},(_,k)=>prev+k), desc: `Found block [${prev}..${Math.min(curr,n)-1}]. Linear search in this block.` });
+  for (let i = prev; i < Math.min(curr, n); i++) {
+    steps.push({ array: sorted, comparing: [i], desc: `Linear check: a[${i}] = ${sorted[i]}` });
+    if (sorted[i] === target) {
+      steps.push({ array: sorted, found: i, sorted: [i], desc: `Found ${target} at index ${i}! 🎉` });
+      return steps;
+    }
+  }
+  steps.push({ array: sorted, desc: `${target} not found.` });
+  return steps;
+};
+
+// ===== Bellman-Ford Step Generator =====
+GraphGenerators.bellmanFord = function(start = 'A') {
+  const g = this.sampleGraph;
+  const weights = {'A-B':4,'A-C':2,'B-D':5,'B-E':1,'C-F':8,'C-G':10,'E-F':3};
+  const edges = Object.keys(weights).map(k => { const [u,v]=k.split('-'); return [u,v,weights[k]]; });
+  const steps = [];
+  const dist = {}; Object.keys(g.nodes).forEach(n => dist[n] = Infinity);
+  dist[start] = 0;
+  const V = Object.keys(g.nodes).length;
+  steps.push({ nodes: g.nodes, edges: g.edges, weights, dist: {...dist}, visited: [], desc: `Bellman-Ford from ${start}. Init all distances to ∞ except source (0).` });
+  for (let i = 0; i < V - 1; i++) {
+    let changed = false;
+    for (const [u, v, w] of edges) {
+      if (dist[u] !== Infinity && dist[u] + w < dist[v]) {
+        dist[v] = dist[u] + w; changed = true;
+        steps.push({ nodes: g.nodes, edges: g.edges, weights, dist: {...dist}, current: u, queue: [v], desc: `Iteration ${i+1}: Relax ${u}→${v}. ${dist[u]}+${w}=${dist[v]}. Updated!` });
+      }
+    }
+    if (!changed) { steps.push({ nodes: g.nodes, edges: g.edges, weights, dist: {...dist}, desc: `Iteration ${i+1}: No updates. Converged early!` }); break; }
+  }
+  steps.push({ nodes: g.nodes, edges: g.edges, weights, dist: {...dist}, path: Object.keys(g.nodes), desc: `Bellman-Ford Complete! Shortest distances: ${Object.entries(dist).map(([k,v])=>`${k}:${v}`).join(', ')} 🎉` });
+  return steps;
 };
 
 // ===== Viz Controls Setup =====

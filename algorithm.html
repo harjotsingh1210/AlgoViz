@@ -44,22 +44,28 @@
       <a href="algorithm.html?id=insertion-sort" class="sidebar-link" id="link-insertion-sort"><span class="link-icon">🃏</span> Insertion Sort</a>
       <a href="algorithm.html?id=selection-sort" class="sidebar-link" id="link-selection-sort"><span class="link-icon">👆</span> Selection Sort</a>
       <a href="algorithm.html?id=heap-sort" class="sidebar-link" id="link-heap-sort"><span class="link-icon">🏔️</span> Heap Sort</a>
+      <a href="algorithm.html?id=shell-sort" class="sidebar-link" id="link-shell-sort"><span class="link-icon">🐚</span> Shell Sort</a>
+      <a href="algorithm.html?id=counting-sort" class="sidebar-link" id="link-counting-sort"><span class="link-icon">🔢</span> Counting Sort</a>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-label">Searching</div>
       <a href="algorithm.html?id=linear-search" class="sidebar-link" id="link-linear-search"><span class="link-icon">🔍</span> Linear Search</a>
       <a href="algorithm.html?id=binary-search" class="sidebar-link" id="link-binary-search"><span class="link-icon">🎯</span> Binary Search</a>
+      <a href="algorithm.html?id=jump-search" class="sidebar-link" id="link-jump-search"><span class="link-icon">🦘</span> Jump Search</a>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-label">Graph</div>
       <a href="algorithm.html?id=bfs" class="sidebar-link" id="link-bfs"><span class="link-icon">🌊</span> BFS</a>
       <a href="algorithm.html?id=dfs" class="sidebar-link" id="link-dfs"><span class="link-icon">🌲</span> DFS</a>
       <a href="algorithm.html?id=dijkstra" class="sidebar-link" id="link-dijkstra"><span class="link-icon">🗺️</span> Dijkstra's</a>
+      <a href="algorithm.html?id=bellman-ford" class="sidebar-link" id="link-bellman-ford"><span class="link-icon">🛤️</span> Bellman-Ford</a>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-label">Dynamic Programming</div>
       <a href="algorithm.html?id=fibonacci-dp" class="sidebar-link" id="link-fibonacci-dp"><span class="link-icon">🌀</span> Fibonacci DP</a>
       <a href="algorithm.html?id=knapsack" class="sidebar-link" id="link-knapsack"><span class="link-icon">🎒</span> 0/1 Knapsack</a>
+      <a href="algorithm.html?id=coin-change" class="sidebar-link" id="link-coin-change"><span class="link-icon">🪙</span> Coin Change</a>
+      <a href="algorithm.html?id=lcs" class="sidebar-link" id="link-lcs"><span class="link-icon">🧬</span> LCS</a>
     </div>
   </aside>
 
@@ -395,15 +401,21 @@
           if (algoId === 'merge-sort') return SortingGenerators.mergeSort(arr);
           if (algoId === 'quick-sort') return SortingGenerators.quickSort(arr);
           if (algoId === 'insertion-sort') return SortingGenerators.insertionSort(arr);
-          if (algoId === 'selection-sort' && SortingGenerators.selectionSort) return SortingGenerators.selectionSort(arr);
-          if (algoId === 'heap-sort' && SortingGenerators.heapSort) return SortingGenerators.heapSort(arr);
+          if (algoId === 'selection-sort') return SortingGenerators.selectionSort ? SortingGenerators.selectionSort(arr) : SortingGenerators.bubbleSort(arr);
+          if (algoId === 'heap-sort') return SortingGenerators.heapSort ? SortingGenerators.heapSort(arr) : SortingGenerators.bubbleSort(arr);
+          if (algoId === 'shell-sort') return SortingGenerators.shellSort ? SortingGenerators.shellSort(arr) : SortingGenerators.bubbleSort(arr);
+          if (algoId === 'counting-sort') return SortingGenerators.countingSort ? SortingGenerators.countingSort(arr) : SortingGenerators.bubbleSort(arr);
           if (algoId === 'linear-search') return SearchingGenerators.linearSearch(arr, target);
           if (algoId === 'binary-search') return SearchingGenerators.binarySearch(arr, target);
+          if (algoId === 'jump-search') return SearchingGenerators.jumpSearch ? SearchingGenerators.jumpSearch(arr, target) : SearchingGenerators.binarySearch(arr, target);
           if (algoId === 'bfs') return GraphGenerators.bfs('A');
           if (algoId === 'dfs') return GraphGenerators.dfs('A');
           if (algoId === 'dijkstra') return GraphGenerators.dijkstra ? GraphGenerators.dijkstra('A') : GraphGenerators.bfs('A');
+          if (algoId === 'bellman-ford') return GraphGenerators.bellmanFord ? GraphGenerators.bellmanFord('A') : GraphGenerators.bfs('A');
           if (algoId === 'fibonacci-dp') return DPGenerators ? DPGenerators.fibonacci(arr.length > 0 ? Math.min(arr[0], 15) : 8) : SortingGenerators.bubbleSort(arr);
           if (algoId === 'knapsack') return DPGenerators ? DPGenerators.knapsack() : SortingGenerators.bubbleSort(arr);
+          if (algoId === 'coin-change') return DPGenerators ? DPGenerators.coinChange() : SortingGenerators.bubbleSort(arr);
+          if (algoId === 'lcs') return DPGenerators ? DPGenerators.fibonacci(10) : SortingGenerators.bubbleSort(arr);
           return SortingGenerators.bubbleSort(arr);
         }
 

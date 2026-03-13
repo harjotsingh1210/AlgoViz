@@ -709,6 +709,336 @@ def dijkstra(graph, start):
     },
     related: ['fibonacci-dp', 'lcs'],
     tags: ['dp', 'optimization', 'combinatorics']
+  },
+
+  // ===== MORE SORTING =====
+  {
+    id: 'shell-sort',
+    name: 'Shell Sort',
+    category: 'sorting',
+    difficulty: 'medium',
+    icon: '🐚',
+    timeComplexity: { best: 'O(n log n)', average: 'O(n log² n)', worst: 'O(n²)' },
+    spaceComplexity: 'O(1)',
+    stable: false,
+    description: 'Shell Sort is an optimized Insertion Sort that compares elements far apart, gradually reducing the gap to produce a nearly sorted array before the final pass.',
+    longDesc: `Shell Sort improves Insertion Sort by sorting elements that are far apart first, using a decreasing "gap" sequence. This moves elements quickly toward their final positions. When gap=1, it becomes a regular Insertion Sort on a nearly-sorted array, making it very efficient.`,
+    useCases: 'Medium-sized arrays, embedded systems with limited memory, when average performance matters',
+    code: {
+      javascript: `function shellSort(arr) {
+  let gap = Math.floor(arr.length / 2);
+  while (gap > 0) {
+    for (let i = gap; i < arr.length; i++) {
+      const temp = arr[i];
+      let j = i;
+      while (j >= gap && arr[j - gap] > temp) {
+        arr[j] = arr[j - gap];
+        j -= gap;
+      }
+      arr[j] = temp;
+    }
+    gap = Math.floor(gap / 2);
+  }
+  return arr;
+}`,
+      python: `def shell_sort(arr):
+    gap = len(arr) // 2
+    while gap > 0:
+        for i in range(gap, len(arr)):
+            temp, j = arr[i], i
+            while j >= gap and arr[j - gap] > temp:
+                arr[j] = arr[j - gap]; j -= gap
+            arr[j] = temp
+        gap //= 2
+    return arr`,
+      cpp: `void shellSort(vector<int>& arr) {
+  for(int gap=arr.size()/2; gap>0; gap/=2)
+    for(int i=gap;i<arr.size();i++) {
+      int temp=arr[i], j=i;
+      while(j>=gap && arr[j-gap]>temp){arr[j]=arr[j-gap];j-=gap;}
+      arr[j]=temp;
+    }
+}`,
+      java: `void shellSort(int[] arr) {
+  for(int gap=arr.length/2; gap>0; gap/=2)
+    for(int i=gap;i<arr.length;i++) {
+      int temp=arr[i], j=i;
+      while(j>=gap && arr[j-gap]>temp){arr[j]=arr[j-gap];j-=gap;}
+      arr[j]=temp;
+    }
+}`
+    },
+    related: ['insertion-sort', 'bubble-sort', 'merge-sort'],
+    tags: ['comparison', 'in-place', 'gap-sequence']
+  },
+  {
+    id: 'counting-sort',
+    name: 'Counting Sort',
+    category: 'sorting',
+    difficulty: 'easy',
+    icon: '🔢',
+    timeComplexity: { best: 'O(n+k)', average: 'O(n+k)', worst: 'O(n+k)' },
+    spaceComplexity: 'O(k)',
+    stable: true,
+    description: 'Counting Sort counts occurrences of each element, then uses cumulative counts to place each element in its correct position. Works only with integers in a known range.',
+    longDesc: `Counting Sort is a non-comparison sorting algorithm. It counts how many times each value appears, computes a prefix sum to determine positions, then places elements in sorted order. Time complexity is O(n+k) where k is the range of values — much faster than O(n log n) when k is small.`,
+    useCases: 'Integer sorting with small range, stable sort needed, radix sort base, vote counting',
+    code: {
+      javascript: `function countingSort(arr) {
+  const max = Math.max(...arr);
+  const count = new Array(max + 1).fill(0);
+  arr.forEach(v => count[v]++);
+  // Prefix sum
+  for (let i = 1; i <= max; i++) count[i] += count[i-1];
+  const out = new Array(arr.length);
+  for (let i = arr.length-1; i >= 0; i--) {
+    out[--count[arr[i]]] = arr[i];
+  }
+  return out;
+}`,
+      python: `def counting_sort(arr):
+    max_v = max(arr)
+    count = [0] * (max_v + 1)
+    for v in arr: count[v] += 1
+    for i in range(1, max_v+1): count[i] += count[i-1]
+    out = [0] * len(arr)
+    for v in reversed(arr):
+        count[v] -= 1; out[count[v]] = v
+    return out`,
+      cpp: `vector<int> countingSort(vector<int>& arr) {
+  int mx=*max_element(arr.begin(),arr.end());
+  vector<int> cnt(mx+1,0), out(arr.size());
+  for(int v:arr) cnt[v]++;
+  for(int i=1;i<=mx;i++) cnt[i]+=cnt[i-1];
+  for(int i=arr.size()-1;i>=0;i--) out[--cnt[arr[i]]]=arr[i];
+  return out;
+}`,
+      java: `int[] countingSort(int[] arr) {
+  int mx=Arrays.stream(arr).max().getAsInt();
+  int[] cnt=new int[mx+1], out=new int[arr.length];
+  for(int v:arr) cnt[v]++;
+  for(int i=1;i<=mx;i++) cnt[i]+=cnt[i-1];
+  for(int i=arr.length-1;i>=0;i--) out[--cnt[arr[i]]]=arr[i];
+  return out;
+}`
+    },
+    related: ['merge-sort', 'bubble-sort', 'radix-sort'],
+    tags: ['non-comparison', 'stable', 'linear-time', 'integer']
+  },
+
+  // ===== MORE SEARCHING =====
+  {
+    id: 'jump-search',
+    name: 'Jump Search',
+    category: 'searching',
+    difficulty: 'medium',
+    icon: '🦘',
+    timeComplexity: { best: 'O(1)', average: 'O(√n)', worst: 'O(√n)' },
+    spaceComplexity: 'O(1)',
+    stable: true,
+    description: 'Jump Search works on sorted arrays by jumping ahead by fixed steps of √n, then doing a linear search backward in the identified block.',
+    longDesc: `Jump Search finds the optimal block size of √n elements to skip over. It jumps forward by √n steps until it finds a block where the element may lie, then does a linear search in that block. Faster than linear search O(n) but slower than binary search O(log n). Best for when backward traversal is expensive.`,
+    useCases: 'Sorted arrays where jumping back is costly, large sorted data, systems where binary search is impractical',
+    code: {
+      javascript: `function jumpSearch(arr, target) {
+  const n = arr.length;
+  const step = Math.floor(Math.sqrt(n));
+  let prev = 0, curr = step;
+  while (curr < n && arr[curr] < target) {
+    prev = curr; curr += step;
+  }
+  for (let i = prev; i < Math.min(curr, n); i++) {
+    if (arr[i] === target) return i;
+  }
+  return -1;
+}`,
+      python: `import math
+def jump_search(arr, target):
+    n, step, prev = len(arr), int(math.sqrt(len(arr))), 0
+    curr = step
+    while curr < n and arr[curr] < target:
+        prev, curr = curr, curr + step
+    for i in range(prev, min(curr, n)):
+        if arr[i] == target: return i
+    return -1`,
+      cpp: `int jumpSearch(vector<int>& arr, int target) {
+  int n=arr.size(), step=sqrt(n), prev=0, curr=step;
+  while(curr<n && arr[curr]<target){prev=curr;curr+=step;}
+  for(int i=prev;i<min(curr,n);i++)
+    if(arr[i]==target) return i;
+  return -1;
+}`,
+      java: `int jumpSearch(int[] arr, int target) {
+  int n=arr.length, step=(int)Math.sqrt(n), prev=0, curr=step;
+  while(curr<n && arr[curr]<target){prev=curr;curr+=step;}
+  for(int i=prev;i<Math.min(curr,n);i++)
+    if(arr[i]==target) return i;
+  return -1;
+}`
+    },
+    related: ['linear-search', 'binary-search'],
+    tags: ['sorted', 'block-search', 'sqrt']
+  },
+
+  // ===== MORE DP =====
+  {
+    id: 'coin-change',
+    name: 'Coin Change',
+    category: 'dp',
+    difficulty: 'medium',
+    icon: '🪙',
+    timeComplexity: { best: 'O(amount)', average: 'O(n·amount)', worst: 'O(n·amount)' },
+    spaceComplexity: 'O(amount)',
+    stable: true,
+    description: 'Coin Change finds the minimum number of coins needed to make a given amount. DP builds up solutions from amount=0 to the target.',
+    longDesc: `Given coin denominations, find the fewest coins to make the target amount. dp[i] stores the minimum coins needed for amount i. For each amount, try every coin — if using that coin leads to fewer coins, update dp[i]. Starting from dp[0]=0, each subsequent amount builds on previous results.`,
+    useCases: 'Currency exchange, change-making, resource allocation problems',
+    code: {
+      javascript: `function coinChange(coins, amount) {
+  const dp = Array(amount + 1).fill(Infinity);
+  dp[0] = 0;
+  for (let i = 1; i <= amount; i++)
+    for (const c of coins)
+      if (c <= i && dp[i - c] + 1 < dp[i])
+        dp[i] = dp[i - c] + 1;
+  return dp[amount] === Infinity ? -1 : dp[amount];
+}`,
+      python: `def coin_change(coins, amount):
+    dp = [float('inf')] * (amount + 1)
+    dp[0] = 0
+    for i in range(1, amount + 1):
+        for c in coins:
+            if c <= i and dp[i-c] + 1 < dp[i]:
+                dp[i] = dp[i-c] + 1
+    return dp[amount] if dp[amount] != float('inf') else -1`,
+      cpp: `int coinChange(vector<int>& coins, int amount) {
+  vector<int> dp(amount+1, INT_MAX);
+  dp[0]=0;
+  for(int i=1;i<=amount;i++)
+    for(int c:coins)
+      if(c<=i && dp[i-c]!=INT_MAX)
+        dp[i]=min(dp[i],dp[i-c]+1);
+  return dp[amount]==INT_MAX?-1:dp[amount];
+}`,
+      java: `int coinChange(int[] coins, int amount) {
+  int[] dp = new int[amount+1];
+  Arrays.fill(dp, Integer.MAX_VALUE); dp[0]=0;
+  for(int i=1;i<=amount;i++)
+    for(int c:coins)
+      if(c<=i && dp[i-c]!=Integer.MAX_VALUE)
+        dp[i]=Math.min(dp[i],dp[i-c]+1);
+  return dp[amount]==Integer.MAX_VALUE?-1:dp[amount];
+}`
+    },
+    related: ['knapsack', 'fibonacci-dp', 'lcs'],
+    tags: ['dp', 'greedy', 'optimization']
+  },
+  {
+    id: 'lcs',
+    name: 'Longest Common Subsequence',
+    category: 'dp',
+    difficulty: 'hard',
+    icon: '🧬',
+    timeComplexity: { best: 'O(m·n)', average: 'O(m·n)', worst: 'O(m·n)' },
+    spaceComplexity: 'O(m·n)',
+    stable: true,
+    description: 'LCS finds the longest subsequence common to two sequences. A subsequence maintains relative order but need not be contiguous.',
+    longDesc: `The Longest Common Subsequence finds the longest sequence that appears in the same order in both input strings (but not necessarily contiguous). dp[i][j] stores the LCS length for the first i characters of text1 and j characters of text2. If characters match, extend the LCS; otherwise take the maximum of the two options.`,
+    useCases: 'DNA sequence alignment, diff tools (git diff), spell correction, file comparison',
+    code: {
+      javascript: `function lcs(text1, text2) {
+  const m = text1.length, n = text2.length;
+  const dp = Array(m+1).fill(null).map(() => Array(n+1).fill(0));
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = text1[i-1] === text2[j-1]
+        ? dp[i-1][j-1] + 1
+        : Math.max(dp[i-1][j], dp[i][j-1]);
+  return dp[m][n];
+}`,
+      python: `def lcs(text1, text2):
+    m, n = len(text1), len(text2)
+    dp = [[0]*(n+1) for _ in range(m+1)]
+    for i in range(1, m+1):
+        for j in range(1, n+1):
+            if text1[i-1] == text2[j-1]: dp[i][j] = dp[i-1][j-1]+1
+            else: dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+    return dp[m][n]`,
+      cpp: `int lcs(string& a, string& b) {
+  int m=a.size(), n=b.size();
+  vector<vector<int>> dp(m+1,vector<int>(n+1,0));
+  for(int i=1;i<=m;i++)
+    for(int j=1;j<=n;j++)
+      dp[i][j]=a[i-1]==b[j-1]?dp[i-1][j-1]+1:max(dp[i-1][j],dp[i][j-1]);
+  return dp[m][n];
+}`,
+      java: `int lcs(String a, String b) {
+  int m=a.length(), n=b.length();
+  int[][] dp=new int[m+1][n+1];
+  for(int i=1;i<=m;i++)
+    for(int j=1;j<=n;j++)
+      dp[i][j]=a.charAt(i-1)==b.charAt(j-1)?dp[i-1][j-1]+1:Math.max(dp[i-1][j],dp[i][j-1]);
+  return dp[m][n];
+}`
+    },
+    related: ['knapsack', 'coin-change', 'fibonacci-dp'],
+    tags: ['dp', 'string', 'sequence']
+  },
+
+  // ===== MORE GRAPH =====
+  {
+    id: 'bellman-ford',
+    name: 'Bellman-Ford',
+    category: 'graph',
+    difficulty: 'hard',
+    icon: '🛤️',
+    timeComplexity: { best: 'O(VE)', average: 'O(VE)', worst: 'O(VE)' },
+    spaceComplexity: 'O(V)',
+    stable: true,
+    description: 'Bellman-Ford finds shortest paths from a source vertex, handling negative edge weights — unlike Dijkstra. It also detects negative weight cycles.',
+    longDesc: `Bellman-Ford relaxes all edges V-1 times. After each iteration, the shortest distance to each vertex converges. Unlike Dijkstra, it handles negative edge weights. If any edge can still be relaxed after V-1 iterations, a negative cycle exists. Time complexity is O(VE).`,
+    useCases: 'Graphs with negative edge weights, detecting negative cycles, network routing protocols (RIP)',
+    code: {
+      javascript: `function bellmanFord(V, edges, src) {
+  const dist = Array(V).fill(Infinity);
+  dist[src] = 0;
+  for (let i = 0; i < V - 1; i++)
+    for (const [u, v, w] of edges)
+      if (dist[u] + w < dist[v]) dist[v] = dist[u] + w;
+  // Check for negative cycles
+  for (const [u, v, w] of edges)
+    if (dist[u] + w < dist[v]) return null; // negative cycle
+  return dist;
+}`,
+      python: `def bellman_ford(V, edges, src):
+    dist = [float('inf')] * V
+    dist[src] = 0
+    for _ in range(V - 1):
+        for u, v, w in edges:
+            if dist[u] + w < dist[v]: dist[v] = dist[u] + w
+    for u, v, w in edges:
+        if dist[u] + w < dist[v]: return None  # negative cycle
+    return dist`,
+      cpp: `vector<int> bellmanFord(int V, vector<tuple<int,int,int>>& edges, int src) {
+  vector<int> dist(V, INT_MAX); dist[src]=0;
+  for(int i=0;i<V-1;i++)
+    for(auto&[u,v,w]:edges)
+      if(dist[u]!=INT_MAX && dist[u]+w<dist[v]) dist[v]=dist[u]+w;
+  for(auto&[u,v,w]:edges)
+    if(dist[u]!=INT_MAX && dist[u]+w<dist[v]) return {}; // neg cycle
+  return dist;
+}`,
+      java: `int[] bellmanFord(int V, int[][] edges, int src) {
+  int[] dist = new int[V]; Arrays.fill(dist, Integer.MAX_VALUE); dist[src]=0;
+  for(int i=0;i<V-1;i++)
+    for(int[] e:edges)
+      if(dist[e[0]]!=Integer.MAX_VALUE && dist[e[0]]+e[2]<dist[e[1]])
+        dist[e[1]]=dist[e[0]]+e[2];
+  return dist;
+}`
+    },
+    related: ['dijkstra', 'bfs', 'dfs'],
+    tags: ['graph', 'shortest-path', 'negative-weights', 'dynamic-programming']
   }
 ];
 
