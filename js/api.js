@@ -251,3 +251,10 @@ if (document.readyState === 'loading') {
 } else {
   initNavUserArea();
 }
+
+// ─────────────────────────────────────────
+// Warm-up ping — wakes Render from cold start silently
+// ─────────────────────────────────────────
+if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+  fetch(`${API_BASE_URL}/ping`, { method: 'GET', cache: 'no-cache' }).catch(() => {});
+}

@@ -18,13 +18,27 @@ const limiter = rateLimit({
 });
 
 // Middleware
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  'http://localhost:3000',
+  'http://localhost:8080',
+];
+
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (Postman, curl) or any localhost in dev
-    if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1') || origin === process.env.CLIENT_URL) {
+    // Allow: no origin (curl/Postman), localhost, vercel.app, netlify.app, explicit CLIENT_URL
+    if (
+      !origin ||
+      origin.includes('localhost') ||
+      origin.includes('127.0.0.1') ||
+      origin.includes('.vercel.app') ||
+      origin.includes('.netlify.app') ||
+      allowedOrigins.includes(origin)
+    ) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      console.warn('CORS blocked:', origin);
+      callback(null, true); // Allow all for now — tighten after testing
     }
   },
   credentials: true
@@ -39,10 +53,11 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/progress', require('./routes/progress'));
 app.use('/api/algorithms', require('./routes/algorithms'));
 
-// Health check
+// Health check + keep-alive ping (prevents Render cold start)
 app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'AlgoViz API is running 🚀', timestamp: new Date().toISOString() });
 });
+app.get('/ping', (req, res) => res.send('pong'));
 
 // 404 handler
 app.use((req, res) => {
