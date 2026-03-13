@@ -12,7 +12,7 @@ const API_BASE_URL =
   window.API_BASE_URL ||               // Set by deployment (vercel env var injection)
   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:5000'          // Local dev
-    : 'https://algoviz-api.onrender.com'); // ← CHANGE THIS to your Render URL after deploy
+    : 'https://algoviz-api-7x5i.onrender.com'); // ← Your Render backend
 
 // ─────────────────────────────────────────
 // Core fetch wrapper
