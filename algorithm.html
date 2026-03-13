@@ -157,11 +157,12 @@
                 <div class="code-dot"></div>
               </div>
               <span class="code-title" id="codeTitle">algorithm.js</span>
-              <div style="display:flex;gap:8px;">
+              <div style="display:flex;gap:8px;align-items:center;">
                 <button class="btn btn-secondary btn-sm" id="langJS" onclick="switchLang('javascript')">JS</button>
                 <button class="btn btn-secondary btn-sm" id="langPY" onclick="switchLang('python')">PY</button>
                 <button class="btn btn-secondary btn-sm" id="langCPP" onclick="switchLang('cpp')">C++</button>
                 <button class="btn btn-secondary btn-sm" id="langJAVA" onclick="switchLang('java')">Java</button>
+                <button class="btn btn-secondary btn-sm" id="btnCopy" onclick="copyCode()" title="Copy code">📋 Copy</button>
               </div>
             </div>
             <div class="code-body" id="codeBody" style="max-height:320px;overflow-y:auto;">
@@ -308,14 +309,63 @@
         });
       }
 
-      function syntaxHighlight(code, lang) {
-        return code
-          .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-          .replace(/\b(function|return|if|else|while|for|let|const|var|new|of|in|break|true|false|null|undefined|def|import|from|not|and|or|pass|None|len|range|class|public|private|static|void|int|boolean|string|vector|auto|using|namespace|include|extends|implements|this|super)\b/g, '<span class="kw">$1</span>')
-          .replace(/(\/\/.*$|#.*$)/gm, '<span class="cm">$1</span>')
-          .replace(/(\d+)/g, '<span class="num">$1</span>')
-          .replace(/(["'`])(.*?)\1/g, '<span class="str">$1$2$1</span>');
+      function syntaxHighlight(code) {
+        const KEYWORDS = new Set(['function','return','if','else','while','for','do','let','const','var','new','of','in','break','continue','true','false','null','undefined','def','import','from','not','and','or','pass','None','len','range','class','public','private','protected','static','void','int','long','short','char','bool','boolean','float','double','unsigned','signed','string','vector','auto','using','namespace','include','extends','implements','this','super','switch','case','default','try','catch','throw','final','abstract']);
+
+        function esc(s) {
+          return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        let out = '', i = 0, n = code.length;
+        while (i < n) {
+          // Single-line comment: // or #
+          if ((code[i]==='/' && code[i+1]==='/') || (code[i]==='#' && code[i-1]!=='&')) {
+            const end = code.indexOf('\n', i);
+            const chunk = end===-1 ? code.slice(i) : code.slice(i,end);
+            out += `<span class="cm">${esc(chunk)}</span>`;
+            i += chunk.length; continue;
+          }
+          // String literal
+          if (code[i]==='\'||code[i]==='"'||code[i]==='`') {
+            const q=code[i]; let j=i+1;
+            while(j<n && code[j]!==q){if(code[j]==='\\')j++;j++;}
+            out += `<span class="str">${esc(code.slice(i,j+1))}</span>`;
+            i=j+1; continue;
+          }
+          // Word (keyword or identifier)
+          if (/[A-Za-z_]/.test(code[i])) {
+            let j=i; while(j<n && /\w/.test(code[j]))j++;
+            const word=code.slice(i,j);
+            out += KEYWORDS.has(word) ? `<span class="kw">${word}</span>` : esc(word);
+            i=j; continue;
+          }
+          // Number
+          if (/\d/.test(code[i]) && (i===0||!/\w/.test(code[i-1]))) {
+            let j=i; while(j<n && /[\d.xXa-fA-F]/.test(code[j]))j++;
+            out += `<span class="num">${code.slice(i,j)}</span>`;
+            i=j; continue;
+          }
+          // Everything else (operators, symbols, whitespace)
+          out += esc(code[i]); i++;
+        }
+        return out;
       }
+
+      window.copyCode = () => {
+        const code = algo.code[currentLang] || algo.code.javascript;
+        navigator.clipboard.writeText(code).then(() => {
+          const btn = document.getElementById('btnCopy');
+          btn.textContent = '✅ Copied!';
+          setTimeout(() => btn.textContent = '📋 Copy', 2000);
+        }).catch(() => {
+          const ta = document.createElement('textarea');
+          ta.value = code; document.body.appendChild(ta); ta.select();
+          document.execCommand('copy'); document.body.removeChild(ta);
+          const btn = document.getElementById('btnCopy');
+          btn.textContent = '✅ Copied!';
+          setTimeout(() => btn.textContent = '📋 Copy', 2000);
+        });
+      };
 
       window.switchLang = (lang) => { currentLang = lang; renderCode(lang); };
       renderCode('javascript');
