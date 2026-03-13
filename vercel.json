@@ -1,21 +1,6 @@
 {
   "version": 2,
   "name": "algoviz",
-  "builds": [
-    {
-      "src": "*.html",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ],
-  "env": {
-    "API_BASE_URL": "https://algoviz-api.onrender.com"
-  },
   "headers": [
     {
       "source": "/(.*)",
