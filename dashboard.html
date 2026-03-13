@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard – AlgoViz</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="logo-icon">〈/〉</div>
+      <span class="logo-text">Algo<span>Viz</span></span>
+    </a>
+    <div class="navbar-links">
+      <a href="index.html">Home</a>
+      <a href="library.html">Algorithms</a>
+      <a href="compare.html">Compare</a>
+      <a href="practice.html">Practice</a>
+      <a href="dashboard.html" class="active">Dashboard</a>
+    </div>
+    <div class="navbar-actions">
+      <button class="theme-toggle">☀️</button>
+      <div id="navUserArea" style="display:flex;gap:10px;align-items:center;"></div>
+      <button class="nav-toggle" id="navToggle">☰</button>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <div style="max-width:1100px;margin:0 auto;padding:32px 24px;">
+
+      <!-- Guest banner -->
+      <div id="guestBanner" style="display:none;background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.25);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="font-weight:700;margin-bottom:4px;">👋 Welcome, Guest!</div>
+          <p style="font-size:0.85rem;color:var(--text-muted);">Sign in to track your progress, save quiz scores, and unlock your personalized learning dashboard.</p>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <a href="signup.html" class="btn btn-primary btn-sm">Sign Up Free</a>
+          <a href="login.html" class="btn btn-secondary btn-sm">Login</a>
+        </div>
+      </div>
+
+      <!-- Welcome Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:16px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div id="userAvatar" style="width:52px;height:52px;border-radius:50%;background:var(--gradient-brand);display:flex;align-items:center;justify-content:center;font-size:1.5rem;border:2px solid var(--border-color);"></div>
+          <div>
+            <div id="welcomeMsg" style="font-size:1.4rem;font-weight:800;">My Dashboard</div>
+            <div id="userEmail" style="font-size:0.85rem;color:var(--text-muted);"></div>
+          </div>
+        </div>
+        <a href="profile.html" class="btn btn-secondary btn-sm">⚙️ Edit Profile</a>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="grid-4" style="margin-bottom:28px;">
+        <div class="stat-card">
+          <div class="stat-value" id="statExplored">0</div>
+          <div class="stat-label">Algorithms Explored</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statQuizzes">0</div>
+          <div class="stat-label">Quizzes Completed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statAvg">–</div>
+          <div class="stat-label">Average Quiz Score</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statPoints">0</div>
+          <div class="stat-label">Total Points</div>
+        </div>
+      </div>
+
+      <!-- Progress by Category -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;" id="mainGrid">
+        <!-- Category Progress -->
+        <div class="card">
+          <div style="font-weight:700;font-size:0.9rem;margin-bottom:16px;">📊 Progress by Category</div>
+          <div style="display:flex;flex-direction:column;gap:14px;" id="categoryProgress"></div>
+        </div>
+
+        <!-- Quest Chart -->
+        <div class="card">
+          <div style="font-weight:700;font-size:0.9rem;margin-bottom:12px;">🏆 Quiz Performance</div>
+          <div style="height:200px;position:relative;">
+            <canvas id="quizChart"></canvas>
+          </div>
+          <p id="quizChartEmpty" style="text-align:center;color:var(--text-muted);font-size:0.85rem;padding:20px 0;display:none;">Complete quizzes to see your performance!</p>
+        </div>
+      </div>
+
+      <!-- Recently Explored -->
+      <div style="margin-bottom:24px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <h2 style="font-size:1rem;font-weight:700;">📚 Recently Explored</h2>
+          <a href="library.html" class="btn btn-secondary btn-sm">Browse All</a>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;" id="recentExplored"></div>
+        <div id="recentEmpty" style="display:none;text-align:center;padding:28px;color:var(--text-muted);font-size:0.85rem;">
+          No algorithms explored yet. <a href="library.html" style="color:var(--accent);">Start exploring →</a>
+        </div>
+      </div>
+
+      <!-- Quick Access -->
+      <div>
+        <h2 style="font-size:1rem;font-weight:700;margin-bottom:14px;">⚡ Quick Access</h2>
+        <div class="grid-4">
+          <a href="library.html" class="card" style="text-align:center;cursor:pointer;">
+            <div style="font-size:1.8rem;margin-bottom:8px;">📚</div>
+            <div style="font-size:0.85rem;font-weight:700;">Algorithm Library</div>
+          </a>
+          <a href="compare.html" class="card" style="text-align:center;cursor:pointer;">
+            <div style="font-size:1.8rem;margin-bottom:8px;">⚖️</div>
+            <div style="font-size:0.85rem;font-weight:700;">Compare Algorithms</div>
+          </a>
+          <a href="practice.html" class="card" style="text-align:center;cursor:pointer;">
+            <div style="font-size:1.8rem;margin-bottom:8px;">🎯</div>
+            <div style="font-size:0.85rem;font-weight:700;">Practice Quizzes</div>
+          </a>
+          <a href="algorithm.html?id=bubble-sort" class="card" style="text-align:center;cursor:pointer;">
+            <div style="font-size:1.8rem;margin-bottom:8px;">▶</div>
+            <div style="font-size:0.85rem;font-weight:700;">Start Visualizing</div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav-item"><span class="nav-icon">🏠</span>Home</a>
+    <a href="library.html" class="bottom-nav-item"><span class="nav-icon">📚</span>Algorithms</a>
+    <a href="practice.html" class="bottom-nav-item"><span class="nav-icon">🎯</span>Practice</a>
+    <a href="dashboard.html" class="bottom-nav-item active"><span class="nav-icon">📊</span>Dashboard</a>
+    <a href="profile.html" class="bottom-nav-item"><span class="nav-icon">👤</span>Profile</a>
+  </nav>
+
+  <script src="js/theme.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/algorithms.js"></script>
+  <script src="js/comparison.js"></script>
+  <script>
+    const session = Auth.getSession();
+    if (!session) {
+      document.getElementById('guestBanner').style.display = 'flex';
+      document.getElementById('welcomeMsg').textContent = 'Your Dashboard';
+      document.getElementById('userAvatar').textContent = '👤';
+    } else {
+      document.getElementById('welcomeMsg').textContent = `Welcome, ${session.name.split(' ')[0]}! 👋`;
+      document.getElementById('userEmail').textContent = session.email;
+      document.getElementById('guestBanner').style.display = 'none';
+      if (session.avatar) {
+        document.getElementById('userAvatar').innerHTML = `<img src="${session.avatar}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;">`;
+      }
+    }
+
+    const progress = session ? Auth.getProgress(session.id) : { explored: [], quizScores: {}, totalPoints: 0 };
+    const explored = progress.explored || [];
+    const quizScores = progress.quizScores || {};
+    const scoreValues = Object.values(quizScores);
+
+    // Stats
+    document.getElementById('statExplored').textContent = explored.length;
+    document.getElementById('statQuizzes').textContent = scoreValues.length;
+    document.getElementById('statAvg').textContent = scoreValues.length ? (scoreValues.reduce((a,b)=>a+b,0)/scoreValues.length).toFixed(1) : '–';
+    document.getElementById('statPoints').textContent = scoreValues.reduce((a,b)=>a+b,0);
+
+    // Category progress
+    const catProgress = document.getElementById('categoryProgress');
+    Object.entries(CATEGORIES).forEach(([cat, meta]) => {
+      const catAlgos = ALGORITHMS.filter(a => a.category === cat);
+      const done = catAlgos.filter(a => explored.includes(a.id)).length;
+      const pct = Math.round((done / catAlgos.length) * 100);
+      catProgress.innerHTML += `
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:5px;">
+            <span style="color:var(--text-secondary);font-weight:600;">${meta.icon} ${meta.label}</span>
+            <span style="color:var(--accent);font-weight:700;">${done}/${catAlgos.length}</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+        </div>
+      `;
+    });
+
+    // Quiz chart
+    const quizAlgoIds = Object.keys(quizScores);
+    if (quizAlgoIds.length > 0) {
+      const ctx = document.getElementById('quizChart').getContext('2d');
+      const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+      new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: quizAlgoIds.map(id => getAlgorithmById(id)?.name || id),
+          datasets: [{
+            label: 'Score',
+            data: quizAlgoIds.map(id => (quizScores[id] / 4) * 100),
+            borderColor: '#f97316',
+            backgroundColor: 'rgba(249,115,22,0.15)',
+            borderWidth: 2,
+            pointBackgroundColor: '#f97316'
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          scales: { r: { min: 0, max: 100, grid: { color: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }, ticks: { color: isDark ? '#666' : '#999' }, pointLabels: { color: isDark ? '#aaa' : '#555', font: { size: 10 } } } },
+          plugins: { legend: { display: false } }
+        }
+      });
+    } else {
+      document.getElementById('quizChart').style.display = 'none';
+      document.getElementById('quizChartEmpty').style.display = 'block';
+    }
+
+    // Recently explored
+    const recentContainer = document.getElementById('recentExplored');
+    if (explored.length === 0) {
+      document.getElementById('recentEmpty').style.display = 'block';
+    } else {
+      explored.slice(-6).reverse().forEach(id => {
+        const a = getAlgorithmById(id);
+        if (!a) return;
+        recentContainer.innerHTML += `
+          <a href="algorithm.html?id=${a.id}" class="card" style="display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;min-width:160px;flex:1;">
+            <span style="font-size:1.4rem;">${a.icon}</span>
+            <div>
+              <div style="font-size:0.82rem;font-weight:700;">${a.name}</div>
+              <span class="badge badge-${a.difficulty}" style="font-size:0.65rem;">${a.difficulty}</span>
+            </div>
+          </a>
+        `;
+      });
+    }
+
+    function handleResize() {
+      const g = document.getElementById('mainGrid');
+      if (g) g.style.gridTemplateColumns = window.innerWidth < 768 ? '1fr' : '1fr 1fr';
+      const q = document.querySelector('.grid-4');
+      if (q && window.innerWidth < 600) q.style.gridTemplateColumns = '1fr 1fr';
+    }
+    handleResize();
+    window.addEventListener('resize', handleResize);
+  </script>
+</body>
+</html>

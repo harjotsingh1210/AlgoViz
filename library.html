@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Algorithm Library – AlgoViz</title>
+  <meta name="description" content="Browse our complete library of algorithm visualizations. Filter by category (Sorting, Searching, Graph, DP) and difficulty level.">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="logo-icon">〈/〉</div>
+      <span class="logo-text">Algo<span>Viz</span></span>
+    </a>
+    <div class="navbar-links">
+      <a href="index.html">Home</a>
+      <a href="library.html" class="active">Algorithms</a>
+      <a href="compare.html">Compare</a>
+      <a href="practice.html">Practice</a>
+      <a href="dashboard.html">Dashboard</a>
+    </div>
+    <div class="navbar-actions">
+      <button class="theme-toggle">☀️</button>
+      <div id="navUserArea" style="display:flex;gap:10px;align-items:center;"></div>
+      <button class="nav-toggle" id="navToggle">☰</button>
+    </div>
+  </nav>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">🏠 Home</a>
+    <a href="library.html">📚 Algorithms</a>
+    <a href="compare.html">⚖️ Compare</a>
+    <a href="practice.html">🎯 Practice</a>
+    <a href="dashboard.html">📊 Dashboard</a>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Categories</div>
+      <a href="#" class="sidebar-link active" data-cat="all" id="sideAll"><span class="link-icon">📦</span> All Algorithms <span style="margin-left:auto;font-size:0.75rem;color:var(--text-muted);" id="countAll"></span></a>
+      <a href="#" class="sidebar-link" data-cat="sorting" id="sideSorting"><span class="link-icon">↕️</span> Sorting <span style="margin-left:auto;font-size:0.75rem;color:var(--text-muted);">4</span></a>
+      <a href="#" class="sidebar-link" data-cat="searching" id="sideSearching"><span class="link-icon">🔍</span> Searching <span style="margin-left:auto;font-size:0.75rem;color:var(--text-muted);">2</span></a>
+      <a href="#" class="sidebar-link" data-cat="graph" id="sideGraph"><span class="link-icon">🕸️</span> Graph <span style="margin-left:auto;font-size:0.75rem;color:var(--text-muted);">3</span></a>
+      <a href="#" class="sidebar-link" data-cat="dp" id="sideDP"><span class="link-icon">🧩</span> Dynamic Programming <span style="margin-left:auto;font-size:0.75rem;color:var(--text-muted);">2</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Difficulty</div>
+      <a href="#" class="sidebar-link" data-diff="easy"><span class="link-icon" style="color:#22c55e;">●</span> Easy</a>
+      <a href="#" class="sidebar-link" data-diff="medium"><span class="link-icon" style="color:#eab308;">●</span> Medium</a>
+      <a href="#" class="sidebar-link" data-diff="hard"><span class="link-icon" style="color:#ef4444;">●</span> Hard</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Quick Links</div>
+      <a href="compare.html" class="sidebar-link"><span class="link-icon">⚖️</span> Compare Tool</a>
+      <a href="practice.html" class="sidebar-link"><span class="link-icon">🎯</span> Practice</a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="page-wrapper with-sidebar">
+    <div class="content-area">
+      <!-- Header -->
+      <div style="margin-bottom:28px;">
+        <h1 style="font-size:1.8rem;font-weight:800;margin-bottom:6px;">Algorithm <span style="color:var(--accent);">Library</span></h1>
+        <p style="color:var(--text-muted);font-size:0.9rem;">Explore and visualize all supported algorithms</p>
+      </div>
+
+      <!-- Filters Bar -->
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap;">
+        <!-- Search -->
+        <div class="search-bar" style="flex:1;min-width:220px;max-width:100%;">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Search algorithms..." autocomplete="off">
+        </div>
+
+        <!-- Category tabs -->
+        <div class="tabs" style="flex-shrink:0;">
+          <button class="tab-btn active" data-cat="all">All</button>
+          <button class="tab-btn" data-cat="sorting">Sorting</button>
+          <button class="tab-btn" data-cat="searching">Searching</button>
+          <button class="tab-btn" data-cat="graph">Graph</button>
+          <button class="tab-btn" data-cat="dp">DP</button>
+        </div>
+      </div>
+
+      <!-- Difficulty Filter Chips -->
+      <div class="filter-chips mb-6">
+        <span class="chip active" data-diff="all">All Difficulties</span>
+        <span class="chip" data-diff="easy">🟢 Easy</span>
+        <span class="chip" data-diff="medium">🟡 Medium</span>
+        <span class="chip" data-diff="hard">🔴 Hard</span>
+      </div>
+
+      <!-- Results info -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <span style="font-size:0.82rem;color:var(--text-muted);" id="resultsInfo">Showing all algorithms</span>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-secondary btn-sm" id="sortName">Sort by Name</button>
+        </div>
+      </div>
+
+      <!-- Algorithms Grid -->
+      <div class="algo-grid" id="algoGrid"></div>
+
+      <!-- Empty state -->
+      <div id="emptyState" style="display:none;text-align:center;padding:60px 20px;">
+        <div style="font-size:3rem;margin-bottom:12px;">🔍</div>
+        <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:8px;">No algorithms found</h3>
+        <p style="color:var(--text-muted);font-size:0.9rem;">Try adjusting your search or filters</p>
+        <button class="btn btn-primary btn-sm mt-4" onclick="resetFilters()">Reset Filters</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav-item"><span class="nav-icon">🏠</span>Home</a>
+    <a href="library.html" class="bottom-nav-item active"><span class="nav-icon">📚</span>Algorithms</a>
+    <a href="practice.html" class="bottom-nav-item"><span class="nav-icon">🎯</span>Practice</a>
+    <a href="dashboard.html" class="bottom-nav-item"><span class="nav-icon">📊</span>Dashboard</a>
+    <a href="profile.html" class="bottom-nav-item"><span class="nav-icon">👤</span>Profile</a>
+  </nav>
+
+  <script src="js/theme.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/algorithms.js"></script>
+  <script>
+    let activeCategory = 'all';
+    let activeDifficulty = 'all';
+    let searchQuery = '';
+    let sortNameAsc = true;
+
+    function getFiltered() {
+      let algos = [...ALGORITHMS];
+      if (activeCategory !== 'all') algos = algos.filter(a => a.category === activeCategory);
+      if (activeDifficulty !== 'all') algos = algos.filter(a => a.difficulty === activeDifficulty);
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        algos = algos.filter(a =>
+          a.name.toLowerCase().includes(q) ||
+          a.description.toLowerCase().includes(q) ||
+          a.tags.some(t => t.includes(q)) ||
+          a.category.includes(q)
+        );
+      }
+      return algos;
+    }
+
+    function renderGrid() {
+      const algos = getFiltered();
+      const grid = document.getElementById('algoGrid');
+      const empty = document.getElementById('emptyState');
+      const info = document.getElementById('resultsInfo');
+
+      if (algos.length === 0) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+        info.textContent = 'No results found';
+        return;
+      }
+      empty.style.display = 'none';
+      info.textContent = `Showing ${algos.length} algorithm${algos.length !== 1 ? 's' : ''}`;
+
+      grid.innerHTML = algos.map(a => `
+        <a href="algorithm.html?id=${a.id}" class="algo-card">
+          <div class="algo-card-icon">${a.icon}</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+            <span class="badge badge-${a.category}">${CATEGORIES[a.category]?.label || a.category}</span>
+          </div>
+          <div class="algo-card-title">${a.name}</div>
+          <div class="algo-card-desc">${a.description.substring(0,100)}...</div>
+          <div class="algo-card-footer">
+            <span class="badge badge-${a.difficulty}">${a.difficulty.charAt(0).toUpperCase() + a.difficulty.slice(1)}</span>
+            <span class="complexity-tag">${a.timeComplexity.average}</span>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <span style="font-size:0.75rem;color:var(--text-muted);">Space: </span>
+            <span class="complexity-tag" style="font-size:0.72rem;">${a.spaceComplexity}</span>
+            ${a.stable ? '<span style="font-size:0.72rem;color:#22c55e;margin-left:auto;">Stable</span>' : ''}
+          </div>
+        </a>
+      `).join('');
+    }
+
+    function resetFilters() {
+      activeCategory = 'all'; activeDifficulty = 'all'; searchQuery = '';
+      document.getElementById('searchInput').value = '';
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === 'all'));
+      document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.diff === 'all'));
+      renderGrid();
+    }
+
+    // Category tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeCategory = btn.dataset.cat;
+        renderGrid();
+      });
+    });
+
+    // Difficulty chips
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        activeDifficulty = chip.dataset.diff;
+        renderGrid();
+      });
+    });
+
+    // Sidebar links
+    document.querySelectorAll('[data-cat]').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        activeCategory = link.dataset.cat;
+        document.querySelectorAll('.sidebar-link[data-cat]').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === activeCategory));
+        renderGrid();
+      });
+    });
+    document.querySelectorAll('[data-diff]').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        activeDifficulty = link.dataset.diff;
+        document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.diff === activeDifficulty));
+        renderGrid();
+      });
+    });
+
+    // Search
+    document.getElementById('searchInput').addEventListener('input', e => {
+      searchQuery = e.target.value.trim();
+      renderGrid();
+    });
+
+    // Sort
+    document.getElementById('sortName').addEventListener('click', () => {
+      sortNameAsc = !sortNameAsc;
+      ALGORITHMS.sort((a,b) => sortNameAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
+      document.getElementById('sortName').textContent = `Sort: ${sortNameAsc ? 'A→Z' : 'Z→A'}`;
+      renderGrid();
+    });
+
+    // URL param for category
+    const urlCat = new URLSearchParams(window.location.search).get('cat');
+    if (urlCat) {
+      activeCategory = urlCat;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === urlCat));
+    }
+
+    document.getElementById('countAll').textContent = ALGORITHMS.length;
+    renderGrid();
+  </script>
+</body>
+</html>

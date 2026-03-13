@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Practice – AlgoViz</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="logo-icon">〈/〉</div>
+      <span class="logo-text">Algo<span>Viz</span></span>
+    </a>
+    <div class="navbar-links">
+      <a href="index.html">Home</a>
+      <a href="library.html">Algorithms</a>
+      <a href="compare.html">Compare</a>
+      <a href="practice.html" class="active">Practice</a>
+      <a href="dashboard.html">Dashboard</a>
+    </div>
+    <div class="navbar-actions">
+      <button class="theme-toggle">☀️</button>
+      <div id="navUserArea" style="display:flex;gap:10px;align-items:center;"></div>
+      <button class="nav-toggle" id="navToggle">☰</button>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <div style="max-width:1100px;margin:0 auto;padding:32px 24px;">
+
+      <!-- Header -->
+      <div style="margin-bottom:32px;">
+        <div class="section-label" style="margin-bottom:10px;">🎯 Practice & Learning</div>
+        <h1 style="font-size:1.8rem;font-weight:800;margin-bottom:8px;">Practice <span style="color:var(--accent);">Algorithms</span></h1>
+        <p style="color:var(--text-muted);">Reinforce your knowledge with interactive quizzes and coding challenges</p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs" style="margin-bottom:28px;max-width:500px;">
+        <button class="tab-btn active" onclick="showTab('quizzes',this)">🧠 Quizzes</button>
+        <button class="tab-btn" onclick="showTab('challenges',this)">💻 Challenges</button>
+        <button class="tab-btn" onclick="showTab('path',this)">🗺️ Learning Path</button>
+      </div>
+
+      <!-- QUIZZES TAB -->
+      <div id="tab-quizzes">
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:24px;" id="quizLayout">
+          <!-- Quiz selector -->
+          <div>
+            <h2 style="font-size:0.9rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">Choose Topic</h2>
+            <div style="display:flex;flex-direction:column;gap:8px;" id="quizTopicList"></div>
+          </div>
+          <!-- Quiz area -->
+          <div>
+            <div id="quizIntro" style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:28px;text-align:center;">
+              <div style="font-size:3rem;margin-bottom:12px;">🎓</div>
+              <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:8px;">Ready to Test Your Knowledge?</h2>
+              <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:20px;">Select a topic from the left to start a quiz. Each quiz has 4 questions and instant feedback.</p>
+              <div class="grid-3" style="gap:12px;">
+                <div class="stat-card"><div class="stat-value" id="totalQuizzesTaken">0</div><div class="stat-label">Quizzes Taken</div></div>
+                <div class="stat-card"><div class="stat-value" id="avgScore">–</div><div class="stat-label">Avg Score</div></div>
+                <div class="stat-card"><div class="stat-value" id="bestScore">–</div><div class="stat-label">Best Score</div></div>
+              </div>
+            </div>
+            <div id="quizContainer" style="display:none;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:24px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHALLENGES TAB -->
+      <div id="tab-challenges" style="display:none;">
+        <div class="algo-grid" id="challengesGrid"></div>
+      </div>
+
+      <!-- LEARNING PATH TAB -->
+      <div id="tab-path" style="display:none;">
+        <div style="max-width:700px;">
+          <h2 style="font-size:1rem;font-weight:700;margin-bottom:6px;">🌱 Beginner to Expert</h2>
+          <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:20px;">Follow this structured path to master all algorithms</p>
+          <div style="display:flex;flex-direction:column;gap:10px;" id="learningPath"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav-item"><span class="nav-icon">🏠</span>Home</a>
+    <a href="library.html" class="bottom-nav-item"><span class="nav-icon">📚</span>Algorithms</a>
+    <a href="practice.html" class="bottom-nav-item active"><span class="nav-icon">🎯</span>Practice</a>
+    <a href="dashboard.html" class="bottom-nav-item"><span class="nav-icon">📊</span>Dashboard</a>
+    <a href="profile.html" class="bottom-nav-item"><span class="nav-icon">👤</span>Profile</a>
+  </nav>
+
+  <script src="js/theme.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/algorithms.js"></script>
+  <script src="js/comparison.js"></script>
+  <script>
+    function showTab(name, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      ['quizzes','challenges','path'].forEach(t => {
+        document.getElementById(`tab-${t}`).style.display = t === name ? 'block' : 'none';
+      });
+    }
+
+    // Quiz topics - algorithms that have quiz questions
+    const quizAlgos = ALGORITHMS.filter(a => QUIZ_QUESTIONS[a.id]);
+    const topicList = document.getElementById('quizTopicList');
+    let activeQuizId = null;
+
+    quizAlgos.forEach(a => {
+      const btn = document.createElement('button');
+      btn.className = 'sidebar-link';
+      btn.style.cssText = 'width:100%;text-align:left;cursor:pointer;border:1px solid var(--border-subtle);background:var(--bg-card);border-radius:var(--radius-md);';
+      btn.innerHTML = `${a.icon} ${a.name} <span class="badge badge-${a.difficulty}" style="margin-left:auto;">${a.difficulty}</span>`;
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#quizTopicList button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeQuizId = a.id;
+        document.getElementById('quizIntro').style.display = 'none';
+        const qc = document.getElementById('quizContainer');
+        qc.style.display = 'block';
+        QuizEngine.load(a.id);
+      });
+      topicList.appendChild(btn);
+    });
+
+    // Load quiz stats
+    function loadStats() {
+      const session = Auth.getSession();
+      if (!session) return;
+      const prog = Auth.getProgress(session.id);
+      const scores = Object.values(prog.quizScores || {});
+      if (scores.length > 0) {
+        document.getElementById('totalQuizzesTaken').textContent = scores.length;
+        document.getElementById('avgScore').textContent = (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1);
+        document.getElementById('bestScore').textContent = Math.max(...scores);
+      }
+    }
+    loadStats();
+
+    // Challenges
+    const challenges = [
+      { title: 'Sort a Rotated Array', diff: 'medium', category: 'sorting', desc: 'Given a rotated sorted array, find the minimum element. Apply your knowledge of binary search concepts.', algo: 'binary-search' },
+      { title: 'Two Sum Problem', diff: 'easy', category: 'searching', desc: 'Find two numbers in an array that add up to a target. Can you solve it in O(n) time?', algo: 'linear-search' },
+      { title: 'Valid Parentheses', diff: 'easy', category: 'sorting', desc: 'Check if a string of brackets is valid. Use a stack-based approach similar to DFS.', algo: 'dfs' },
+      { title: 'Shortest Path in Grid', diff: 'hard', category: 'graph', desc: 'Find the shortest path from top-left to bottom-right in a grid with obstacles.', algo: 'bfs' },
+      { title: 'Fibonacci Variants', diff: 'medium', category: 'dp', desc: 'Solve climbing stairs, coin change, and house robber using dynamic programming.', algo: 'fibonacci-dp' },
+      { title: 'Kth Largest Element', diff: 'medium', category: 'sorting', desc: 'Find the kth largest element in an array using QuickSelect algorithm.', algo: 'quick-sort' },
+      { title: 'Word Search in Grid', diff: 'hard', category: 'graph', desc: 'Find if a word exists in a 2D board using DFS with backtracking.', algo: 'dfs' },
+      { title: 'Merge Intervals', diff: 'medium', category: 'sorting', desc: 'Merge overlapping intervals in an array. Requires sorting and a single pass.', algo: 'merge-sort' }
+    ];
+
+    document.getElementById('challengesGrid').innerHTML = challenges.map(c => `
+      <div class="algo-card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <span class="badge badge-${c.diff}">${c.diff}</span>
+          <span class="badge badge-${c.category}">${c.category}</span>
+        </div>
+        <div class="algo-card-title">${c.title}</div>
+        <div class="algo-card-desc">${c.desc}</div>
+        <div style="margin-top:12px;display:flex;gap:8px;">
+          <a href="algorithm.html?id=${c.algo}" class="btn btn-outline btn-sm">Study Algo</a>
+          <button class="btn btn-primary btn-sm" onclick="Toast.show('Coding challenges coming soon! 🔨','info')">Start Challenge</button>
+        </div>
+      </div>
+    `).join('');
+
+    // Learning path
+    const path = [
+      { step: 1, title: 'Introduction to Sorting', algo: 'bubble-sort', status: 'done', desc: 'Start with the simplest sorting algorithm' },
+      { step: 2, title: 'Insertion Sort', algo: 'insertion-sort', status: 'done', desc: 'Learn in-place insertion technique' },
+      { step: 3, title: 'Linear Search', algo: 'linear-search', status: 'active', desc: 'Basics of sequential searching' },
+      { step: 4, title: 'Binary Search', algo: 'binary-search', status: 'locked', desc: 'Divide & conquer for sorted arrays' },
+      { step: 5, title: 'Merge Sort', algo: 'merge-sort', status: 'locked', desc: 'Efficient O(n log n) sorting' },
+      { step: 6, title: 'Quick Sort', algo: 'quick-sort', status: 'locked', desc: 'Partitioning-based sorting' },
+      { step: 7, title: 'Graph - BFS', algo: 'bfs', status: 'locked', desc: 'Breadth-first graph traversal' },
+      { step: 8, title: 'Graph - DFS', algo: 'dfs', status: 'locked', desc: 'Depth-first exploration' },
+      { step: 9, title: "Dijkstra's Algorithm", algo: 'dijkstra', status: 'locked', desc: 'Shortest path in weighted graphs' },
+      { step: 10, title: 'Dynamic Programming', algo: 'fibonacci-dp', status: 'locked', desc: 'Memoization and tabulation' },
+    ];
+
+    const session = Auth.getSession();
+    const explored = session ? Auth.getProgress(session.id).explored : [];
+
+    document.getElementById('learningPath').innerHTML = path.map((p,i) => {
+      const isDone = explored.includes(p.algo);
+      const statusColor = isDone ? '#22c55e' : (p.status === 'active' ? '#f97316' : '#3d3d5c');
+      const isLocked = !isDone && p.status === 'locked' && i > 0 && !explored.includes(path[i-1]?.algo);
+      return `
+        <div style="display:flex;align-items:stretch;gap:0;">
+          <!-- Line -->
+          <div style="display:flex;flex-direction:column;align-items:center;width:40px;">
+            <div style="width:32px;height:32px;border-radius:50%;background:${statusColor};display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:${isDone ? '#fff' : (p.status === 'active' ? '#fff' : '#666')};flex-shrink:0;">${isDone ? '✓' : p.step}</div>
+            ${i < path.length-1 ? `<div style="width:2px;flex:1;min-height:20px;background:${isDone ? '#22c55e' : 'var(--border-subtle)'};margin:4px 0;"></div>` : ''}
+          </div>
+          <!-- Content -->
+          <div class="path-node ${isDone ? 'completed' : (p.status === 'active' ? 'active' : '')}" style="flex:1;margin-bottom:8px;margin-left:12px;${isLocked ? 'opacity:0.5;pointer-events:none;' : ''}">
+            <div style="flex:1;">
+              <div style="font-size:0.9rem;font-weight:700;">${p.title}</div>
+              <div style="font-size:0.8rem;color:var(--text-muted);">${p.desc}</div>
+            </div>
+            ${isDone ? '<span style="color:#22c55e;font-size:1.1rem;">✓</span>' : `<a href="algorithm.html?id=${p.algo}" class="btn btn-${isDone ? 'secondary' : 'primary'} btn-sm">${isDone ? 'Review' : 'Start →'}</a>`}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Responsive quiz layout
+    function handleResize() {
+      const layout = document.getElementById('quizLayout');
+      if (layout) layout.style.gridTemplateColumns = window.innerWidth < 768 ? '1fr' : '1fr 2fr';
+    }
+    handleResize();
+    window.addEventListener('resize', handleResize);
+  </script>
+</body>
+</html>

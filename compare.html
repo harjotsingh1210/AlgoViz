@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Algorithm Comparison – AlgoViz</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="logo-icon">〈/〉</div>
+      <span class="logo-text">Algo<span>Viz</span></span>
+    </a>
+    <div class="navbar-links">
+      <a href="index.html">Home</a>
+      <a href="library.html">Algorithms</a>
+      <a href="compare.html" class="active">Compare</a>
+      <a href="practice.html">Practice</a>
+      <a href="dashboard.html">Dashboard</a>
+    </div>
+    <div class="navbar-actions">
+      <button class="theme-toggle">☀️</button>
+      <div id="navUserArea" style="display:flex;gap:10px;align-items:center;"></div>
+      <button class="nav-toggle" id="navToggle">☰</button>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <div style="max-width:1100px;margin:0 auto;padding:32px 24px;">
+      <!-- Header -->
+      <div style="margin-bottom:28px;">
+        <div class="section-label" style="margin-bottom:10px;">⚖️ Comparison Tool</div>
+        <h1 style="font-size:1.8rem;font-weight:800;margin-bottom:8px;">Algorithm <span style="color:var(--accent);">Performance</span> Comparison</h1>
+        <p style="color:var(--text-muted);font-size:0.9rem;">Compare multiple algorithms side-by-side with performance graphs and complexity analysis</p>
+      </div>
+
+      <!-- Controls -->
+      <div class="card" style="margin-bottom:24px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:16px;align-items:end;flex-wrap:wrap;">
+          <div>
+            <div class="form-label">Select Algorithms (choose 2–4)</div>
+            <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;" id="algoCheckboxes"></div>
+          </div>
+          <div>
+            <div class="form-label">Max Input Size</div>
+            <input type="range" class="w-full" id="maxSizeSlider" min="10" max="1000" value="100" style="margin-top:8px;width:100%;">
+            <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);margin-top:4px;">
+              <span>10</span><span id="maxSizeVal" style="color:var(--accent);font-weight:700;">n = 100</span><span>1000</span>
+            </div>
+          </div>
+          <div>
+            <button class="btn btn-primary" onclick="updateCharts()" style="width:100%;">📊 Update Charts</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart Tabs -->
+      <div class="tabs" style="margin-bottom:20px;">
+        <button class="tab-btn active" onclick="showChart('line',this)">📈 Growth Over n</button>
+        <button class="tab-btn" onclick="showChart('bar',this)">📊 Bar Comparison</button>
+        <button class="tab-btn" onclick="showChart('table',this)">📋 Complexity Table</button>
+      </div>
+
+      <!-- Line Chart -->
+      <div id="chartLine" class="card" style="margin-bottom:20px;">
+        <div style="font-size:0.85rem;font-weight:700;margin-bottom:12px;">Operations vs Input Size (n)</div>
+        <div style="height:320px;position:relative;">
+          <canvas id="lineChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Bar Chart -->
+      <div id="chartBar" class="card" style="margin-bottom:20px;display:none;">
+        <div style="font-size:0.85rem;font-weight:700;margin-bottom:12px;">Operations at Selected Input Size</div>
+        <div style="height:300px;position:relative;">
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Complexity Table -->
+      <div id="chartTable" style="display:none;margin-bottom:20px;">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Algorithm</th>
+                <th>Category</th>
+                <th>Best Case</th>
+                <th>Average Case</th>
+                <th>Worst Case</th>
+                <th>Space</th>
+                <th>Stable</th>
+              </tr>
+            </thead>
+            <tbody id="complexityTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Info Cards -->
+      <div class="grid-3" id="algoInfoCards" style="margin-top:24px;"></div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav-item"><span class="nav-icon">🏠</span>Home</a>
+    <a href="library.html" class="bottom-nav-item"><span class="nav-icon">📚</span>Algorithms</a>
+    <a href="practice.html" class="bottom-nav-item"><span class="nav-icon">🎯</span>Practice</a>
+    <a href="dashboard.html" class="bottom-nav-item"><span class="nav-icon">📊</span>Dashboard</a>
+    <a href="profile.html" class="bottom-nav-item"><span class="nav-icon">👤</span>Profile</a>
+  </nav>
+
+  <script src="js/theme.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/algorithms.js"></script>
+  <script src="js/comparison.js"></script>
+  <script>
+    const defaultSelected = ['bubble-sort', 'merge-sort', 'quick-sort'];
+    let selected = [...defaultSelected];
+
+    // Render checkboxes
+    const cbContainer = document.getElementById('algoCheckboxes');
+    ALGORITHMS.forEach(a => {
+      const label = document.createElement('label');
+      label.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer;color:var(--text-secondary);';
+      const checked = selected.includes(a.id) ? 'checked' : '';
+      label.innerHTML = `
+        <input type="checkbox" value="${a.id}" ${checked} style="accent-color:var(--accent);" onchange="toggleAlgo('${a.id}',this.checked)">
+        ${a.icon} ${a.name} <span class="badge badge-${a.category}" style="font-size:0.65rem;">${a.category}</span>
+      `;
+      cbContainer.appendChild(label);
+    });
+
+    function toggleAlgo(id, checked) {
+      if (checked) { if (selected.length < 6) selected.push(id); else { event.target.checked = false; Toast.show('Max 6 algorithms', 'warning'); } }
+      else selected = selected.filter(s => s !== id);
+    }
+
+    function getSizes(max) {
+      const steps = 12;
+      return Array.from({length: steps}, (_, i) => Math.round((max / steps) * (i + 1)));
+    }
+
+    function updateCharts() {
+      if (selected.length < 2) { Toast.show('Please select at least 2 algorithms', 'warning'); return; }
+      const maxN = parseInt(document.getElementById('maxSizeSlider').value);
+      const sizes = getSizes(maxN);
+      ComparisonTool.renderLineChart('lineChart', selected, sizes);
+      ComparisonTool.renderBarChart('barChart', selected, maxN);
+
+      // Complexity table
+      const tbody = document.getElementById('complexityTable');
+      tbody.innerHTML = selected.map(id => {
+        const a = getAlgorithmById(id);
+        if (!a) return '';
+        return `<tr>
+          <td><strong>${a.icon} ${a.name}</strong></td>
+          <td><span class="badge badge-${a.category}">${CATEGORIES[a.category]?.label || a.category}</span></td>
+          <td><span class="complexity-tag" style="color:#22c55e;">${a.timeComplexity.best}</span></td>
+          <td><span class="complexity-tag" style="color:#eab308;">${a.timeComplexity.average}</span></td>
+          <td><span class="complexity-tag" style="color:#ef4444;">${a.timeComplexity.worst}</span></td>
+          <td><span class="complexity-tag" style="color:#3b82f6;">${a.spaceComplexity}</span></td>
+          <td><span style="color:${a.stable ? '#22c55e' : '#ef4444'};font-weight:700;">${a.stable ? '✓ Stable' : '✗ Unstable'}</span></td>
+        </tr>`;
+      }).join('');
+
+      // Info cards
+      document.getElementById('algoInfoCards').innerHTML = selected.slice(0,3).map(id => {
+        const a = getAlgorithmById(id);
+        return `
+          <div class="card">
+            <div style="font-size:1.5rem;margin-bottom:8px;">${a.icon}</div>
+            <div style="font-weight:700;margin-bottom:6px;">${a.name}</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:10px;">${a.description.substring(0,80)}...</div>
+            <a href="algorithm.html?id=${a.id}" class="btn btn-outline btn-sm w-full">Visualize →</a>
+          </div>
+        `;
+      }).join('');
+    }
+
+    document.getElementById('maxSizeSlider').addEventListener('input', function() {
+      document.getElementById('maxSizeVal').textContent = `n = ${this.value}`;
+    });
+
+    function showChart(type, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('chartLine').style.display = type === 'line' ? 'block' : 'none';
+      document.getElementById('chartBar').style.display = type === 'bar' ? 'block' : 'none';
+      document.getElementById('chartTable').style.display = type === 'table' ? 'block' : 'none';
+    }
+
+    updateCharts();
+  </script>
+</body>
+</html>

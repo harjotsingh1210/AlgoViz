@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Algorithm Management – AlgoViz Admin</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <aside class="admin-sidebar">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:28px;padding:0 8px;">
+      <div style="width:32px;height:32px;background:var(--gradient-brand);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;">〈/〉</div>
+      <div><div style="font-size:0.9rem;font-weight:800;">AlgoViz</div><div style="font-size:0.7rem;color:var(--accent);font-weight:600;">Admin Panel</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px;">
+      <a href="dashboard.html" class="sidebar-link"><span class="link-icon">📊</span> Dashboard</a>
+      <a href="algorithms.html" class="sidebar-link active"><span class="link-icon">🧮</span> Algorithms</a>
+      <a href="users.html" class="sidebar-link"><span class="link-icon">👥</span> Users</a>
+      <a href="analytics.html" class="sidebar-link"><span class="link-icon">📈</span> Analytics</a>
+    </div>
+    <div style="margin-top:32px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.06);">
+      <a href="../index.html" class="sidebar-link"><span class="link-icon">🏠</span> Back to Site</a>
+      <button onclick="Auth.clearSession();window.location='login.html';" class="sidebar-link w-full" style="color:#ef4444;"><span class="link-icon">🚪</span> Logout</button>
+    </div>
+  </aside>
+
+  <div class="admin-content">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+      <div>
+        <h1 style="font-size:1.4rem;font-weight:800;">Algorithm <span style="color:var(--accent);">Management</span></h1>
+        <p style="font-size:0.82rem;color:var(--text-muted);">View and manage algorithm entries</p>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Add Algorithm</button>
+        <button class="theme-toggle">🌙</button>
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+      <div class="search-bar" style="max-width:300px;flex:1;">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="algoSearch" placeholder="Search algorithms..." style="padding:9px 14px 9px 40px;font-size:0.85rem;">
+      </div>
+      <div class="tabs">
+        <button class="tab-btn active" data-cat="all">All</button>
+        <button class="tab-btn" data-cat="sorting">Sorting</button>
+        <button class="tab-btn" data-cat="searching">Searching</button>
+        <button class="tab-btn" data-cat="graph">Graph</button>
+        <button class="tab-btn" data-cat="dp">DP</button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr><th>Algorithm</th><th>Category</th><th>Difficulty</th><th>Best</th><th>Average</th><th>Worst</th><th>Space</th><th>Stable</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="algoTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Add Algorithm Modal -->
+  <div id="addModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;display:none;align-items:center;justify-content:center;">
+    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:28px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <h2 style="font-size:1.1rem;font-weight:800;">Add New Algorithm</h2>
+        <button onclick="closeModal()" style="color:var(--text-muted);font-size:1.2rem;">✕</button>
+      </div>
+      <form id="addAlgoForm">
+        <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="newAlgoName" required placeholder="e.g. Heap Sort"></div>
+        <div class="form-group"><label class="form-label">Icon (emoji)</label><input class="form-input" id="newAlgoIcon" placeholder="e.g. 🔺" maxlength="4"></div>
+        <div class="form-group"><label class="form-label">Category</label><select class="form-select" id="newAlgoCat"><option value="sorting">Sorting</option><option value="searching">Searching</option><option value="graph">Graph</option><option value="dp">DP</option></select></div>
+        <div class="form-group"><label class="form-label">Difficulty</label><select class="form-select" id="newAlgoDiff"><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select></div>
+        <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" id="newAlgoDesc" rows="3" placeholder="Brief description..."></textarea></div>
+        <div class="grid-2" style="gap:10px;">
+          <div class="form-group"><label class="form-label">Time (Average)</label><input class="form-input" id="newAlgoTime" placeholder="O(n log n)"></div>
+          <div class="form-group"><label class="form-label">Space</label><input class="form-input" id="newAlgoSpace" placeholder="O(1)"></div>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button type="submit" class="btn btn-primary" style="flex:1;">Save Algorithm</button>
+          <button type="button" onclick="closeModal()" class="btn btn-secondary">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../js/theme.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/algorithms.js"></script>
+  <script>
+    const session = Auth.getSession();
+    if (!session?.isAdmin) window.location.href = 'login.html';
+
+    let filterCat = 'all', filterQ = '';
+
+    function renderTable() {
+      let algos = [...ALGORITHMS];
+      if (filterCat !== 'all') algos = algos.filter(a => a.category === filterCat);
+      if (filterQ) algos = algos.filter(a => a.name.toLowerCase().includes(filterQ) || a.category.includes(filterQ));
+
+      const tbody = document.getElementById('algoTableBody');
+      tbody.innerHTML = algos.map(a => `
+        <tr>
+          <td><strong>${a.icon} ${a.name}</strong></td>
+          <td><span class="badge badge-${a.category}">${CATEGORIES[a.category]?.label || a.category}</span></td>
+          <td><span class="badge badge-${a.difficulty}">${a.difficulty}</span></td>
+          <td><span class="complexity-tag" style="color:#22c55e;">${a.timeComplexity.best}</span></td>
+          <td><span class="complexity-tag" style="color:#eab308;">${a.timeComplexity.average}</span></td>
+          <td><span class="complexity-tag" style="color:#ef4444;">${a.timeComplexity.worst}</span></td>
+          <td><span class="complexity-tag" style="color:#3b82f6;">${a.spaceComplexity}</span></td>
+          <td><span style="color:${a.stable?'#22c55e':'#ef4444'};font-weight:700;">${a.stable?'✓':'✗'}</span></td>
+          <td>
+            <div style="display:flex;gap:6px;">
+              <a href="../algorithm.html?id=${a.id}" class="btn btn-secondary btn-sm">👁 View</a>
+              <button class="btn btn-sm" style="background:rgba(249,115,22,0.15);color:var(--accent);border:1px solid rgba(249,115,22,0.25);" onclick="Toast.show('Edit feature coming soon!','info')">✏️ Edit</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filterCat = btn.dataset.cat;
+        renderTable();
+      });
+    });
+
+    document.getElementById('algoSearch').addEventListener('input', e => { filterQ = e.target.value.toLowerCase(); renderTable(); });
+
+    function openAddModal() { document.getElementById('addModal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('addModal').style.display = 'none'; }
+
+    document.getElementById('addAlgoForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const name = document.getElementById('newAlgoName').value;
+      Toast.show(`Algorithm "${name}" added (demo mode)! 🎉`, 'success');
+      closeModal();
+    });
+
+    renderTable();
+  </script>
+</body>
+</html>

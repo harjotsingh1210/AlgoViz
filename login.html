@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login – AlgoViz</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="logo-icon">〈/〉</div>
+      <span class="logo-text">Algo<span>Viz</span></span>
+    </a>
+    <div class="navbar-actions" style="margin-left:auto;">
+      <button class="theme-toggle">☀️</button>
+    </div>
+  </nav>
+
+  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg-primary);">
+    <div style="background:var(--gradient-mesh);position:fixed;inset:0;pointer-events:none;"></div>
+    <div style="width:100%;max-width:420px;position:relative;">
+      <!-- Card -->
+      <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:36px;box-shadow:var(--shadow-lg);">
+        <div style="text-align:center;margin-bottom:28px;">
+          <div style="width:56px;height:56px;background:var(--gradient-brand);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 14px;box-shadow:var(--shadow-orange);">〈/〉</div>
+          <h1 style="font-size:1.5rem;font-weight:800;margin-bottom:6px;">Welcome Back</h1>
+          <p style="font-size:0.875rem;color:var(--text-muted);">Sign in to your AlgoViz account</p>
+        </div>
+
+        <div id="errorMsg" style="display:none;padding:12px 14px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.25);border-radius:var(--radius-sm);font-size:0.85rem;color:#ef4444;margin-bottom:16px;"></div>
+
+        <form id="loginForm">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" class="form-input" id="loginEmail" placeholder="you@example.com" required autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="display:flex;justify-content:space-between;">
+              Password
+              <a href="forgot.html" style="color:var(--accent);font-size:0.78rem;font-weight:600;">Forgot password?</a>
+            </label>
+            <div style="position:relative;">
+              <input type="password" class="form-input" id="loginPassword" placeholder="Your password" required autocomplete="current-password">
+              <button type="button" onclick="togglePwd('loginPassword',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:1rem;background:none;border:none;cursor:pointer;">👁</button>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;">
+            <input type="checkbox" id="rememberMe" style="accent-color:var(--accent);">
+            <label for="rememberMe" style="font-size:0.85rem;color:var(--text-muted);cursor:pointer;">Remember me</label>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-full" style="font-size:0.95rem;padding:13px;" id="loginBtn">Sign In</button>
+        </form>
+
+        <div style="text-align:center;margin-top:20px;">
+          <p style="font-size:0.85rem;color:var(--text-muted);">Don't have an account? <a href="signup.html" style="color:var(--accent);font-weight:700;">Sign Up Free</a></p>
+        </div>
+
+        <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border-subtle);">
+          <p style="font-size:0.72rem;text-align:center;color:var(--text-muted);margin-bottom:10px;">Or try as:</p>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-secondary w-full btn-sm" onclick="demoLogin('demo@algoviz.com','demo1234')">👤 Demo User</button>
+            <button class="btn btn-secondary w-full btn-sm" onclick="demoLogin('admin@algoviz.com','admin1234','admin')">🔑 Admin</button>
+          </div>
+        </div>
+      </div>
+
+      <p style="text-align:center;font-size:0.78rem;color:var(--text-muted);margin-top:16px;">
+        <a href="admin/login.html" style="color:var(--text-muted);">Admin panel →</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="js/theme.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    // Redirect if already logged in
+    if (AuthAPI.isLoggedIn()) window.location.href = 'dashboard.html';
+
+    // Show expiry notice
+    if (new URLSearchParams(window.location.search).get('expired')) {
+      const msg = document.getElementById('errorMsg');
+      msg.style.display = 'block';
+      msg.textContent = '⏰ Your session expired. Please sign in again.';
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const btn = document.getElementById('loginBtn');
+      const errEl = document.getElementById('errorMsg');
+      btn.innerHTML = '⏳ Signing in...'; btn.disabled = true;
+
+      const res = await AuthAPI.login(email, password);
+      if (res.ok) {
+        Toast.show('Welcome back! 🎉', 'success');
+        setTimeout(() => window.location.href = 'dashboard.html', 800);
+      } else {
+        errEl.style.display = 'block';
+        errEl.textContent = res.message || 'Login failed.';
+        btn.innerHTML = 'Sign In'; btn.disabled = false;
+      }
+    });
+
+    async function demoLogin(email, pass, role) {
+      document.getElementById('loginEmail').value = email;
+      document.getElementById('loginPassword').value = pass;
+      // Try login; if fails (account not seeded), signup first
+      let res = await AuthAPI.login(email, pass);
+      if (!res.ok && res.status !== 403) {
+        // Account doesn't exist yet — auto-create demo account
+        const name = role === 'admin' ? 'Admin User' : 'Demo User';
+        await AuthAPI.signup(name, email, pass);
+        AuthAPI.logout = () => { localStorage.removeItem('algoviz_token'); localStorage.removeItem('algoviz_user'); };  // Prevent redirect
+        if (role === 'admin') {
+          // Re-login to get token, then redirect to admin
+          res = await AuthAPI.login(email, pass);
+        }
+      }
+      if (res.ok) {
+        if (role === 'admin' || res.user?.isAdmin) {
+          window.location.href = 'admin/dashboard.html';
+        } else {
+          window.location.href = 'dashboard.html';
+        }
+      } else {
+        Toast.show(res.message || 'Demo login failed', 'error');
+      }
+    }
+
+    function togglePwd(id, btn) {
+      const inp = document.getElementById(id);
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+    }
+  </script>
+</body>
+</html>

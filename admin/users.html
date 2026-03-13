@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Management – AlgoViz Admin</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <aside class="admin-sidebar">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:28px;padding:0 8px;">
+      <div style="width:32px;height:32px;background:var(--gradient-brand);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;">〈/〉</div>
+      <div><div style="font-size:0.9rem;font-weight:800;color:var(--text-primary);">AlgoViz</div><div style="font-size:0.7rem;color:var(--accent);font-weight:600;">Admin Panel</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px;">
+      <a href="dashboard.html" class="sidebar-link"><span class="link-icon">📊</span> Dashboard</a>
+      <a href="algorithms.html" class="sidebar-link"><span class="link-icon">🧮</span> Algorithms</a>
+      <a href="users.html" class="sidebar-link active"><span class="link-icon">👥</span> Users</a>
+      <a href="analytics.html" class="sidebar-link"><span class="link-icon">📈</span> Analytics</a>
+    </div>
+    <div style="margin-top:32px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.06);">
+      <a href="../index.html" class="sidebar-link"><span class="link-icon">🏠</span> Back to Site</a>
+      <button onclick="Auth.clearSession();window.location='login.html';" class="sidebar-link w-full" style="color:#ef4444;"><span class="link-icon">🚪</span> Logout</button>
+    </div>
+  </aside>
+
+  <div class="admin-content">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+      <div>
+        <h1 style="font-size:1.4rem;font-weight:800;margin-bottom:4px;">User <span style="color:var(--accent);">Management</span></h1>
+        <p style="font-size:0.82rem;color:var(--text-muted);">View and manage registered users</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <div class="search-bar" style="max-width:280px;">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="userSearch" placeholder="Search users..." style="padding:9px 14px 9px 40px;font-size:0.85rem;">
+        </div>
+        <button class="theme-toggle">🌙</button>
+      </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="grid-4" style="margin-bottom:24px;">
+      <div class="stat-card"><div class="stat-value" id="totalUsersCount">0</div><div class="stat-label">Total Users</div></div>
+      <div class="stat-card"><div class="stat-value" id="activeUsers">0</div><div class="stat-label">Active</div></div>
+      <div class="stat-card"><div class="stat-value" id="blockedUsers">0</div><div class="stat-label">Blocked</div></div>
+      <div class="stat-card"><div class="stat-value" id="avgExplored">0</div><div class="stat-label">Avg Explored</div></div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Joined</th>
+            <th>Explored</th>
+            <th>Quizzes</th>
+            <th>Points</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="usersTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="toastArea"></div>
+
+  <script src="../js/theme.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/algorithms.js"></script>
+  <script>
+    const session = Auth.getSession();
+    if (!session?.isAdmin) window.location.href = 'login.html';
+
+    function loadUsers(filter = '') {
+      const users = Auth.getAllUsers().filter(u => !u.isAdmin);
+      const filtered = filter ? users.filter(u => u.name.toLowerCase().includes(filter) || u.email.toLowerCase().includes(filter)) : users;
+
+      document.getElementById('totalUsersCount').textContent = users.length;
+      document.getElementById('activeUsers').textContent = users.filter(u => !u.blocked).length;
+      document.getElementById('blockedUsers').textContent = users.filter(u => u.blocked).length;
+      const avgExp = users.length ? Math.round(users.reduce((sum,u) => sum + (u.progress?.explored?.length||0), 0) / users.length) : 0;
+      document.getElementById('avgExplored').textContent = avgExp;
+
+      const tbody = document.getElementById('usersTable');
+      tbody.innerHTML = '';
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--text-muted);">${filter ? 'No users match your search' : 'No registered users yet'}</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(u => {
+        const explored = u.progress?.explored?.length || 0;
+        const quizzes = Object.keys(u.progress?.quizScores || {}).length;
+        const points = Object.values(u.progress?.quizScores || {}).reduce((a,b)=>a+b, 0);
+        const joined = new Date(u.joinedAt).toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'});
+        tbody.innerHTML += `
+          <tr>
+            <td><div style="display:flex;align-items:center;gap:8px;"><div style="width:32px;height:32px;border-radius:50%;background:var(--gradient-brand);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:800;color:#fff;">${u.name[0]}</div><strong>${u.name}</strong></div></td>
+            <td style="color:var(--text-secondary);font-size:0.82rem;">${u.email}</td>
+            <td style="color:var(--text-muted);font-size:0.82rem;">${joined}</td>
+            <td><span class="badge badge-orange">${explored}</span></td>
+            <td><span class="badge badge-sorting">${quizzes}</span></td>
+            <td style="font-weight:700;color:var(--accent);">${points}</td>
+            <td><span class="${u.blocked ? 'badge badge-hard' : 'badge badge-easy'}">${u.blocked ? '⛔ Blocked' : '✅ Active'}</span></td>
+            <td>
+              <div style="display:flex;gap:6px;">
+                <button class="btn btn-secondary btn-sm" onclick="toggleBlock('${u.id}')">${u.blocked ? '✅ Unblock' : '⛔ Block'}</button>
+                <button class="btn btn-sm" style="background:rgba(239,68,68,0.2);color:#ef4444;border:1px solid rgba(239,68,68,0.3);" onclick="deleteUser('${u.id}')">🗑 Delete</button>
+              </div>
+            </td>
+          </tr>`;
+      });
+    }
+
+    function toggleBlock(id) {
+      Auth.blockUser(id);
+      loadUsers(document.getElementById('userSearch').value);
+      Toast.show('User status updated', 'success');
+    }
+
+    function deleteUser(id) {
+      if (!confirm('Delete this user permanently?')) return;
+      Auth.deleteUser(id);
+      loadUsers(document.getElementById('userSearch').value);
+      Toast.show('User deleted', 'info');
+    }
+
+    document.getElementById('userSearch').addEventListener('input', e => loadUsers(e.target.value.toLowerCase()));
+    loadUsers();
+  </script>
+</body>
+</html>

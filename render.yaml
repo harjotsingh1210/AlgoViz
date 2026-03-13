@@ -1,0 +1,23 @@
+# Render.com deployment configuration
+# This tells Render how to run the Node.js backend
+
+services:
+  - type: web
+    name: algoviz-api
+    env: node
+    region: oregon
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false   # Set this manually in Render dashboard
+      - key: JWT_SECRET
+        sync: false   # Set this manually in Render dashboard
+      - key: CLIENT_URL
+        sync: false   # Set to your Vercel URL e.g. https://algoviz.vercel.app
+    healthCheckPath: /api/health
+    autoDeploy: true

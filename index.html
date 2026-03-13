@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlgoViz – Interactive Algorithm Visualization Platform</title>
+  <meta name="description" content="Learn algorithms visually with step-by-step animations, complexity analysis, and interactive comparisons. Master DSA the fun way.">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="logo-icon">〈/〉</div>
+      <span class="logo-text">Algo<span>Viz</span></span>
+    </a>
+    <div class="navbar-links">
+      <a href="index.html" class="active">Home</a>
+      <a href="library.html">Algorithms</a>
+      <a href="compare.html">Compare</a>
+      <a href="practice.html">Practice</a>
+      <a href="dashboard.html">Dashboard</a>
+    </div>
+    <div class="navbar-actions">
+      <button class="theme-toggle" id="themeToggle">☀️</button>
+      <div id="navUserArea" style="display:flex;gap:10px;align-items:center;"></div>
+      <button class="nav-toggle" id="navToggle">☰</button>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">🏠 Home</a>
+    <a href="library.html">📚 Algorithms</a>
+    <a href="compare.html">⚖️ Compare</a>
+    <a href="practice.html">🎯 Practice</a>
+    <a href="dashboard.html">📊 Dashboard</a>
+    <a href="login.html">🔑 Login</a>
+    <a href="signup.html">✨ Sign Up</a>
+  </div>
+
+  <!-- ===== HERO SECTION ===== -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="container" style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;">
+      <div class="hero-content">
+        <div class="hero-badge">
+          🚀 <span>Interactive Learning Platform</span>
+        </div>
+        <h1 class="hero-title">
+          Visualize<br>
+          <span>Algorithms</span><br>
+          Like Never Before
+        </h1>
+        <p class="hero-subtitle">
+          Master data structures & algorithms through stunning step-by-step visualizations. Learn sorting, searching, graph algorithms and more with interactive demos.
+        </p>
+        <div class="hero-actions">
+          <a href="library.html" class="btn btn-primary btn-lg">
+            🔭 Explore Algorithms
+          </a>
+          <a href="algorithm.html?id=bubble-sort" class="btn btn-secondary btn-lg">
+            ▶ Watch Demo
+          </a>
+        </div>
+        <div class="hero-stats">
+          <div>
+            <div class="hero-stat-val">10+</div>
+            <div class="hero-stat-label">Algorithms</div>
+          </div>
+          <div style="width:1px;height:40px;background:var(--border-subtle);"></div>
+          <div>
+            <div class="hero-stat-val">4</div>
+            <div class="hero-stat-label">Categories</div>
+          </div>
+          <div style="width:1px;height:40px;background:var(--border-subtle);"></div>
+          <div>
+            <div class="hero-stat-val">100%</div>
+            <div class="hero-stat-label">Interactive</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Visual -->
+      <div class="hero-visual" style="position:relative;height:420px;display:flex;align-items:center;justify-content:center;">
+        <!-- Main visualization card -->
+        <div style="position:absolute;width:100%;max-width:380px;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:20px;box-shadow:var(--shadow-lg);animation:float 4s ease-in-out infinite;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <span style="font-size:0.82rem;font-weight:700;color:var(--accent);">BUBBLE SORT</span>
+            <span class="badge badge-easy">Easy</span>
+          </div>
+          <!-- Animated bars -->
+          <div style="display:flex;align-items:flex-end;gap:6px;height:100px;padding:0 8px;" id="heroBars">
+            <!-- Bars rendered by JS -->
+          </div>
+          <div style="margin-top:14px;padding:10px;background:rgba(249,115,22,0.08);border-radius:var(--radius-sm);border:1px solid rgba(249,115,22,0.15);">
+            <p style="font-size:0.75rem;color:var(--text-secondary);" id="heroStepText">🔄 Comparing elements 3 and 7...</p>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button class="btn btn-primary btn-sm" style="flex:1;" onclick="window.location.href='algorithm.html?id=bubble-sort'">▶ Visualize</button>
+            <button class="btn btn-secondary btn-sm" onclick="window.location.href='algorithm.html?id=merge-sort'">Compare</button>
+          </div>
+        </div>
+
+        <!-- Floating mini cards -->
+        <div class="floating-card" style="position:absolute;top:20px;right:-10px;padding:12px 16px;animation:float 3s ease-in-out infinite;">
+          <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:4px;">TIME COMPLEXITY</div>
+          <div style="font-family:var(--font-mono);font-size:0.95rem;color:var(--accent);font-weight:700;">O(n²)</div>
+        </div>
+        <div class="floating-card" style="position:absolute;bottom:40px;right:-20px;padding:12px 16px;animation:float 3.5s ease-in-out infinite 0.5s;">
+          <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:4px;">SPACE</div>
+          <div style="font-family:var(--font-mono);font-size:0.95rem;color:#22c55e;font-weight:700;">O(1)</div>
+        </div>
+        <div class="floating-card" style="position:absolute;top:60px;left:-20px;padding:12px 16px;animation:float 2.8s ease-in-out infinite 1s;">
+          <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:4px;">STEP</div>
+          <div style="font-size:0.95rem;color:var(--text-primary);font-weight:700;">4 / 12</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FEATURED ALGORITHMS ===== -->
+  <section class="section" style="padding-top:40px;">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label reveal">⭐ Featured Algorithms</div>
+        <h2 class="section-title reveal">Most Popular <span>Visualizations</span></h2>
+        <p class="section-desc reveal">Start your learning journey with these commonly used algorithms</p>
+      </div>
+      <div class="algo-grid" id="featuredGrid"></div>
+      <div style="text-align:center;margin-top:32px;" class="reveal">
+        <a href="library.html" class="btn btn-secondary btn-lg">View All Algorithms →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== LEARNING BENEFITS ===== -->
+  <section class="section" style="background:var(--bg-secondary);">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label reveal">💡 Why AlgoViz?</div>
+        <h2 class="section-title reveal">Learn <span>Smarter</span>, Not Harder</h2>
+        <p class="section-desc reveal">Our visual approach makes complex concepts easy to understand and remember</p>
+      </div>
+      <div class="grid-4" id="benefitsGrid">
+        <div class="card reveal">
+          <div style="font-size:2.5rem;margin-bottom:14px;">🎬</div>
+          <h3 style="font-size:1rem;font-weight:700;margin-bottom:8px;">Step-by-Step Animation</h3>
+          <p style="font-size:0.85rem;color:var(--text-muted);line-height:1.6;">Watch every comparison and swap in real-time with color-coded visualizations that show exactly what's happening.</p>
+        </div>
+        <div class="card reveal">
+          <div style="font-size:2.5rem;margin-bottom:14px;">⚡</div>
+          <h3 style="font-size:1rem;font-weight:700;margin-bottom:8px;">Custom Input Data</h3>
+          <p style="font-size:0.85rem;color:var(--text-muted);line-height:1.6;">Enter your own arrays and numbers to see how algorithms behave with different data — best, average, and worst cases.</p>
+        </div>
+        <div class="card reveal">
+          <div style="font-size:2.5rem;margin-bottom:14px;">📊</div>
+          <h3 style="font-size:1rem;font-weight:700;margin-bottom:8px;">Complexity Analysis</h3>
+          <p style="font-size:0.85rem;color:var(--text-muted);line-height:1.6;">Compare algorithms side-by-side with performance charts. Understand why O(n log n) is better than O(n²) visually.</p>
+        </div>
+        <div class="card reveal">
+          <div style="font-size:2.5rem;margin-bottom:14px;">🧠</div>
+          <h3 style="font-size:1rem;font-weight:700;margin-bottom:8px;">Interactive Quizzes</h3>
+          <p style="font-size:0.85rem;color:var(--text-muted);line-height:1.6;">Reinforce your understanding with targeted questions after each algorithm. Track your progress over time.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== HOW IT WORKS ===== -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label reveal">🗺️ Your Journey</div>
+        <h2 class="section-title reveal">How <span>AlgoViz</span> Works</h2>
+      </div>
+      <div class="grid-3" style="gap:32px;">
+        <div style="text-align:center;" class="reveal">
+          <div style="width:64px;height:64px;background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.25);border-radius:var(--radius-xl);display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin:0 auto 16px;">1️⃣</div>
+          <h3 style="font-size:1rem;font-weight:700;margin-bottom:8px;">Choose an Algorithm</h3>
+          <p style="font-size:0.85rem;color:var(--text-muted);">Browse our library by category or difficulty. Use search or filters to find exactly what you need.</p>
+        </div>
+        <div style="text-align:center;" class="reveal">
+          <div style="width:64px;height:64px;background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.25);border-radius:var(--radius-xl);display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin:0 auto 16px;">2️⃣</div>
+          <h3 style="font-size:1rem;font-weight:700;margin-bottom:8px;">Enter Your Data</h3>
+          <p style="font-size:0.85rem;color:var(--text-muted);">Input custom arrays or use random data. Adjust speed controls to learn at your pace.</p>
+        </div>
+        <div style="text-align:center;" class="reveal">
+          <div style="width:64px;height:64px;background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.25);border-radius:var(--radius-xl);display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin:0 auto 16px;">3️⃣</div>
+          <h3 style="font-size:1rem;font-weight:700;margin-bottom:8px;">Watch & Learn</h3>
+          <p style="font-size:0.85rem;color:var(--text-muted);">See every step explained in plain English alongside synchronized code highlighting.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CATEGORIES ===== -->
+  <section class="section" style="background:var(--bg-secondary);">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label reveal">📚 Categories</div>
+        <h2 class="section-title reveal">Explore by <span>Category</span></h2>
+      </div>
+      <div class="grid-4">
+        <a href="library.html?cat=sorting" class="card reveal" style="text-align:center;cursor:pointer;">
+          <div style="font-size:2.5rem;margin-bottom:12px;">↕️</div>
+          <h3 style="font-size:1rem;font-weight:700;color:var(--accent);">Sorting</h3>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:6px;">Bubble, Merge, Quick, Insertion</p>
+          <div class="mt-4"><span class="badge badge-sorting">4 Algorithms</span></div>
+        </a>
+        <a href="library.html?cat=searching" class="card reveal" style="text-align:center;cursor:pointer;">
+          <div style="font-size:2.5rem;margin-bottom:12px;">🔍</div>
+          <h3 style="font-size:1rem;font-weight:700;color:#22d3ee;">Searching</h3>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:6px;">Linear, Binary Search</p>
+          <div class="mt-4"><span class="badge badge-searching">2 Algorithms</span></div>
+        </a>
+        <a href="library.html?cat=graph" class="card reveal" style="text-align:center;cursor:pointer;">
+          <div style="font-size:2.5rem;margin-bottom:12px;">🕸️</div>
+          <h3 style="font-size:1rem;font-weight:700;color:#c084fc;">Graph</h3>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:6px;">BFS, DFS, Dijkstra's</p>
+          <div class="mt-4"><span class="badge badge-graph">3 Algorithms</span></div>
+        </a>
+        <a href="library.html?cat=dp" class="card reveal" style="text-align:center;cursor:pointer;">
+          <div style="font-size:2.5rem;margin-bottom:12px;">🧩</div>
+          <h3 style="font-size:1rem;font-weight:700;color:var(--accent);">Dynamic Programming</h3>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:6px;">Fibonacci, Knapsack</p>
+          <div class="mt-4"><span class="badge badge-dp">2 Algorithms</span></div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TESTIMONIALS ===== -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label reveal">💬 Testimonials</div>
+        <h2 class="section-title reveal">What <span>Students</span> Say</h2>
+      </div>
+      <div class="grid-3">
+        <div class="card reveal">
+          <div style="display:flex;gap:4px;margin-bottom:12px;">
+            <span style="color:#f97316;">★★★★★</span>
+          </div>
+          <p style="font-size:0.9rem;color:var(--text-secondary);line-height:1.7;margin-bottom:16px;">"AlgoViz completely changed how I understand sorting algorithms. Watching Merge Sort split and merge arrays visually made it click instantly!"</p>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--gradient-brand);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem;color:#fff;">A</div>
+            <div><div style="font-size:0.85rem;font-weight:600;">Aditya Sharma</div><div style="font-size:0.75rem;color:var(--text-muted);">CS Student, IIT Delhi</div></div>
+          </div>
+        </div>
+        <div class="card reveal">
+          <div style="display:flex;gap:4px;margin-bottom:12px;">
+            <span style="color:#f97316;">★★★★★</span>
+          </div>
+          <p style="font-size:0.9rem;color:var(--text-secondary);line-height:1.7;margin-bottom:16px;">"The comparison tool is genius! Being able to see Bubble Sort vs Quick Sort on the same chart with different input sizes helped me ace my algorithms exam."</p>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem;color:#fff;">P</div>
+            <div><div style="font-size:0.85rem;font-weight:600;">Priya Mehta</div><div style="font-size:0.75rem;color:var(--text-muted);">Software Engineer, Bangalore</div></div>
+          </div>
+        </div>
+        <div class="card reveal">
+          <div style="display:flex;gap:4px;margin-bottom:12px;">
+            <span style="color:#f97316;">★★★★☆</span>
+          </div>
+          <p style="font-size:0.9rem;color:var(--text-secondary);line-height:1.7;margin-bottom:16px;">"BFS and DFS always confused me until I saw the graph animations here. The explanation panel describing each step is incredibly helpful for beginners."</p>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#06b6d4);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem;color:#fff;">R</div>
+            <div><div style="font-size:0.85rem;font-weight:600;">Rahul Patel</div><div style="font-size:0.75rem;color:var(--text-muted);">Data Structures Learner</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="section" style="background:var(--bg-secondary);">
+    <div class="container" style="max-width:720px;">
+      <div class="section-header">
+        <div class="section-label reveal">❓ FAQ</div>
+        <h2 class="section-title reveal">Frequently Asked <span>Questions</span></h2>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="faq-item reveal">
+          <button class="faq-question">Is AlgoViz free to use? <span class="faq-icon">▼</span></button>
+          <div class="faq-answer">Yes! AlgoViz is completely free to use. Create an account to track your progress, save quiz scores, and unlock your personalized dashboard.</div>
+        </div>
+        <div class="faq-item reveal">
+          <button class="faq-question">Do I need programming experience? <span class="faq-icon">▼</span></button>
+          <div class="faq-answer">Not at all! AlgoViz is designed for everyone — from complete beginners to experienced developers. The visual approach and plain-English explanations make it accessible to all skill levels.</div>
+        </div>
+        <div class="faq-item reveal">
+          <button class="faq-question">Which algorithms are supported? <span class="faq-icon">▼</span></button>
+          <div class="faq-answer">We currently support 10+ algorithms including Bubble Sort, Merge Sort, Quick Sort, Insertion Sort, Linear Search, Binary Search, BFS, DFS, Dijkstra's Algorithm, Fibonacci DP, and 0/1 Knapsack, with more being added regularly.</div>
+        </div>
+        <div class="faq-item reveal">
+          <button class="faq-question">Can I use my own data for visualizations? <span class="faq-icon">▼</span></button>
+          <div class="faq-answer">Absolutely! On each algorithm's detail page, you can enter your own custom array or numbers. You can also generate random data for quick testing.</div>
+        </div>
+        <div class="faq-item reveal">
+          <button class="faq-question">Is there a mobile app? <span class="faq-icon">▼</span></button>
+          <div class="faq-answer">AlgoViz is a mobile-first responsive web application — it works brilliantly on all screen sizes including phones and tablets with an app-like experience and bottom navigation.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA SECTION ===== -->
+  <section class="section" style="text-align:center;">
+    <div class="container" style="max-width:600px;">
+      <div class="section-label reveal" style="margin-bottom:20px;">🚀 Get Started Today</div>
+      <h2 class="section-title reveal">Ready to Master <span>Algorithms</span>?</h2>
+      <p class="section-desc reveal" style="margin-top:12px;">Join thousands of students who are learning algorithms the visual way</p>
+      <div style="display:flex;gap:14px;justify-content:center;margin-top:32px;flex-wrap:wrap;" class="reveal">
+        <a href="signup.html" class="btn btn-primary btn-lg animate-pulse-glow">Create Free Account</a>
+        <a href="library.html" class="btn btn-secondary btn-lg">Browse Algorithms</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="navbar-brand" style="margin-bottom:12px;">
+            <div class="logo-icon">〈/〉</div>
+            <span class="logo-text">Algo<span>Viz</span></span>
+          </div>
+          <p class="footer-brand-desc">Interactive algorithm visualization platform for students and developers. Learn DSA the visual way.</p>
+        </div>
+        <div>
+          <div class="footer-col-title">Algorithms</div>
+          <div class="footer-links">
+            <a href="library.html?cat=sorting">Sorting</a>
+            <a href="library.html?cat=searching">Searching</a>
+            <a href="library.html?cat=graph">Graph</a>
+            <a href="library.html?cat=dp">Dynamic Programming</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-title">Platform</div>
+          <div class="footer-links">
+            <a href="library.html">Algorithm Library</a>
+            <a href="compare.html">Comparison Tool</a>
+            <a href="practice.html">Practice</a>
+            <a href="dashboard.html">Dashboard</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-title">Account</div>
+          <div class="footer-links">
+            <a href="signup.html">Sign Up</a>
+            <a href="login.html">Login</a>
+            <a href="profile.html">Profile</a>
+            <a href="admin/dashboard.html">Admin</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span class="footer-copy">© 2026 AlgoViz. Built for Hackathon 2026 🚀</span>
+        <div style="display:flex;gap:16px;">
+          <span style="font-size:0.8rem;color:var(--text-muted);">HTML · CSS · JavaScript</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bottom Nav (Mobile) -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav-item active"><span class="nav-icon">🏠</span>Home</a>
+    <a href="library.html" class="bottom-nav-item"><span class="nav-icon">📚</span>Algorithms</a>
+    <a href="practice.html" class="bottom-nav-item"><span class="nav-icon">🎯</span>Practice</a>
+    <a href="dashboard.html" class="bottom-nav-item"><span class="nav-icon">📊</span>Dashboard</a>
+    <a href="profile.html" class="bottom-nav-item"><span class="nav-icon">👤</span>Profile</a>
+  </nav>
+
+  <script src="js/theme.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/algorithms.js"></script>
+  <script>
+    // Hero animated bars
+    const heroAlgo = [64, 34, 25, 12, 22, 11, 90, 45, 72, 30];
+    let heroStep = 0;
+    const heroColors = ['#3d3d5c','#3d3d5c','#f97316','#f97316','#3d3d5c','#3d3d5c','#3d3d5c','#3d3d5c','#3d3d5c','#3d3d5c'];
+    const heroSteps = [
+      { arr: [64,34,25,12,22,11,90,45,72,30], cmp: [0,1], txt: '🔍 Comparing 64 and 34...' },
+      { arr: [34,64,25,12,22,11,90,45,72,30], cmp: [1,2], txt: '🔄 Swapped! Now comparing 64 and 25...' },
+      { arr: [34,25,64,12,22,11,90,45,72,30], cmp: [2,3], txt: '🔄 Swap! Comparing 64 and 12...' },
+      { arr: [25,34,12,22,11,64,45,72,30,90], cmp: [7,8], txt: '✨ 90 is in its final position!', sorted: [9] },
+      { arr: [12,22,25,30,34,45,64,72,90,11], cmp: [0,1], txt: '🎉 Almost sorted! Final pass...' },
+      { arr: [11,12,22,25,30,34,45,64,72,90], cmp: [], txt: '✅ Array fully sorted!', sorted: [0,1,2,3,4,5,6,7,8,9] },
+    ];
+
+    function renderHeroBars() {
+      const s = heroSteps[heroStep % heroSteps.length];
+      const bars = document.getElementById('heroBars');
+      if (!bars) return;
+      const maxV = 90;
+      bars.innerHTML = s.arr.map((v,i) => {
+        let color = '#3d3d5c';
+        if (s.sorted?.includes(i)) color = '#22c55e';
+        else if (s.cmp?.includes(i)) color = '#f97316';
+        return `<div style="flex:1;height:${(v/maxV)*80}px;background:${color};border-radius:3px 3px 0 0;transition:all 0.4s ease;"></div>`;
+      }).join('');
+      document.getElementById('heroStepText').textContent = s.txt;
+      heroStep++;
+    }
+    renderHeroBars();
+    setInterval(renderHeroBars, 1200);
+
+    // Featured algorithms grid
+    const featured = ['bubble-sort', 'merge-sort', 'binary-search', 'bfs', 'quick-sort', 'dijkstra'];
+    const grid = document.getElementById('featuredGrid');
+    featured.forEach(id => {
+      const a = getAlgorithmById(id);
+      if (!a) return;
+      const card = document.createElement('a');
+      card.href = `algorithm.html?id=${a.id}`;
+      card.className = 'algo-card reveal';
+      card.innerHTML = `
+        <div class="algo-card-icon">${a.icon}</div>
+        <div class="algo-card-title">${a.name}</div>
+        <div class="algo-card-desc">${a.description.substring(0,90)}...</div>
+        <div class="algo-card-footer">
+          <span class="badge badge-${a.difficulty}">${a.difficulty}</span>
+          <span class="complexity-tag">${a.timeComplexity.average}</span>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    // Responsive hero visual
+    function fixHeroGrid() {
+      const heroGrid = document.querySelector('.hero > .container');
+      if (window.innerWidth < 768 && heroGrid) {
+        heroGrid.style.gridTemplateColumns = '1fr';
+        const visual = document.querySelector('.hero-visual');
+        if (visual) visual.style.display = 'none';
+      }
+    }
+    fixHeroGrid();
+    window.addEventListener('resize', fixHeroGrid);
+  </script>
+</body>
+</html>

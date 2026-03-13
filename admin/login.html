@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login – AlgoViz</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg-primary);">
+    <div style="background:var(--gradient-mesh);position:fixed;inset:0;pointer-events:none;"></div>
+    <div style="width:100%;max-width:400px;position:relative;">
+      <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:36px;box-shadow:var(--shadow-lg);">
+        <div style="text-align:center;margin-bottom:28px;">
+          <div style="width:56px;height:56px;background:linear-gradient(135deg,#1e1e2a,#2d2d40);border:2px solid var(--border-color);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 14px;">🛡️</div>
+          <h1 style="font-size:1.4rem;font-weight:800;margin-bottom:4px;">Admin Panel</h1>
+          <p style="font-size:0.82rem;color:var(--text-muted);">AlgoViz Administrative Access</p>
+        </div>
+        <div id="errorMsg" style="display:none;padding:10px 14px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.2);border-radius:var(--radius-sm);font-size:0.85rem;color:#ef4444;margin-bottom:14px;"></div>
+        <form id="adminLoginForm">
+          <div class="form-group">
+            <label class="form-label">Admin Email</label>
+            <input type="email" class="form-input" id="adminEmail" placeholder="admin@algoviz.com" required value="admin@algoviz.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-input" id="adminPassword" placeholder="••••••••" required value="admin1234">
+          </div>
+          <button type="submit" class="btn btn-primary w-full" id="adminLoginBtn" style="font-size:0.95rem;padding:12px;">Access Admin Dashboard</button>
+        </form>
+        <div style="text-align:center;margin-top:16px;">
+          <a href="../index.html" style="font-size:0.82rem;color:var(--text-muted);">← Back to main site</a>
+        </div>
+        <div style="margin-top:20px;padding:12px;background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.15);border-radius:var(--radius-sm);">
+          <p style="font-size:0.75rem;color:var(--text-muted);text-align:center;">Demo credentials pre-filled. Click to access.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="../js/theme.js"></script>
+  <script src="../js/auth.js"></script>
+  <script>
+    // Create admin on first visit
+    const users = Auth.getUsers();
+    if (!users.find(u => u.email === 'admin@algoviz.com')) {
+      Auth.signup('Admin User', 'admin@algoviz.com', 'admin1234');
+      const all = Auth.getUsers();
+      const admin = all.find(u => u.email === 'admin@algoviz.com');
+      if (admin) { admin.isAdmin = true; admin.role = 'Super Admin'; Auth.saveUsers(all); }
+      Auth.clearSession();
+    }
+
+    const session = Auth.getSession();
+    if (session?.isAdmin) window.location.href = 'dashboard.html';
+
+    document.getElementById('adminLoginForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const email = document.getElementById('adminEmail').value;
+      const pass = document.getElementById('adminPassword').value;
+      const btn = document.getElementById('adminLoginBtn');
+      btn.innerHTML = '⏳ Verifying...'; btn.disabled = true;
+      setTimeout(() => {
+        const res = Auth.login(email, pass);
+        if (res.ok) {
+          const s = Auth.getSession();
+          const users = Auth.getUsers();
+          const u = users.find(u => u.id === s.id);
+          if (!u?.isAdmin) { document.getElementById('errorMsg').style.display='block'; document.getElementById('errorMsg').textContent='Access denied. Admin only.'; btn.innerHTML='Access Admin Dashboard'; btn.disabled=false; Auth.clearSession(); return; }
+          s.isAdmin = true; s.role = u.role || 'Admin';
+          Auth.setSession(s);
+          window.location.href = 'dashboard.html';
+        } else {
+          document.getElementById('errorMsg').style.display = 'block';
+          document.getElementById('errorMsg').textContent = res.msg;
+          btn.innerHTML = 'Access Admin Dashboard'; btn.disabled = false;
+        }
+      }, 600);
+    });
+  </script>
+</body>
+</html>
