@@ -19,14 +19,11 @@ const ALGORITHMS = [
   for (let i = 0; i < n - 1; i++) {
     let swapped = false;
     for (let j = 0; j < n - i - 1; j++) {
-      // Compare adjacent elements
       if (arr[j] > arr[j + 1]) {
-        // Swap elements
         [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
         swapped = true;
       }
     }
-    // If no swap, array is sorted
     if (!swapped) break;
   }
   return arr;
@@ -39,9 +36,29 @@ const ALGORITHMS = [
             if arr[j] > arr[j + 1]:
                 arr[j], arr[j + 1] = arr[j + 1], arr[j]
                 swapped = True
-        if not swapped:
-            break
-    return arr`
+        if not swapped: break
+    return arr`,
+      cpp: `void bubbleSort(vector<int>& arr) {
+  int n = arr.size();
+  for (int i = 0; i < n-1; i++) {
+    bool swapped = false;
+    for (int j = 0; j < n-i-1; j++)
+      if (arr[j] > arr[j+1]) { swap(arr[j], arr[j+1]); swapped = true; }
+    if (!swapped) break;
+  }
+}`,
+      java: `void bubbleSort(int[] arr) {
+  int n = arr.length;
+  for (int i = 0; i < n-1; i++) {
+    boolean swapped = false;
+    for (int j = 0; j < n-i-1; j++)
+      if (arr[j] > arr[j+1]) {
+        int t = arr[j]; arr[j] = arr[j+1]; arr[j+1] = t;
+        swapped = true;
+      }
+    if (!swapped) break;
+  }
+}`
     },
     related: ['insertion-sort', 'selection-sort', 'merge-sort'],
     tags: ['comparison', 'in-place', 'stable']
@@ -61,43 +78,46 @@ const ALGORITHMS = [
     code: {
       javascript: `function mergeSort(arr) {
   if (arr.length <= 1) return arr;
-  
   const mid = Math.floor(arr.length / 2);
-  const left = mergeSort(arr.slice(0, mid));
-  const right = mergeSort(arr.slice(mid));
-  
-  return merge(left, right);
+  return merge(mergeSort(arr.slice(0, mid)), mergeSort(arr.slice(mid)));
 }
-
-function merge(left, right) {
-  const result = [];
-  let i = 0, j = 0;
-  
-  while (i < left.length && j < right.length) {
-    if (left[i] <= right[j]) {
-      result.push(left[i++]);
-    } else {
-      result.push(right[j++]);
-    }
-  }
-  return [...result, ...left.slice(i), ...right.slice(j)];
+function merge(L, R) {
+  const res = []; let i = 0, j = 0;
+  while (i < L.length && j < R.length)
+    res.push(L[i] <= R[j] ? L[i++] : R[j++]);
+  return [...res, ...L.slice(i), ...R.slice(j)];
 }`,
       python: `def merge_sort(arr):
-    if len(arr) <= 1:
-        return arr
+    if len(arr) <= 1: return arr
     mid = len(arr) // 2
-    left = merge_sort(arr[:mid])
-    right = merge_sort(arr[mid:])
-    return merge(left, right)
-
-def merge(left, right):
-    result, i, j = [], 0, 0
-    while i < len(left) and j < len(right):
-        if left[i] <= right[j]:
-            result.append(left[i]); i += 1
-        else:
-            result.append(right[j]); j += 1
-    return result + left[i:] + right[j:]`
+    L, R = merge_sort(arr[:mid]), merge_sort(arr[mid:])
+    res, i, j = [], 0, 0
+    while i < len(L) and j < len(R):
+        if L[i] <= R[j]: res.append(L[i]); i += 1
+        else: res.append(R[j]); j += 1
+    return res + L[i:] + R[j:]`,
+      cpp: `void merge(vector<int>& a, int l, int m, int r) {
+  vector<int> L(a.begin()+l, a.begin()+m+1), R(a.begin()+m+1, a.begin()+r+1);
+  int i=0, j=0, k=l;
+  while(i<L.size()&&j<R.size()) a[k++]=L[i]<=R[j]?L[i++]:R[j++];
+  while(i<L.size()) a[k++]=L[i++];
+  while(j<R.size()) a[k++]=R[j++];
+}
+void mergeSort(vector<int>& a, int l, int r) {
+  if(l>=r) return;
+  int m=l+(r-l)/2;
+  mergeSort(a,l,m); mergeSort(a,m+1,r); merge(a,l,m,r);
+}`,
+      java: `void mergeSort(int[] a, int l, int r) {
+  if(l>=r) return;
+  int m=l+(r-l)/2;
+  mergeSort(a,l,m); mergeSort(a,m+1,r);
+  int[] L=Arrays.copyOfRange(a,l,m+1), R=Arrays.copyOfRange(a,m+1,r+1);
+  int i=0,j=0,k=l;
+  while(i<L.length&&j<R.length) a[k++]=L[i]<=R[j]?L[i++]:R[j++];
+  while(i<L.length) a[k++]=L[i++];
+  while(j<R.length) a[k++]=R[j++];
+}`
     },
     related: ['quick-sort', 'bubble-sort', 'heap-sort'],
     tags: ['divide-and-conquer', 'recursive', 'stable']
@@ -115,45 +135,49 @@ def merge(left, right):
     longDesc: `Quick Sort is a highly efficient sorting algorithm that uses a divide-and-conquer strategy. It picks a pivot element and rearranges the array so that all elements smaller than the pivot come before it and all greater elements come after it. Then it recursively sorts the sub-arrays.`,
     useCases: 'General-purpose sorting, arrays, cache-friendly operations',
     code: {
-      javascript: `function quickSort(arr, low = 0, high = arr.length - 1) {
-  if (low < high) {
-    const pi = partition(arr, low, high);
-    quickSort(arr, low, pi - 1);
-    quickSort(arr, pi + 1, high);
+      javascript: `function quickSort(arr, lo=0, hi=arr.length-1) {
+  if (lo < hi) {
+    const p = partition(arr, lo, hi);
+    quickSort(arr, lo, p-1); quickSort(arr, p+1, hi);
   }
   return arr;
 }
-
-function partition(arr, low, high) {
-  const pivot = arr[high];
-  let i = low - 1;
-  
-  for (let j = low; j < high; j++) {
-    if (arr[j] <= pivot) {
-      i++;
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-  }
-  [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
-  return i + 1;
+function partition(arr, lo, hi) {
+  const pivot = arr[hi]; let i = lo-1;
+  for (let j=lo; j<hi; j++)
+    if (arr[j]<=pivot) { i++; [arr[i],arr[j]]=[arr[j],arr[i]]; }
+  [arr[i+1],arr[hi]]=[arr[hi],arr[i+1]];
+  return i+1;
 }`,
-      python: `def quick_sort(arr, low=0, high=None):
-    if high is None: high = len(arr) - 1
-    if low < high:
-        pi = partition(arr, low, high)
-        quick_sort(arr, low, pi - 1)
-        quick_sort(arr, pi + 1, high)
-    return arr
-
-def partition(arr, low, high):
-    pivot = arr[high]
-    i = low - 1
-    for j in range(low, high):
+      python: `def quick_sort(arr, lo=0, hi=None):
+    if hi is None: hi = len(arr)-1
+    if lo < hi:
+        p = partition(arr, lo, hi)
+        quick_sort(arr, lo, p-1)
+        quick_sort(arr, p+1, hi)
+def partition(arr, lo, hi):
+    pivot, i = arr[hi], lo-1
+    for j in range(lo, hi):
         if arr[j] <= pivot:
-            i += 1
-            arr[i], arr[j] = arr[j], arr[i]
-    arr[i+1], arr[high] = arr[high], arr[i+1]
-    return i + 1`
+            i += 1; arr[i], arr[j] = arr[j], arr[i]
+    arr[i+1], arr[hi] = arr[hi], arr[i+1]
+    return i+1`,
+      cpp: `int partition(vector<int>& a, int lo, int hi) {
+  int pivot=a[hi], i=lo-1;
+  for(int j=lo;j<hi;j++) if(a[j]<=pivot) swap(a[++i],a[j]);
+  swap(a[i+1],a[hi]); return i+1;
+}
+void quickSort(vector<int>& a, int lo, int hi) {
+  if(lo<hi){int p=partition(a,lo,hi);quickSort(a,lo,p-1);quickSort(a,p+1,hi);}
+}`,
+      java: `int partition(int[] a, int lo, int hi) {
+  int pivot=a[hi], i=lo-1;
+  for(int j=lo;j<hi;j++) if(a[j]<=pivot){int t=a[++i];a[i]=a[j];a[j]=t;}
+  int t=a[i+1];a[i+1]=a[hi];a[hi]=t; return i+1;
+}
+void quickSort(int[] a, int lo, int hi) {
+  if(lo<hi){int p=partition(a,lo,hi);quickSort(a,lo,p-1);quickSort(a,p+1,hi);}
+}`
     },
     related: ['merge-sort', 'heap-sort', 'insertion-sort'],
     tags: ['divide-and-conquer', 'in-place', 'recursive']
@@ -173,29 +197,147 @@ def partition(arr, low, high):
     code: {
       javascript: `function insertionSort(arr) {
   for (let i = 1; i < arr.length; i++) {
-    const key = arr[i];
-    let j = i - 1;
-    
-    while (j >= 0 && arr[j] > key) {
-      arr[j + 1] = arr[j];
-      j--;
-    }
-    arr[j + 1] = key;
+    const key = arr[i]; let j = i-1;
+    while (j >= 0 && arr[j] > key) { arr[j+1] = arr[j]; j--; }
+    arr[j+1] = key;
   }
   return arr;
 }`,
       python: `def insertion_sort(arr):
     for i in range(1, len(arr)):
-        key = arr[i]
-        j = i - 1
+        key, j = arr[i], i-1
         while j >= 0 and arr[j] > key:
-            arr[j + 1] = arr[j]
-            j -= 1
-        arr[j + 1] = key
-    return arr`
+            arr[j+1] = arr[j]; j -= 1
+        arr[j+1] = key
+    return arr`,
+      cpp: `void insertionSort(vector<int>& arr) {
+  for(int i=1;i<arr.size();i++) {
+    int key=arr[i], j=i-1;
+    while(j>=0 && arr[j]>key) { arr[j+1]=arr[j]; j--; }
+    arr[j+1]=key;
+  }
+}`,
+      java: `void insertionSort(int[] arr) {
+  for(int i=1;i<arr.length;i++) {
+    int key=arr[i], j=i-1;
+    while(j>=0 && arr[j]>key) { arr[j+1]=arr[j]; j--; }
+    arr[j+1]=key;
+  }
+}`
     },
     related: ['bubble-sort', 'selection-sort', 'shell-sort'],
     tags: ['comparison', 'in-place', 'stable', 'online']
+  },
+  {
+    id: 'selection-sort',
+    name: 'Selection Sort',
+    category: 'sorting',
+    difficulty: 'easy',
+    icon: '👆',
+    timeComplexity: { best: 'O(n²)', average: 'O(n²)', worst: 'O(n²)' },
+    spaceComplexity: 'O(1)',
+    stable: false,
+    description: 'Selection Sort repeatedly finds the minimum element from the unsorted part and places it at the beginning.',
+    longDesc: `Selection Sort divides the array into sorted and unsorted regions. It finds the minimum element in the unsorted region and swaps it to the end of the sorted region. This continues until the entire array is sorted. Simple but inefficient for large datasets.`,
+    useCases: 'Small datasets, minimizing swaps, educational purposes',
+    code: {
+      javascript: `function selectionSort(arr) {
+  for (let i = 0; i < arr.length-1; i++) {
+    let min = i;
+    for (let j = i+1; j < arr.length; j++)
+      if (arr[j] < arr[min]) min = j;
+    if (min !== i) [arr[i], arr[min]] = [arr[min], arr[i]];
+  }
+  return arr;
+}`,
+      python: `def selection_sort(arr):
+    for i in range(len(arr)-1):
+        min_idx = i
+        for j in range(i+1, len(arr)):
+            if arr[j] < arr[min_idx]: min_idx = j
+        arr[i], arr[min_idx] = arr[min_idx], arr[i]
+    return arr`,
+      cpp: `void selectionSort(vector<int>& arr) {
+  for(int i=0;i<arr.size()-1;i++) {
+    int m=i;
+    for(int j=i+1;j<arr.size();j++) if(arr[j]<arr[m]) m=j;
+    swap(arr[i],arr[m]);
+  }
+}`,
+      java: `void selectionSort(int[] arr) {
+  for(int i=0;i<arr.length-1;i++) {
+    int m=i;
+    for(int j=i+1;j<arr.length;j++) if(arr[j]<arr[m]) m=j;
+    int t=arr[i]; arr[i]=arr[m]; arr[m]=t;
+  }
+}`
+    },
+    related: ['bubble-sort', 'insertion-sort', 'heap-sort'],
+    tags: ['comparison', 'in-place', 'unstable']
+  },
+  {
+    id: 'heap-sort',
+    name: 'Heap Sort',
+    category: 'sorting',
+    difficulty: 'hard',
+    icon: '🏔️',
+    timeComplexity: { best: 'O(n log n)', average: 'O(n log n)', worst: 'O(n log n)' },
+    spaceComplexity: 'O(1)',
+    stable: false,
+    description: 'Heap Sort builds a max-heap from the array, then repeatedly extracts the maximum element to build the sorted array from the end.',
+    longDesc: `Heap Sort uses a binary heap data structure. First, a max-heap is built from the input array. Then, the root (maximum element) is swapped with the last element, the heap size is reduced, and heapify is called on the root. This process repeats until sorted.`,
+    useCases: 'Guaranteed O(n log n) worst case, in-place sorting, priority queues',
+    code: {
+      javascript: `function heapSort(arr) {
+  const n = arr.length;
+  for (let i = Math.floor(n/2)-1; i >= 0; i--) heapify(arr, n, i);
+  for (let i = n-1; i > 0; i--) {
+    [arr[0], arr[i]] = [arr[i], arr[0]];
+    heapify(arr, i, 0);
+  }
+}
+function heapify(arr, n, i) {
+  let lg = i, l = 2*i+1, r = 2*i+2;
+  if (l < n && arr[l] > arr[lg]) lg = l;
+  if (r < n && arr[r] > arr[lg]) lg = r;
+  if (lg !== i) { [arr[i], arr[lg]] = [arr[lg], arr[i]]; heapify(arr, n, lg); }
+}`,
+      python: `def heap_sort(arr):
+    n = len(arr)
+    for i in range(n//2-1, -1, -1): heapify(arr, n, i)
+    for i in range(n-1, 0, -1):
+        arr[0], arr[i] = arr[i], arr[0]
+        heapify(arr, i, 0)
+def heapify(arr, n, i):
+    lg, l, r = i, 2*i+1, 2*i+2
+    if l < n and arr[l] > arr[lg]: lg = l
+    if r < n and arr[r] > arr[lg]: lg = r
+    if lg != i: arr[i], arr[lg] = arr[lg], arr[i]; heapify(arr, n, lg)`,
+      cpp: `void heapify(vector<int>& a, int n, int i) {
+  int lg=i, l=2*i+1, r=2*i+2;
+  if(l<n && a[l]>a[lg]) lg=l;
+  if(r<n && a[r]>a[lg]) lg=r;
+  if(lg!=i){swap(a[i],a[lg]);heapify(a,n,lg);}
+}
+void heapSort(vector<int>& a) {
+  int n=a.size();
+  for(int i=n/2-1;i>=0;i--) heapify(a,n,i);
+  for(int i=n-1;i>0;i--){swap(a[0],a[i]);heapify(a,i,0);}
+}`,
+      java: `void heapSort(int[] a) {
+  int n=a.length;
+  for(int i=n/2-1;i>=0;i--) heapify(a,n,i);
+  for(int i=n-1;i>0;i--){int t=a[0];a[0]=a[i];a[i]=t;heapify(a,i,0);}
+}
+void heapify(int[] a, int n, int i) {
+  int lg=i, l=2*i+1, r=2*i+2;
+  if(l<n && a[l]>a[lg]) lg=l;
+  if(r<n && a[r]>a[lg]) lg=r;
+  if(lg!=i){int t=a[i];a[i]=a[lg];a[lg]=t;heapify(a,n,lg);}
+}`
+    },
+    related: ['merge-sort', 'quick-sort', 'selection-sort'],
+    tags: ['heap', 'in-place', 'unstable']
   },
 
   // ===== SEARCHING =====
@@ -213,18 +355,24 @@ def partition(arr, low, high):
     useCases: 'Unsorted arrays, small datasets, single search on a list',
     code: {
       javascript: `function linearSearch(arr, target) {
-  for (let i = 0; i < arr.length; i++) {
-    if (arr[i] === target) {
-      return i; // Found at index i
-    }
-  }
-  return -1; // Not found
+  for (let i = 0; i < arr.length; i++)
+    if (arr[i] === target) return i;
+  return -1;
 }`,
       python: `def linear_search(arr, target):
     for i, val in enumerate(arr):
-        if val == target:
-            return i  # Found
-    return -1  # Not found`
+        if val == target: return i
+    return -1`,
+      cpp: `int linearSearch(vector<int>& arr, int target) {
+  for(int i=0;i<arr.size();i++)
+    if(arr[i]==target) return i;
+  return -1;
+}`,
+      java: `int linearSearch(int[] arr, int target) {
+  for(int i=0;i<arr.length;i++)
+    if(arr[i]==target) return i;
+  return -1;
+}`
     },
     related: ['binary-search'],
     tags: ['sequential', 'unsorted']
@@ -244,27 +392,40 @@ def partition(arr, low, high):
     code: {
       javascript: `function binarySearch(arr, target) {
   let left = 0, right = arr.length - 1;
-  
   while (left <= right) {
     const mid = Math.floor((left + right) / 2);
-    
     if (arr[mid] === target) return mid;
     if (arr[mid] < target) left = mid + 1;
     else right = mid - 1;
   }
-  return -1; // Not found
+  return -1;
 }`,
       python: `def binary_search(arr, target):
     left, right = 0, len(arr) - 1
     while left <= right:
         mid = (left + right) // 2
-        if arr[mid] == target:
-            return mid
-        elif arr[mid] < target:
-            left = mid + 1
-        else:
-            right = mid - 1
-    return -1`
+        if arr[mid] == target: return mid
+        elif arr[mid] < target: left = mid + 1
+        else: right = mid - 1
+    return -1`,
+      cpp: `int binarySearch(vector<int>& arr, int target) {
+  int l=0, r=arr.size()-1;
+  while(l<=r) {
+    int m=l+(r-l)/2;
+    if(arr[m]==target) return m;
+    arr[m]<target ? l=m+1 : r=m-1;
+  }
+  return -1;
+}`,
+      java: `int binarySearch(int[] arr, int target) {
+  int l=0, r=arr.length-1;
+  while(l<=r) {
+    int m=l+(r-l)/2;
+    if(arr[m]==target) return m;
+    if(arr[m]<target) l=m+1; else r=m-1;
+  }
+  return -1;
+}`
     },
     related: ['linear-search', 'jump-search', 'interpolation-search'],
     tags: ['divide-and-conquer', 'sorted', 'efficient']
@@ -285,40 +446,45 @@ def partition(arr, low, high):
     useCases: 'Shortest path in unweighted graphs, level-order traversal, social networks',
     code: {
       javascript: `function bfs(graph, start) {
-  const visited = new Set();
-  const queue = [start];
-  const order = [];
-  
-  visited.add(start);
-  
+  const visited = new Set([start]);
+  const queue = [start], order = [];
   while (queue.length > 0) {
-    const vertex = queue.shift();
-    order.push(vertex);
-    
-    for (const neighbor of graph[vertex] || []) {
-      if (!visited.has(neighbor)) {
-        visited.add(neighbor);
-        queue.push(neighbor);
-      }
-    }
+    const v = queue.shift();
+    order.push(v);
+    for (const nb of graph[v] || [])
+      if (!visited.has(nb)) { visited.add(nb); queue.push(nb); }
   }
   return order;
 }`,
       python: `from collections import deque
-
 def bfs(graph, start):
-    visited = set([start])
-    queue = deque([start])
-    order = []
-    
+    visited, queue, order = {start}, deque([start]), []
     while queue:
-        vertex = queue.popleft()
-        order.append(vertex)
-        for neighbor in graph.get(vertex, []):
-            if neighbor not in visited:
-                visited.add(neighbor)
-                queue.append(neighbor)
-    return order`
+        v = queue.popleft(); order.append(v)
+        for nb in graph.get(v, []):
+            if nb not in visited: visited.add(nb); queue.append(nb)
+    return order`,
+      cpp: `vector<int> bfs(vector<vector<int>>& adj, int start) {
+  vector<bool> vis(adj.size(), false);
+  queue<int> q; q.push(start); vis[start]=true;
+  vector<int> order;
+  while(!q.empty()) {
+    int v=q.front(); q.pop(); order.push_back(v);
+    for(int nb : adj[v]) if(!vis[nb]){vis[nb]=true;q.push(nb);}
+  }
+  return order;
+}`,
+      java: `List<Integer> bfs(List<List<Integer>> adj, int start) {
+  boolean[] vis = new boolean[adj.size()];
+  Queue<Integer> q = new LinkedList<>();
+  q.add(start); vis[start]=true;
+  List<Integer> order = new ArrayList<>();
+  while(!q.isEmpty()) {
+    int v=q.poll(); order.add(v);
+    for(int nb : adj.get(v)) if(!vis[nb]){vis[nb]=true;q.add(nb);}
+  }
+  return order;
+}`
     },
     related: ['dfs', 'dijkstra'],
     tags: ['graph', 'queue', 'shortest-path']
@@ -336,43 +502,48 @@ def bfs(graph, start):
     longDesc: `Depth-First Search starts at a source vertex and explores as far as possible along each branch before backtracking. It uses a stack (or recursion) to keep track of the path. DFS is useful for detecting cycles, topological sorting, and finding connected components.`,
     useCases: 'Cycle detection, topological sort, maze solving, connected components',
     code: {
-      javascript: `function dfs(graph, start, visited = new Set()) {
-  visited.add(start);
-  const order = [start];
-  
-  for (const neighbor of graph[start] || []) {
-    if (!visited.has(neighbor)) {
-      order.push(...dfs(graph, neighbor, visited));
-    }
-  }
-  return order;
-}
-
-// Iterative version
-function dfsIterative(graph, start) {
-  const visited = new Set();
-  const stack = [start];
-  const order = [];
-  
+      javascript: `function dfs(graph, start) {
+  const visited = new Set(), stack = [start], order = [];
   while (stack.length > 0) {
-    const vertex = stack.pop();
-    if (!visited.has(vertex)) {
-      visited.add(vertex);
-      order.push(vertex);
-      for (const n of (graph[vertex] || []).reverse())
-        stack.push(n);
+    const v = stack.pop();
+    if (!visited.has(v)) {
+      visited.add(v); order.push(v);
+      for (const nb of (graph[v]||[]).reverse()) stack.push(nb);
     }
   }
   return order;
 }`,
-      python: `def dfs(graph, start, visited=None):
-    if visited is None: visited = set()
-    visited.add(start)
-    order = [start]
-    for neighbor in graph.get(start, []):
-        if neighbor not in visited:
-            order.extend(dfs(graph, neighbor, visited))
-    return order`
+      python: `def dfs(graph, start):
+    visited, stack, order = set(), [start], []
+    while stack:
+        v = stack.pop()
+        if v not in visited:
+            visited.add(v); order.append(v)
+            for nb in reversed(graph.get(v, [])): stack.append(nb)
+    return order`,
+      cpp: `vector<int> dfs(vector<vector<int>>& adj, int start) {
+  vector<bool> vis(adj.size(), false);
+  stack<int> st; st.push(start);
+  vector<int> order;
+  while(!st.empty()) {
+    int v=st.top(); st.pop();
+    if(!vis[v]){vis[v]=true;order.push_back(v);
+    for(int i=adj[v].size()-1;i>=0;i--)st.push(adj[v][i]);}
+  }
+  return order;
+}`,
+      java: `List<Integer> dfs(List<List<Integer>> adj, int start) {
+  boolean[] vis = new boolean[adj.size()];
+  Stack<Integer> st = new Stack<>(); st.push(start);
+  List<Integer> order = new ArrayList<>();
+  while(!st.isEmpty()) {
+    int v=st.pop();
+    if(!vis[v]){vis[v]=true;order.add(v);
+    List<Integer> nb=adj.get(v);
+    for(int i=nb.size()-1;i>=0;i--)st.push(nb.get(i));}
+  }
+  return order;
+}`
     },
     related: ['bfs', 'dijkstra'],
     tags: ['graph', 'stack', 'recursive']
@@ -391,45 +562,54 @@ function dfsIterative(graph, start) {
     useCases: 'GPS navigation, network routing, shortest path in weighted graphs',
     code: {
       javascript: `function dijkstra(graph, start) {
-  const dist = {};
-  const visited = new Set();
-  
+  const dist = {}, vis = new Set();
   for (const v in graph) dist[v] = Infinity;
   dist[start] = 0;
-  
   while (true) {
-    // Find unvisited vertex with min distance
     let u = null;
-    for (const v in dist) {
-      if (!visited.has(v) && (u === null || dist[v] < dist[u]))
-        u = v;
-    }
-    if (u === null || dist[u] === Infinity) break;
-    visited.add(u);
-    
-    for (const [v, weight] of graph[u] || []) {
-      if (dist[u] + weight < dist[v]) {
-        dist[v] = dist[u] + weight;
-      }
-    }
+    for (const v in dist)
+      if (!vis.has(v) && (u===null || dist[v]<dist[u])) u = v;
+    if (!u || dist[u]===Infinity) break;
+    vis.add(u);
+    for (const [v, w] of graph[u] || [])
+      if (dist[u]+w < dist[v]) dist[v] = dist[u]+w;
   }
   return dist;
 }`,
       python: `import heapq
-
 def dijkstra(graph, start):
     dist = {v: float('inf') for v in graph}
-    dist[start] = 0
-    pq = [(0, start)]
-    
+    dist[start] = 0; pq = [(0, start)]
     while pq:
         d, u = heapq.heappop(pq)
         if d > dist[u]: continue
         for v, w in graph.get(u, []):
-            if dist[u] + w < dist[v]:
-                dist[v] = dist[u] + w
+            if dist[u]+w < dist[v]:
+                dist[v] = dist[u]+w
                 heapq.heappush(pq, (dist[v], v))
-    return dist`
+    return dist`,
+      cpp: `vector<int> dijkstra(vector<vector<pair<int,int>>>& g, int s) {
+  int n=g.size(); vector<int> d(n,INT_MAX); d[s]=0;
+  priority_queue<pair<int,int>,vector<pair<int,int>>,greater<>> pq;
+  pq.push({0,s});
+  while(!pq.empty()){
+    auto[dist,u]=pq.top();pq.pop();
+    if(dist>d[u]) continue;
+    for(auto[v,w]:g[u]) if(d[u]+w<d[v]){d[v]=d[u]+w;pq.push({d[v],v});}
+  }
+  return d;
+}`,
+      java: `int[] dijkstra(List<int[]>[] g, int s) {
+  int n=g.length; int[] d=new int[n]; Arrays.fill(d,Integer.MAX_VALUE); d[s]=0;
+  PriorityQueue<int[]> pq=new PriorityQueue<>((a,b)->a[0]-b[0]);
+  pq.add(new int[]{0,s});
+  while(!pq.isEmpty()){
+    int[] t=pq.poll(); int dist=t[0],u=t[1];
+    if(dist>d[u]) continue;
+    for(int[] e:g[u]) if(d[u]+e[1]<d[e[0]]){d[e[0]]=d[u]+e[1];pq.add(new int[]{d[e[0]],e[0]});}
+  }
+  return d;
+}`
     },
     related: ['bfs', 'bellman-ford', 'a-star'],
     tags: ['graph', 'greedy', 'shortest-path', 'weighted']
@@ -449,37 +629,31 @@ def dijkstra(graph, start):
     longDesc: `The naive recursive Fibonacci has O(2^n) complexity due to overlapping subproblems. Dynamic Programming (memoization/tabulation) stores computed results so each subproblem is solved only once, achieving O(n) time complexity.`,
     useCases: 'Introduction to DP concepts, memoization demonstration',
     code: {
-      javascript: `// Memoization (Top-Down)
-function fibMemo(n, memo = {}) {
-  if (n <= 1) return n;
-  if (memo[n]) return memo[n];
-  memo[n] = fibMemo(n-1, memo) + fibMemo(n-2, memo);
-  return memo[n];
-}
-
-// Tabulation (Bottom-Up)
-function fibTab(n) {
+      javascript: `function fibonacci(n) {
   if (n <= 1) return n;
   const dp = [0, 1];
-  for (let i = 2; i <= n; i++) {
+  for (let i = 2; i <= n; i++)
     dp[i] = dp[i-1] + dp[i-2];
-  }
   return dp[n];
 }`,
-      python: `# Memoization
-def fib_memo(n, memo={}):
-    if n <= 1: return n
-    if n in memo: return memo[n]
-    memo[n] = fib_memo(n-1) + fib_memo(n-2)
-    return memo[n]
-
-# Tabulation
-def fib_tab(n):
+      python: `def fibonacci(n):
     if n <= 1: return n
     dp = [0, 1]
     for i in range(2, n+1):
         dp.append(dp[-1] + dp[-2])
-    return dp[n]`
+    return dp[n]`,
+      cpp: `int fibonacci(int n) {
+  if(n<=1) return n;
+  vector<int> dp(n+1); dp[0]=0; dp[1]=1;
+  for(int i=2;i<=n;i++) dp[i]=dp[i-1]+dp[i-2];
+  return dp[n];
+}`,
+      java: `int fibonacci(int n) {
+  if(n<=1) return n;
+  int[] dp = new int[n+1]; dp[0]=0; dp[1]=1;
+  for(int i=2;i<=n;i++) dp[i]=dp[i-1]+dp[i-2];
+  return dp[n];
+}`
     },
     related: ['knapsack', 'lcs'],
     tags: ['dp', 'memoization', 'tabulation']
@@ -497,34 +671,41 @@ def fib_tab(n):
     longDesc: `Given items with weights and values, the 0/1 Knapsack problem asks: what is the maximum value we can achieve with a given weight capacity? Each item can be included or excluded. DP fills a 2D table where dp[i][w] represents the max value using first i items and weight capacity w.`,
     useCases: 'Resource allocation, budget planning, cut stock problem',
     code: {
-      javascript: `function knapsack(weights, values, capacity) {
-  const n = weights.length;
-  const dp = Array(n+1).fill(null)
-    .map(() => Array(capacity+1).fill(0));
-  
-  for (let i = 1; i <= n; i++) {
-    for (let w = 0; w <= capacity; w++) {
-      // Don't include item i
+      javascript: `function knapsack(W, wt, val, n) {
+  const dp = Array(n+1).fill(null).map(()=>Array(W+1).fill(0));
+  for(let i=1;i<=n;i++)
+    for(let w=0;w<=W;w++) {
       dp[i][w] = dp[i-1][w];
-      // Include item i if it fits
-      if (weights[i-1] <= w) {
-        dp[i][w] = Math.max(dp[i][w],
-          values[i-1] + dp[i-1][w - weights[i-1]]);
-      }
+      if(wt[i-1]<=w) dp[i][w]=Math.max(dp[i][w], val[i-1]+dp[i-1][w-wt[i-1]]);
     }
-  }
-  return dp[n][capacity];
+  return dp[n][W];
 }`,
-      python: `def knapsack(weights, values, capacity):
-    n = len(weights)
-    dp = [[0]*(capacity+1) for _ in range(n+1)]
+      python: `def knapsack(W, wt, val, n):
+    dp = [[0]*(W+1) for _ in range(n+1)]
     for i in range(1, n+1):
-        for w in range(capacity+1):
+        for w in range(W+1):
             dp[i][w] = dp[i-1][w]
-            if weights[i-1] <= w:
-                dp[i][w] = max(dp[i][w],
-                  values[i-1] + dp[i-1][w-weights[i-1]])
-    return dp[n][capacity]`
+            if wt[i-1] <= w:
+                dp[i][w] = max(dp[i][w], val[i-1]+dp[i-1][w-wt[i-1]])
+    return dp[n][W]`,
+      cpp: `int knapsack(int W, vector<int>& wt, vector<int>& val, int n) {
+  vector<vector<int>> dp(n+1, vector<int>(W+1,0));
+  for(int i=1;i<=n;i++)
+    for(int w=0;w<=W;w++) {
+      dp[i][w]=dp[i-1][w];
+      if(wt[i-1]<=w) dp[i][w]=max(dp[i][w],val[i-1]+dp[i-1][w-wt[i-1]]);
+    }
+  return dp[n][W];
+}`,
+      java: `int knapsack(int W, int[] wt, int[] val, int n) {
+  int[][] dp = new int[n+1][W+1];
+  for(int i=1;i<=n;i++)
+    for(int w=0;w<=W;w++) {
+      dp[i][w]=dp[i-1][w];
+      if(wt[i-1]<=w) dp[i][w]=Math.max(dp[i][w],val[i-1]+dp[i-1][w-wt[i-1]]);
+    }
+  return dp[n][W];
+}`
     },
     related: ['fibonacci-dp', 'lcs'],
     tags: ['dp', 'optimization', 'combinatorics']

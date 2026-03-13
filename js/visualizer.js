@@ -518,6 +518,127 @@ const GraphGenerators = {
     dfsHelper(start);
     steps.push({ nodes: g.nodes, edges: g.edges, visited: [...visited], path: order, current: null, desc: `DFS Complete! Visited: ${order.join(' → ')} 🎉` });
     return steps;
+  },
+
+  dijkstra(start = 'A') {
+    const g = this.sampleGraph;
+    const weights = {'A-B':4,'A-C':2,'B-D':5,'B-E':1,'C-F':8,'C-G':10,'E-F':3};
+    const steps = [];
+    const dist = {}; const visited = [];
+    Object.keys(g.nodes).forEach(n => dist[n] = Infinity);
+    dist[start] = 0;
+    steps.push({ nodes: g.nodes, edges: g.edges, weights, visited: [], dist: {...dist}, current: null, desc: `Starting Dijkstra from ${start}. All distances set to ∞ except source (0).` });
+
+    for (let i = 0; i < Object.keys(g.nodes).length; i++) {
+      let u = null;
+      for (const v of Object.keys(dist)) {
+        if (!visited.includes(v) && (u === null || dist[v] < dist[u])) u = v;
+      }
+      if (u === null || dist[u] === Infinity) break;
+      visited.push(u);
+      steps.push({ nodes: g.nodes, edges: g.edges, weights, visited: [...visited], dist: {...dist}, current: u, desc: `Visit node ${u} (distance=${dist[u]}). Relaxing neighbors.` });
+      for (const nb of g.adj[u] || []) {
+        const w = weights[`${u}-${nb}`] || weights[`${nb}-${u}`] || 1;
+        if (dist[u] + w < dist[nb]) {
+          dist[nb] = dist[u] + w;
+          steps.push({ nodes: g.nodes, edges: g.edges, weights, visited: [...visited], dist: {...dist}, current: u, queue: [nb], desc: `Relax ${u}→${nb}: ${dist[u]}+${w}=${dist[nb]}. Updated distance of ${nb}.` });
+        }
+      }
+    }
+    steps.push({ nodes: g.nodes, edges: g.edges, weights, visited: [...visited], dist: {...dist}, path: visited, current: null, desc: `Dijkstra Complete! Shortest distances: ${Object.entries(dist).map(([k,v])=>`${k}:${v}`).join(', ')} 🎉` });
+    return steps;
+  }
+};
+
+// ===== Selection Sort & Heap Sort Generators =====
+SortingGenerators.selectionSort = function(arr) {
+  const steps = [];
+  const a = [...arr]; const n = a.length; const sorted = [];
+  steps.push({ array: [...a], sorted: [], desc: 'Starting Selection Sort. Find the minimum element and place it at the beginning.' });
+  for (let i = 0; i < n - 1; i++) {
+    let minIdx = i;
+    for (let j = i + 1; j < n; j++) {
+      steps.push({ array: [...a], comparing: [minIdx, j], sorted: [...sorted], desc: `Comparing ${a[minIdx]} (min) with ${a[j]}.` });
+      if (a[j] < a[minIdx]) minIdx = j;
+    }
+    if (minIdx !== i) {
+      steps.push({ array: [...a], swapping: [i, minIdx], sorted: [...sorted], desc: `Swapping ${a[i]} and ${a[minIdx]}.` });
+      [a[i], a[minIdx]] = [a[minIdx], a[i]];
+    }
+    sorted.push(i);
+    steps.push({ array: [...a], sorted: [...sorted], desc: `${a[i]} placed at position ${i}. ✓` });
+  }
+  sorted.push(n - 1);
+  steps.push({ array: [...a], sorted: [...sorted], desc: 'Selection Sort Complete! 🎉' });
+  return steps;
+};
+
+SortingGenerators.heapSort = function(arr) {
+  const steps = [];
+  const a = [...arr]; const n = a.length; const sorted = [];
+
+  function heapify(size, i) {
+    let largest = i, l = 2*i+1, r = 2*i+2;
+    if (l < size && a[l] > a[largest]) largest = l;
+    if (r < size && a[r] > a[largest]) largest = r;
+    if (largest !== i) {
+      steps.push({ array: [...a], swapping: [i, largest], sorted: [...sorted], desc: `Heapify: swapping ${a[i]} and ${a[largest]}.` });
+      [a[i], a[largest]] = [a[largest], a[i]];
+      steps.push({ array: [...a], sorted: [...sorted], desc: `Array: [${a.join(', ')}]` });
+      heapify(size, largest);
+    }
+  }
+
+  steps.push({ array: [...a], desc: 'Starting Heap Sort. Building max-heap first.' });
+  for (let i = Math.floor(n/2)-1; i >= 0; i--) heapify(n, i);
+  steps.push({ array: [...a], desc: `Max-heap built: [${a.join(', ')}]` });
+  for (let i = n-1; i > 0; i--) {
+    steps.push({ array: [...a], swapping: [0, i], sorted: [...sorted], desc: `Moving max ${a[0]} to end.` });
+    [a[0], a[i]] = [a[i], a[0]];
+    sorted.push(i);
+    steps.push({ array: [...a], sorted: [...sorted], desc: `${a[i]} in final position.` });
+    heapify(i, 0);
+  }
+  sorted.push(0);
+  steps.push({ array: [...a], sorted: Array.from({length:n},(_,k)=>k), desc: 'Heap Sort Complete! 🎉' });
+  return steps;
+};
+
+// ===== DP Step Generators =====
+const DPGenerators = {
+  fibonacci(n) {
+    const steps = [];
+    const dp = [0, 1];
+    steps.push({ array: [0, 1], active: [0, 1], desc: `Computing Fibonacci(${n}). Base cases: F(0)=0, F(1)=1.` });
+    for (let i = 2; i <= n; i++) {
+      dp[i] = dp[i-1] + dp[i-2];
+      steps.push({ array: [...dp], comparing: [i-1, i-2], desc: `F(${i}) = F(${i-1}) + F(${i-2}) = ${dp[i-1]} + ${dp[i-2]} = ${dp[i]}` });
+      steps.push({ array: [...dp], active: [i], sorted: Array.from({length:i+1},(_,k)=>k), desc: `Computed F(${i}) = ${dp[i]}. DP table: [${dp.join(', ')}]` });
+    }
+    steps.push({ array: [...dp], sorted: Array.from({length:dp.length},(_,k)=>k), desc: `Fibonacci(${n}) = ${dp[n]}. Complete! 🎉` });
+    return steps;
+  },
+
+  knapsack() {
+    const weights = [2, 3, 4, 5];
+    const values = [3, 4, 5, 6];
+    const W = 8;
+    const n = weights.length;
+    const steps = [];
+    const dp = Array(n+1).fill(null).map(()=>Array(W+1).fill(0));
+    steps.push({ array: [0,0,0,0,0,0,0,0,0], desc: `0/1 Knapsack: ${n} items, capacity=${W}. Weights=[${weights}], Values=[${values}]` });
+    for (let i = 1; i <= n; i++) {
+      for (let w = 0; w <= W; w++) {
+        dp[i][w] = dp[i-1][w];
+        if (weights[i-1] <= w) {
+          const include = values[i-1] + dp[i-1][w-weights[i-1]];
+          if (include > dp[i][w]) dp[i][w] = include;
+        }
+      }
+      steps.push({ array: dp[i].slice(), comparing: [weights[i-1]], active: dp[i].map((_,k)=>k).filter(k=>dp[i][k]>dp[i-1][k]), desc: `Item ${i} (w=${weights[i-1]}, v=${values[i-1]}): row=[${dp[i].join(',')}]. Max so far: ${dp[i][W]}` });
+    }
+    steps.push({ array: dp[n].slice(), sorted: Array.from({length:W+1},(_,k)=>k), desc: `Knapsack Complete! Maximum value = ${dp[n][W]} 🎉` });
+    return steps;
   }
 };
 

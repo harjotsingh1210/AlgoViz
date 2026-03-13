@@ -42,6 +42,8 @@
       <a href="algorithm.html?id=merge-sort" class="sidebar-link" id="link-merge-sort"><span class="link-icon">🔀</span> Merge Sort</a>
       <a href="algorithm.html?id=quick-sort" class="sidebar-link" id="link-quick-sort"><span class="link-icon">⚡</span> Quick Sort</a>
       <a href="algorithm.html?id=insertion-sort" class="sidebar-link" id="link-insertion-sort"><span class="link-icon">🃏</span> Insertion Sort</a>
+      <a href="algorithm.html?id=selection-sort" class="sidebar-link" id="link-selection-sort"><span class="link-icon">👆</span> Selection Sort</a>
+      <a href="algorithm.html?id=heap-sort" class="sidebar-link" id="link-heap-sort"><span class="link-icon">🏔️</span> Heap Sort</a>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-label">Searching</div>
@@ -158,6 +160,8 @@
               <div style="display:flex;gap:8px;">
                 <button class="btn btn-secondary btn-sm" id="langJS" onclick="switchLang('javascript')">JS</button>
                 <button class="btn btn-secondary btn-sm" id="langPY" onclick="switchLang('python')">PY</button>
+                <button class="btn btn-secondary btn-sm" id="langCPP" onclick="switchLang('cpp')">C++</button>
+                <button class="btn btn-secondary btn-sm" id="langJAVA" onclick="switchLang('java')">Java</button>
               </div>
             </div>
             <div class="code-body" id="codeBody" style="max-height:320px;overflow-y:auto;">
@@ -294,15 +298,20 @@
       function renderCode(lang) {
         const code = algo.code[lang] || algo.code.javascript;
         document.getElementById('codeContent').innerHTML = syntaxHighlight(code, lang);
-        document.getElementById('codeTitle').textContent = lang === 'javascript' ? `${algoId}.js` : `${algoId}.py`;
-        document.getElementById('langJS').className = lang === 'javascript' ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm';
-        document.getElementById('langPY').className = lang === 'python' ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm';
+        const extMap = {javascript:'.js',python:'.py',cpp:'.cpp',java:'.java'};
+        document.getElementById('codeTitle').textContent = algoId + (extMap[lang]||'.js');
+        ['langJS','langPY','langCPP','langJAVA'].forEach(id => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          const langKey = {langJS:'javascript',langPY:'python',langCPP:'cpp',langJAVA:'java'}[id];
+          el.className = lang === langKey ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm';
+        });
       }
 
       function syntaxHighlight(code, lang) {
         return code
           .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-          .replace(/\b(function|return|if|else|while|for|let|const|var|new|of|in|break|true|false|null|undefined|def|import|from|not|and|or|pass|None|len|range)\b/g, '<span class="kw">$1</span>')
+          .replace(/\b(function|return|if|else|while|for|let|const|var|new|of|in|break|true|false|null|undefined|def|import|from|not|and|or|pass|None|len|range|class|public|private|static|void|int|boolean|string|vector|auto|using|namespace|include|extends|implements|this|super)\b/g, '<span class="kw">$1</span>')
           .replace(/(\/\/.*$|#.*$)/gm, '<span class="cm">$1</span>')
           .replace(/(\d+)/g, '<span class="num">$1</span>')
           .replace(/(["'`])(.*?)\1/g, '<span class="str">$1$2$1</span>');
@@ -336,11 +345,15 @@
           if (algoId === 'merge-sort') return SortingGenerators.mergeSort(arr);
           if (algoId === 'quick-sort') return SortingGenerators.quickSort(arr);
           if (algoId === 'insertion-sort') return SortingGenerators.insertionSort(arr);
+          if (algoId === 'selection-sort' && SortingGenerators.selectionSort) return SortingGenerators.selectionSort(arr);
+          if (algoId === 'heap-sort' && SortingGenerators.heapSort) return SortingGenerators.heapSort(arr);
           if (algoId === 'linear-search') return SearchingGenerators.linearSearch(arr, target);
           if (algoId === 'binary-search') return SearchingGenerators.binarySearch(arr, target);
           if (algoId === 'bfs') return GraphGenerators.bfs('A');
           if (algoId === 'dfs') return GraphGenerators.dfs('A');
-          if (['fibonacci-dp','knapsack','dijkstra'].includes(algoId)) return GraphGenerators.bfs('A');
+          if (algoId === 'dijkstra') return GraphGenerators.dijkstra ? GraphGenerators.dijkstra('A') : GraphGenerators.bfs('A');
+          if (algoId === 'fibonacci-dp') return DPGenerators ? DPGenerators.fibonacci(arr.length > 0 ? Math.min(arr[0], 15) : 8) : SortingGenerators.bubbleSort(arr);
+          if (algoId === 'knapsack') return DPGenerators ? DPGenerators.knapsack() : SortingGenerators.bubbleSort(arr);
           return SortingGenerators.bubbleSort(arr);
         }
 
