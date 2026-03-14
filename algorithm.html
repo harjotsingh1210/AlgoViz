@@ -379,7 +379,7 @@
 
       // Visualizer
       setTimeout(() => {
-        const isGraph = ['bfs','dfs','dijkstra'].includes(algoId);
+        const isGraph = ['bfs','dfs','dijkstra','bellman-ford','prims'].includes(algoId);
         viz = new AlgorithmVisualizer('vizCanvas', {
           type: isGraph ? 'graph' : 'bar',
           onStepChange: (step, idx, total) => {
@@ -406,17 +406,21 @@
           if (algoId === 'heap-sort') return SortingGenerators.heapSort ? SortingGenerators.heapSort(arr) : SortingGenerators.bubbleSort(arr);
           if (algoId === 'shell-sort') return SortingGenerators.shellSort ? SortingGenerators.shellSort(arr) : SortingGenerators.bubbleSort(arr);
           if (algoId === 'counting-sort') return SortingGenerators.countingSort ? SortingGenerators.countingSort(arr) : SortingGenerators.bubbleSort(arr);
+          if (algoId === 'radix-sort') return SortingGenerators.radixSort(arr);
           if (algoId === 'linear-search') return SearchingGenerators.linearSearch(arr, target);
           if (algoId === 'binary-search') return SearchingGenerators.binarySearch(arr, target);
           if (algoId === 'jump-search') return SearchingGenerators.jumpSearch ? SearchingGenerators.jumpSearch(arr, target) : SearchingGenerators.binarySearch(arr, target);
+          if (algoId === 'exponential-search') return SearchingGenerators.exponentialSearch(arr, target);
           if (algoId === 'bfs') return GraphGenerators.bfs('A');
           if (algoId === 'dfs') return GraphGenerators.dfs('A');
           if (algoId === 'dijkstra') return GraphGenerators.dijkstra ? GraphGenerators.dijkstra('A') : GraphGenerators.bfs('A');
           if (algoId === 'bellman-ford') return GraphGenerators.bellmanFord ? GraphGenerators.bellmanFord('A') : GraphGenerators.bfs('A');
+          if (algoId === 'prims') return GraphGenerators.prims('A');
           if (algoId === 'fibonacci-dp') return DPGenerators ? DPGenerators.fibonacci(arr.length > 0 ? Math.min(arr[0], 15) : 8) : SortingGenerators.bubbleSort(arr);
           if (algoId === 'knapsack') return DPGenerators ? DPGenerators.knapsack() : SortingGenerators.bubbleSort(arr);
           if (algoId === 'coin-change') return DPGenerators ? DPGenerators.coinChange() : SortingGenerators.bubbleSort(arr);
-          if (algoId === 'lcs') return DPGenerators ? DPGenerators.fibonacci(10) : SortingGenerators.bubbleSort(arr);
+          if (algoId === 'lcs') return DPGenerators && DPGenerators.lcs ? DPGenerators.lcs() : SortingGenerators.bubbleSort(arr);
+          if (algoId === 'lis') return DPGenerators.lis(arr.length ? arr : [10, 9, 2, 5, 3, 7, 101, 18]);
           return SortingGenerators.bubbleSort(arr);
         }
 

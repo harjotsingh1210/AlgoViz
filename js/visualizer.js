@@ -754,6 +754,152 @@ GraphGenerators.bellmanFord = function(start = 'A') {
   return steps;
 };
 
+// ===== Radix Sort Step Generator =====
+SortingGenerators.radixSort = function(arr) {
+  const steps = [];
+  let a = [...arr];
+  let sorted = [];
+  const max = Math.max(...a);
+  steps.push({ array: [...a], desc: `Starting Radix Sort. Max value is ${max}` });
+  
+  for (let exp = 1; Math.floor(max / exp) > 0; exp *= 10) {
+    steps.push({ array: [...a], desc: `Sorting by digit: ${exp}s place` });
+    const count = Array(10).fill(0);
+    const out = Array(a.length).fill(0);
+    
+    // Count occurrences
+    for (let i = 0; i < a.length; i++) {
+      const digit = Math.floor(a[i] / exp) % 10;
+      count[digit]++;
+      steps.push({ array: [...a], comparing: [i], desc: `Count occurrences of digit ${digit} at index ${i}` });
+    }
+    
+    // Cumulative count
+    for (let i = 1; i < 10; i++) count[i] += count[i-1];
+    
+    // Build output array
+    for (let i = a.length - 1; i >= 0; i--) {
+      const digit = Math.floor(a[i] / exp) % 10;
+      count[digit]--;
+      out[count[digit]] = a[i];
+      steps.push({ array: [...a], swapping: [i], desc: `Placing ${a[i]} into its sorted position for digit ${exp}s place` });
+    }
+    
+    a = [...out];
+    steps.push({ array: [...a], desc: `Array after sorting by ${exp}s place` });
+  }
+  
+  // Final sorted list
+  for (let k = 0; k < a.length; k++) sorted.push(k);
+  steps.push({ array: [...a], sorted: sorted, desc: `Radix Sort Complete! 🎉` });
+  return steps;
+};
+
+// ===== Exponential Search Step Generator =====
+SearchingGenerators.exponentialSearch = function(arr, target) {
+  const steps = [];
+  steps.push({ array: arr.slice(), desc: `Searching for ${target} in array of length ${arr.length}` });
+  if (arr[0] === target) {
+    steps.push({ array: arr.slice(), comparing: [0], found: 0, desc: `Found ${target} at index 0! 🎉` });
+    return steps;
+  }
+  steps.push({ array: arr.slice(), comparing: [0], desc: `${arr[0]} is not ${target}, beginning bound expansion.` });
+  let i = 1, n = arr.length;
+  while (i < n && arr[i] <= target) {
+    steps.push({ array: arr.slice(), comparing: [i], desc: `Index ${i}: ${arr[i]} <= ${target}. Doubling window...` });
+    i *= 2;
+  }
+  
+  let left = Math.floor(i / 2);
+  let right = Math.min(i, n - 1);
+  steps.push({ array: arr.slice(), left, right, desc: `Bounds found. Doing Binary Search between index ${left} and ${right}` });
+  
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2);
+    steps.push({ array: arr.slice(), left, right, mid, desc: `Binary Search: checking mid index ${mid} (${arr[mid]})` });
+    if (arr[mid] === target) {
+      steps.push({ array: arr.slice(), left, right, mid, found: mid, desc: `Found ${target} at index ${mid}! 🎉` });
+      return steps;
+    }
+    if (arr[mid] < target) {
+      left = mid + 1;
+      steps.push({ array: arr.slice(), left, right, desc: `${arr[mid]} < ${target}, moving left bound to ${left}` });
+    } else {
+      right = mid - 1;
+      steps.push({ array: arr.slice(), left, right, desc: `${arr[mid]} > ${target}, moving right bound to ${right}` });
+    }
+  }
+  steps.push({ array: arr.slice(), desc: `Value ${target} not found in array.` });
+  return steps;
+};
+
+// ===== Prim's MST Step Generator =====
+GraphGenerators.prims = function(start = 'A') {
+  const g = this.sampleGraph;
+  const weights = {'A-B':4,'A-C':2,'B-D':5,'B-E':1,'C-F':8,'C-G':10,'E-F':3};
+  const edgesData = Object.keys(weights).map(k => { const [u,v]=k.split('-'); return [u,v,weights[k]]; });
+  const adj = {};
+  for(let n in g.nodes) adj[n] = [];
+  for(const [u,v,w] of edgesData) {
+    adj[u].push([v,w]); adj[v].push([u,w]);
+  }
+  
+  const steps = [];
+  const V = Object.keys(g.nodes).length;
+  const key = {}; Object.keys(g.nodes).forEach(n => key[n] = Infinity);
+  key[start] = 0;
+  
+  const inMST = new Set();
+  const parent = {};
+  
+  steps.push({ nodes: g.nodes, edges: g.edges, weights, dist: {...key}, visited: [], desc: `Prim's MST from ${start}. Init keys to ∞ except source.` });
+  
+  for (let count = 0; count < V; count++) {
+    let u = null, min = Infinity;
+    for (const v in key) {
+      if (!inMST.has(v) && key[v] < min) { min = key[v]; u = v; }
+    }
+    if (!u) break;
+    inMST.add(u);
+    steps.push({ nodes: g.nodes, edges: g.edges, weights, dist: {...key}, current: u, visited: [...inMST], desc: `Adding ${u} to MST. Min edge weight ${min}` });
+    
+    for (const [v, w] of adj[u] || []) {
+      if (!inMST.has(v) && w < key[v]) {
+        key[v] = w; parent[v] = u;
+        steps.push({ nodes: g.nodes, edges: g.edges, weights, dist: {...key}, current: u, queue: [v], visited: [...inMST], desc: `Update key for ${v} to ${w} (parent becomes ${u})` });
+      }
+    }
+  }
+  steps.push({ nodes: g.nodes, edges: g.edges, weights, dist: {...key}, path: Object.keys(parent).map(n => parent[n] ? n : '').filter(Boolean), visited: [...inMST], desc: `Prim's MST Complete! 🎉` });
+  return steps;
+};
+
+// ===== LIS Step Generator =====
+DPGenerators.lis = function(arr = [10, 9, 2, 5, 3, 7, 101, 18]) {
+  const steps = [];
+  const dp = Array(arr.length).fill(1);
+  steps.push({ array: arr.slice(), active: [], comparing: [], sorted: [], desc: `Starting LIS. dp array initialized to 1s. array=[${arr.join(',')}]` });
+  
+  let maxLIS = 1;
+  for (let i = 1; i < arr.length; i++) {
+    steps.push({ array: arr.slice(), active: [i], desc: `Checking element i=${i} (${arr[i]}). dp=[${dp.join(',')}]` });
+    for (let j = 0; j < i; j++) {
+      steps.push({ array: arr.slice(), active: [i], comparing: [j], desc: `Comparing arr[${i}]=${arr[i]} with arr[${j}]=${arr[j]}` });
+      if (arr[i] > arr[j]) {
+        if (dp[j] + 1 > dp[i]) {
+          dp[i] = dp[j] + 1;
+          steps.push({ array: arr.slice(), active: [i], comparing: [j], desc: `${arr[i]} > ${arr[j]}, updating dp[${i}]=${dp[i]}` });
+        }
+      } else {
+         steps.push({ array: arr.slice(), active: [i], comparing: [j], desc: `${arr[i]} is not > ${arr[j]}, skipping...` });
+      }
+    }
+    maxLIS = Math.max(maxLIS, dp[i]);
+  }
+  steps.push({ array: arr.slice(), sorted: Array.from({length:arr.length},(_,k)=>k).filter(k=>dp[k]===maxLIS), desc: `LIS Complete! Longest increasing subsequence length = ${maxLIS} 🎉. dp=[${dp.join(',')}]` });
+  return steps;
+};
+
 // ===== Viz Controls Setup =====
 function setupVizControls(viz, btnPlayId, btnPauseId, btnResetId, btnPrevId, btnNextId, speedId) {
   const playBtn = document.getElementById(btnPlayId);

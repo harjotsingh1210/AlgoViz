@@ -1039,6 +1039,296 @@ def jump_search(arr, target):
     },
     related: ['dijkstra', 'bfs', 'dfs'],
     tags: ['graph', 'shortest-path', 'negative-weights', 'dynamic-programming']
+  },
+  {
+    id: 'radix-sort',
+    name: 'Radix Sort',
+    category: 'sorting',
+    difficulty: 'medium',
+    icon: '🗂️',
+    timeComplexity: { best: 'O(nk)', average: 'O(nk)', worst: 'O(nk)' },
+    spaceComplexity: 'O(n+k)',
+    stable: true,
+    description: 'Radix Sort sorts integers by processing individual digits, from least significant to most significant.',
+    longDesc: `Radix Sort is a non-comparative algorithm that sorts keys digit by digit. It uses Counting Sort as a stable subroutine to sort the array based on the current digit's value. Its time complexity is O(nk) where n is the number of elements and k is the number of digits.`,
+    useCases: 'Sorting phone numbers, dates, or large lists of integers',
+    code: {
+      javascript: `function radixSort(arr) {
+  if (!arr.length) return arr;
+  const max = Math.max(...arr);
+  for (let exp = 1; Math.floor(max / exp) > 0; exp *= 10)
+    countingSortByDigit(arr, exp);
+  return arr;
+}
+function countingSortByDigit(arr, exp) {
+  const count = Array(10).fill(0), out = Array(arr.length);
+  for (let v of arr) count[Math.floor(v / exp) % 10]++;
+  for (let i = 1; i < 10; i++) count[i] += count[i-1];
+  for (let i = arr.length - 1; i >= 0; i--) {
+    const digit = Math.floor(arr[i] / exp) % 10;
+    out[--count[digit]] = arr[i];
+  }
+  for (let i = 0; i < arr.length; i++) arr[i] = out[i];
+}`,
+      python: `def radix_sort(arr):
+    if not arr: return arr
+    max_val = max(arr)
+    exp = 1
+    while max_val // exp > 0:
+        counting_sort_by_digit(arr, exp)
+        exp *= 10
+    return arr
+def counting_sort_by_digit(arr, exp):
+    count, out = [0] * 10, [0] * len(arr)
+    for v in arr: count[(v // exp) % 10] += 1
+    for i in range(1, 10): count[i] += count[i-1]
+    for v in reversed(arr):
+        idx = (v // exp) % 10
+        count[idx] -= 1
+        out[count[idx]] = v
+    for i in range(len(arr)): arr[i] = out[i]`,
+      cpp: `void countingSortByDigit(vector<int>& arr, int exp) {
+  vector<int> count(10, 0), out(arr.size());
+  for (int v : arr) count[(v / exp) % 10]++;
+  for (int i = 1; i < 10; i++) count[i] += count[i-1];
+  for (int i = arr.size() - 1; i >= 0; i--) {
+    int digit = (arr[i] / exp) % 10;
+    out[--count[digit]] = arr[i];
+  }
+  arr = out;
+}
+void radixSort(vector<int>& arr) {
+  if (arr.empty()) return;
+  int mx = *max_element(arr.begin(), arr.end());
+  for (int exp = 1; mx / exp > 0; exp *= 10)
+    countingSortByDigit(arr, exp);
+}`,
+      java: `void countingSortByDigit(int[] arr, int exp) {
+  int[] count = new int[10], out = new int[arr.length];
+  for (int v : arr) count[(v / exp) % 10]++;
+  for (int i = 1; i < 10; i++) count[i] += count[i-1];
+  for (int i = arr.length - 1; i >= 0; i--) {
+    int digit = (arr[i] / exp) % 10;
+    out[--count[digit]] = arr[i];
+  }
+  System.arraycopy(out, 0, arr, 0, arr.length);
+}
+void radixSort(int[] arr) {
+  if (arr.length == 0) return;
+  int mx = Arrays.stream(arr).max().getAsInt();
+  for (int exp = 1; mx / exp > 0; exp *= 10)
+    countingSortByDigit(arr, exp);
+}`
+    },
+    related: ['counting-sort', 'bucket-sort'],
+    tags: ['non-comparison', 'stable', 'digits']
+  },
+  {
+    id: 'exponential-search',
+    name: 'Exponential Search',
+    category: 'searching',
+    difficulty: 'easy',
+    icon: '🚀',
+    timeComplexity: { best: 'O(1)', average: 'O(log i)', worst: 'O(log i)' },
+    spaceComplexity: 'O(1)',
+    stable: true,
+    description: 'Exponential Search finds the range where the target must lie by doubling the index, then performs Binary Search within that range.',
+    longDesc: `This algorithm is useful for unbounded/infinite arrays or when the target is closer to the beginning. It starts with a window size of 1 and doubles it until the element at the index is greater than the target. Finally, it uses binary search within the identified range.`,
+    useCases: 'Unbounded arrays, when target is near the beginning of the array',
+    code: {
+      javascript: `function exponentialSearch(arr, target) {
+  if (arr[0] === target) return 0;
+  let i = 1, n = arr.length;
+  while (i < n && arr[i] <= target) i *= 2;
+  let left = Math.floor(i / 2), right = Math.min(i, n - 1);
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2);
+    if (arr[mid] === target) return mid;
+    if (arr[mid] < target) left = mid + 1;
+    else right = mid - 1;
+  }
+  return -1;
+}`,
+      python: `def exponential_search(arr, target):
+    if arr[0] == target: return 0
+    i, n = 1, len(arr)
+    while i < n and arr[i] <= target: i *= 2
+    left, right = i // 2, min(i, n - 1)
+    while left <= right:
+        mid = (left + right) // 2
+        if arr[mid] == target: return mid
+        elif arr[mid] < target: left = mid + 1
+        else: right = mid - 1
+    return -1`,
+      cpp: `int exponentialSearch(vector<int>& arr, int target) {
+  if(arr[0] == target) return 0;
+  int i = 1, n = arr.size();
+  while(i < n && arr[i] <= target) i *= 2;
+  int l = i / 2, r = min(i, n - 1);
+  while(l <= r) {
+    int m = l + (r - l) / 2;
+    if(arr[m] == target) return m;
+    arr[m] < target ? l = m + 1 : r = m - 1;
+  }
+  return -1;
+}`,
+      java: `int exponentialSearch(int[] arr, int target) {
+  if(arr[0] == target) return 0;
+  int i = 1, n = arr.length;
+  while(i < n && arr[i] <= target) i *= 2;
+  int l = i / 2, r = Math.min(i, n - 1);
+  while(l <= r) {
+    int m = l + (r - l) / 2;
+    if(arr[m] == target) return m;
+    if(arr[m] < target) l = m + 1; else r = m - 1;
+  }
+  return -1;
+}`
+    },
+    related: ['binary-search', 'jump-search'],
+    tags: ['sorted', 'bounds', 'logarithmic']
+  },
+  {
+    id: 'prims',
+    name: "Prim's MST",
+    category: 'graph',
+    difficulty: 'hard',
+    icon: '🕸️',
+    timeComplexity: { best: 'O(E log V)', average: 'O(E log V)', worst: 'O(E log V)' },
+    spaceComplexity: 'O(V)',
+    stable: true,
+    description: "Prim's algorithm finds the Minimum Spanning Tree (MST) of a weighted undirected graph by constantly picking the smallest edge connecting the growing tree to new vertices.",
+    longDesc: `Prim's MST algorithm starts from an arbitrary node and greedily grows the spanning tree by adding the cheapest edge from the tree to a node not yet in the tree. It usually uses a priority queue to efficiently fetch the minimum weight edge.`,
+    useCases: 'Network design (LAN, roads, pipes), clustering, traveling salesperson approximation',
+    code: {
+      javascript: `function primsMST(graph, V) {
+  const dist = Array(V).fill(Infinity), parent = Array(V).fill(-1);
+  const inMST = new Set();
+  dist[0] = 0;
+  for (let count = 0; count < V - 1; count++) {
+    let u = -1, min = Infinity;
+    for (let v = 0; v < V; v++)
+      if (!inMST.has(v) && dist[v] < min) { min = dist[v]; u = v; }
+    if (u === -1) break;
+    inMST.add(u);
+    for (const [v, w] of graph[u] || [])
+      if (!inMST.has(v) && w < dist[v]) { dist[v] = w; parent[v] = u; }
+  }
+  return parent;
+}`,
+      python: `import heapq
+def prims_mst(graph, V):
+    dist, parent, in_mst = [float('inf')] * V, [-1] * V, [False] * V
+    dist[0] = 0; pq = [(0, 0)]
+    while pq:
+        d, u = heapq.heappop(pq)
+        if in_mst[u]: continue
+        in_mst[u] = True
+        for v, w in graph.get(u, []):
+            if not in_mst[v] and w < dist[v]:
+                dist[v], parent[v] = w, u
+                heapq.heappush(pq, (w, v))
+    return parent`,
+      cpp: `vector<int> primsMST(vector<vector<pair<int,int>>>& g, int V) {
+  vector<int> key(V, INT_MAX), parent(V, -1);
+  vector<bool> inMST(V, false);
+  priority_queue<pair<int,int>, vector<pair<int,int>>, greater<>> pq;
+  pq.push({0,0}); key[0]=0;
+  while(!pq.empty()) {
+    int u = pq.top().second; pq.pop();
+    if (inMST[u]) continue;
+    inMST[u] = true;
+    for (auto& [v, w] : g[u])
+      if (!inMST[v] && w < key[v]) {
+        key[v] = w; parent[v] = u; pq.push({key[v], v});
+      }
+  }
+  return parent;
+}`,
+      java: `int[] primsMST(List<int[]>[] g, int V) {
+  int[] key = new int[V], parent = new int[V];
+  boolean[] inMST = new boolean[V];
+  Arrays.fill(key, Integer.MAX_VALUE); Arrays.fill(parent, -1);
+  PriorityQueue<int[]> pq = new PriorityQueue<>((a,b)->a[0]-b[0]);
+  pq.add(new int[]{0,0}); key[0]=0;
+  while(!pq.isEmpty()) {
+    int u = pq.poll()[1];
+    if (inMST[u]) continue;
+    inMST[u] = true;
+    for (int[] e : g[u]) {
+      int v = e[0], w = e[1];
+      if (!inMST[v] && w < key[v]) {
+        key[v] = w; parent[v] = u; pq.add(new int[]{key[v], v});
+      }
+    }
+  }
+  return parent;
+}`
+    },
+    related: ['dijkstra', 'kruskal'],
+    tags: ['graph', 'greedy', 'mst', 'minimum-spanning-tree']
+  },
+  {
+    id: 'lis',
+    name: 'Longest Increasing Subsequence',
+    category: 'dp',
+    difficulty: 'medium',
+    icon: '📈',
+    timeComplexity: { best: 'O(n log n)', average: 'O(n²)', worst: 'O(n²)' },
+    spaceComplexity: 'O(n)',
+    stable: true,
+    description: 'LIS finds the length of the longest subsequence in an array where elements are strictly increasing. Standard DP takes O(n²).',
+    longDesc: `For each element, we find the longest increasing subsequence that ends with it by looking at all previous elements. The array dp[i] stores the LIS length ending at index i. A more optimized version uses Binary Search to achieve O(n log n), but standard DP is O(n²).`,
+    useCases: 'Sequence analysis, version control longest match, predicting trends',
+    code: {
+      javascript: `function lengthOfLIS(nums) {
+  if (nums.length === 0) return 0;
+  const dp = new Array(nums.length).fill(1);
+  let maxLIS = 1;
+  for (let i = 1; i < nums.length; i++) {
+    for (let j = 0; j < i; j++) {
+      if (nums[i] > nums[j]) {
+        dp[i] = Math.max(dp[i], dp[j] + 1);
+      }
+    }
+    maxLIS = Math.max(maxLIS, dp[i]);
+  }
+  return maxLIS;
+}`,
+      python: `def length_of_LIS(nums):
+    if not nums: return 0
+    dp = [1] * len(nums)
+    for i in range(1, len(nums)):
+        for j in range(i):
+            if nums[i] > nums[j]:
+                dp[i] = max(dp[i], dp[j] + 1)
+    return max(dp)`,
+      cpp: `int lengthOfLIS(vector<int>& nums) {
+  if(nums.empty()) return 0;
+  vector<int> dp(nums.size(), 1);
+  int res = 1;
+  for(int i = 1; i < nums.size(); i++) {
+    for(int j = 0; j < i; j++)
+      if(nums[i] > nums[j]) dp[i] = max(dp[i], dp[j] + 1);
+    res = max(res, dp[i]);
+  }
+  return res;
+}`,
+      java: `int lengthOfLIS(int[] nums) {
+  if(nums.length == 0) return 0;
+  int[] dp = new int[nums.length];
+  Arrays.fill(dp, 1);
+  int res = 1;
+  for(int i = 1; i < nums.length; i++) {
+    for(int j = 0; j < i; j++)
+      if(nums[i] > nums[j]) dp[i] = Math.max(dp[i], dp[j] + 1);
+    res = Math.max(res, dp[i]);
+  }
+  return res;
+}`
+    },
+    related: ['lcs', 'knapsack'],
+    tags: ['dp', 'subsequence', 'optimization']
   }
 ];
 
@@ -1106,5 +1396,21 @@ const QUIZ_QUESTIONS = {
     { q: 'Quick Sort performs worst when:', opts: ['Array is random', 'Pivot is always median', 'Array is already sorted', 'Array has duplicates'], ans: 2, exp: 'When array is already sorted and pivot is always first/last, Quick Sort degrades to O(n²).' },
     { q: 'Is Quick Sort a stable algorithm?', opts: ['Yes', 'No', 'Sometimes', 'Depends on pivot'], ans: 1, exp: 'Quick Sort is not stable by default — equal elements may change relative order.' },
     { q: 'Quick Sort space complexity is:', opts: ['O(1)', 'O(n)', 'O(log n)', 'O(n²)'], ans: 2, exp: 'Quick Sort uses O(log n) stack space for recursion.' }
+  ],
+  'radix-sort': [
+    { q: 'What type of sort is Radix Sort?', opts: ['Comparison', 'Non-comparison', 'Divide and conquer', 'Greedy'], ans: 1, exp: 'Radix Sort is a non-comparison sort; it uses Counting Sort as a subroutine.' },
+    { q: 'What is the time complexity of Radix Sort?', opts: ['O(n log n)', 'O(n²)', 'O(nk)', 'O(n)'], ans: 2, exp: 'O(nk) where n is the number of elements and k is the number of digits.' }
+  ],
+  'exponential-search': [
+    { q: 'What is the main advantage of Exponential Search?', opts: ['Works on unsorted arrays', 'Fast for unbounded arrays', 'O(1) time complexity', 'In-place search'], ans: 1, exp: 'Exponential Search is highly efficient for unbounded arrays by doubling the search boundary.' },
+    { q: 'What search is used as a subroutine in Exponential Search?', opts: ['Linear Search', 'Jump Search', 'Binary Search', 'Interpolation Search'], ans: 2, exp: 'Once the bounds are found, Exponential Search uses Binary Search.' }
+  ],
+  'prims': [
+    { q: "What does Prim's algorithm find?", opts: ['Shortest Path', 'Minimum Spanning Tree', 'Maximum Flow', 'Topological Sort'], ans: 1, exp: "Prim's algorithm finds the Minimum Spanning Tree of a graph." },
+    { q: "What data structure is commonly used in Prim's?", opts: ['Stack', 'Queue', 'Priority Queue', 'Linked List'], ans: 2, exp: "A Priority Queue is used to efficiently pick the edge with the minimum weight." }
+  ],
+  'lis': [
+    { q: 'What does LIS stand for?', opts: ['Linear Insertion Sort', 'Logarithmic Interpolation Search', 'Longest Increasing Subsequence', 'Lowest Integer Sum'], ans: 2, exp: 'LIS stands for Longest Increasing Subsequence.' },
+    { q: 'What is the time complexity of compiling LIS using strictly standard DP?', opts: ['O(n)', 'O(n log n)', 'O(n²)', 'O(2^n)'], ans: 2, exp: 'The standard DP approach to LIS has O(n²) time complexity.' }
   ]
 };
