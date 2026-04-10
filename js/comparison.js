@@ -216,7 +216,9 @@ const QuizEngine = {
         </div>
       </div>
     `;
-    if (this.algoId && Auth.isLoggedIn()) {
+    if (this.algoId && typeof ProgressAPI !== 'undefined' && typeof AuthAPI !== 'undefined' && AuthAPI.isLoggedIn()) {
+      ProgressAPI.saveQuizScore(this.algoId, this.score);
+    } else if (this.algoId && Auth.isLoggedIn()) {
       Auth.saveQuizScore(this.algoId, this.score);
     }
   }

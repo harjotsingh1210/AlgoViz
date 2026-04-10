@@ -144,105 +144,114 @@
   <script src="js/algorithms.js"></script>
   <script src="js/comparison.js"></script>
   <script>
-    const session = Auth.getSession();
-    if (!session) {
-      document.getElementById('guestBanner').style.display = 'flex';
-      document.getElementById('welcomeMsg').textContent = 'Your Dashboard';
-      document.getElementById('userAvatar').textContent = '👤';
-    } else {
-      document.getElementById('welcomeMsg').textContent = `Welcome, ${session.name.split(' ')[0]}! 👋`;
-      document.getElementById('userEmail').textContent = session.email;
-      document.getElementById('guestBanner').style.display = 'none';
-      if (session.avatar) {
-        document.getElementById('userAvatar').innerHTML = `<img src="${session.avatar}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;">`;
-      }
-    }
-
-    const progress = session ? Auth.getProgress(session.id) : { explored: [], quizScores: {}, totalPoints: 0 };
-    const explored = progress.explored || [];
-    const quizScores = progress.quizScores || {};
-    const scoreValues = Object.values(quizScores);
-
-    // Stats
-    document.getElementById('statExplored').textContent = explored.length;
-    document.getElementById('statQuizzes').textContent = scoreValues.length;
-    document.getElementById('statAvg').textContent = scoreValues.length ? (scoreValues.reduce((a,b)=>a+b,0)/scoreValues.length).toFixed(1) : '–';
-    document.getElementById('statPoints').textContent = scoreValues.reduce((a,b)=>a+b,0);
-
-    // Category progress
-    const catProgress = document.getElementById('categoryProgress');
-    Object.entries(CATEGORIES).forEach(([cat, meta]) => {
-      const catAlgos = ALGORITHMS.filter(a => a.category === cat);
-      const done = catAlgos.filter(a => explored.includes(a.id)).length;
-      const pct = Math.round((done / catAlgos.length) * 100);
-      catProgress.innerHTML += `
-        <div>
-          <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:5px;">
-            <span style="color:var(--text-secondary);font-weight:600;">${meta.icon} ${meta.label}</span>
-            <span style="color:var(--accent);font-weight:700;">${done}/${catAlgos.length}</span>
-          </div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-        </div>
-      `;
-    });
-
-    // Quiz chart
-    const quizAlgoIds = Object.keys(quizScores);
-    if (quizAlgoIds.length > 0) {
-      const ctx = document.getElementById('quizChart').getContext('2d');
-      const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
-      new Chart(ctx, {
-        type: 'radar',
-        data: {
-          labels: quizAlgoIds.map(id => getAlgorithmById(id)?.name || id),
-          datasets: [{
-            label: 'Score',
-            data: quizAlgoIds.map(id => (quizScores[id] / 4) * 100),
-            borderColor: '#f97316',
-            backgroundColor: 'rgba(249,115,22,0.15)',
-            borderWidth: 2,
-            pointBackgroundColor: '#f97316'
-          }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          scales: { r: { min: 0, max: 100, grid: { color: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }, ticks: { color: isDark ? '#666' : '#999' }, pointLabels: { color: isDark ? '#aaa' : '#555', font: { size: 10 } } } },
-          plugins: { legend: { display: false } }
+    (async function() {
+      const session = Auth.getSession();
+      if (!session) {
+        document.getElementById('guestBanner').style.display = 'flex';
+        document.getElementById('welcomeMsg').textContent = 'Your Dashboard';
+        document.getElementById('userAvatar').textContent = '👤';
+      } else {
+        document.getElementById('welcomeMsg').textContent = `Welcome, ${session.name.split(' ')[0]}! 👋`;
+        document.getElementById('userEmail').textContent = session.email;
+        document.getElementById('guestBanner').style.display = 'none';
+        if (session.avatar) {
+          document.getElementById('userAvatar').innerHTML = `<img src="${session.avatar}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;">`;
         }
-      });
-    } else {
-      document.getElementById('quizChart').style.display = 'none';
-      document.getElementById('quizChartEmpty').style.display = 'block';
-    }
+      }
 
-    // Recently explored
-    const recentContainer = document.getElementById('recentExplored');
-    if (explored.length === 0) {
-      document.getElementById('recentEmpty').style.display = 'block';
-    } else {
-      explored.slice(-6).reverse().forEach(id => {
-        const a = getAlgorithmById(id);
-        if (!a) return;
-        recentContainer.innerHTML += `
-          <a href="algorithm.html?id=${a.id}" class="card" style="display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;min-width:160px;flex:1;">
-            <span style="font-size:1.4rem;">${a.icon}</span>
-            <div>
-              <div style="font-size:0.82rem;font-weight:700;">${a.name}</div>
-              <span class="badge badge-${a.difficulty}" style="font-size:0.65rem;">${a.difficulty}</span>
+      // Fetch progress from server (falls back to localStorage if offline)
+      let progress;
+      if (session && typeof ProgressAPI !== 'undefined' && AuthAPI.isLoggedIn()) {
+        progress = await ProgressAPI.fetchAndCache();
+      } else {
+        progress = session ? Auth.getProgress(session.id) : { explored: [], quizScores: {}, totalPoints: 0 };
+      }
+
+      const explored = progress.explored || [];
+      const quizScores = progress.quizScores || {};
+      const scoreValues = Object.values(quizScores);
+
+      // Stats
+      document.getElementById('statExplored').textContent = explored.length;
+      document.getElementById('statQuizzes').textContent = scoreValues.length;
+      document.getElementById('statAvg').textContent = scoreValues.length ? (scoreValues.reduce((a,b)=>a+b,0)/scoreValues.length).toFixed(1) : '–';
+      document.getElementById('statPoints').textContent = progress.totalPoints || scoreValues.reduce((a,b)=>a+b,0);
+
+      // Category progress
+      const catProgress = document.getElementById('categoryProgress');
+      Object.entries(CATEGORIES).forEach(([cat, meta]) => {
+        const catAlgos = ALGORITHMS.filter(a => a.category === cat);
+        const done = catAlgos.filter(a => explored.includes(a.id)).length;
+        const pct = Math.round((done / catAlgos.length) * 100);
+        catProgress.innerHTML += `
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:5px;">
+              <span style="color:var(--text-secondary);font-weight:600;">${meta.icon} ${meta.label}</span>
+              <span style="color:var(--accent);font-weight:700;">${done}/${catAlgos.length}</span>
             </div>
-          </a>
+            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          </div>
         `;
       });
-    }
 
-    function handleResize() {
-      const g = document.getElementById('mainGrid');
-      if (g) g.style.gridTemplateColumns = window.innerWidth < 768 ? '1fr' : '1fr 1fr';
-      const q = document.querySelector('.grid-4');
-      if (q && window.innerWidth < 600) q.style.gridTemplateColumns = '1fr 1fr';
-    }
-    handleResize();
-    window.addEventListener('resize', handleResize);
+      // Quiz chart
+      const quizAlgoIds = Object.keys(quizScores);
+      if (quizAlgoIds.length > 0) {
+        const ctx = document.getElementById('quizChart').getContext('2d');
+        const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+        new Chart(ctx, {
+          type: 'radar',
+          data: {
+            labels: quizAlgoIds.map(id => getAlgorithmById(id)?.name || id),
+            datasets: [{
+              label: 'Score',
+              data: quizAlgoIds.map(id => (quizScores[id] / 4) * 100),
+              borderColor: '#f97316',
+              backgroundColor: 'rgba(249,115,22,0.15)',
+              borderWidth: 2,
+              pointBackgroundColor: '#f97316'
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            scales: { r: { min: 0, max: 100, grid: { color: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }, ticks: { color: isDark ? '#666' : '#999' }, pointLabels: { color: isDark ? '#aaa' : '#555', font: { size: 10 } } } },
+            plugins: { legend: { display: false } }
+          }
+        });
+      } else {
+        document.getElementById('quizChart').style.display = 'none';
+        document.getElementById('quizChartEmpty').style.display = 'block';
+      }
+
+      // Recently explored
+      const recentContainer = document.getElementById('recentExplored');
+      if (explored.length === 0) {
+        document.getElementById('recentEmpty').style.display = 'block';
+      } else {
+        explored.slice(-6).reverse().forEach(id => {
+          const a = getAlgorithmById(id);
+          if (!a) return;
+          recentContainer.innerHTML += `
+            <a href="algorithm.html?id=${a.id}" class="card" style="display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;min-width:160px;flex:1;">
+              <span style="font-size:1.4rem;">${a.icon}</span>
+              <div>
+                <div style="font-size:0.82rem;font-weight:700;">${a.name}</div>
+                <span class="badge badge-${a.difficulty}" style="font-size:0.65rem;">${a.difficulty}</span>
+              </div>
+            </a>
+          `;
+        });
+      }
+
+      function handleResize() {
+        const g = document.getElementById('mainGrid');
+        if (g) g.style.gridTemplateColumns = window.innerWidth < 768 ? '1fr' : '1fr 1fr';
+        const q = document.querySelector('.grid-4');
+        if (q && window.innerWidth < 600) q.style.gridTemplateColumns = '1fr 1fr';
+      }
+      handleResize();
+      window.addEventListener('resize', handleResize);
+    })();
   </script>
 </body>
 </html>

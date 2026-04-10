@@ -16,14 +16,18 @@ const ALGORITHMS = [
     code: {
       javascript: `function bubbleSort(arr) {
   const n = arr.length;
+  // Outer loop: each pass places the next largest element at the end
   for (let i = 0; i < n - 1; i++) {
-    let swapped = false;
+    let swapped = false; // Track if any swap happened this pass
+    // Inner loop: compare adjacent pairs (skip already-sorted tail)
     for (let j = 0; j < n - i - 1; j++) {
       if (arr[j] > arr[j + 1]) {
+        // Swap if left element is greater than right
         [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
         swapped = true;
       }
     }
+    // Optimization: if no swaps occurred, array is already sorted
     if (!swapped) break;
   }
   return arr;
@@ -77,14 +81,19 @@ const ALGORITHMS = [
     useCases: 'Large datasets, linked lists, external sorting, stable sort needed',
     code: {
       javascript: `function mergeSort(arr) {
+  // Base case: arrays of 0 or 1 elements are already sorted
   if (arr.length <= 1) return arr;
+  // Divide: split the array into two halves
   const mid = Math.floor(arr.length / 2);
+  // Conquer: recursively sort each half, then merge results
   return merge(mergeSort(arr.slice(0, mid)), mergeSort(arr.slice(mid)));
 }
 function merge(L, R) {
   const res = []; let i = 0, j = 0;
+  // Merge: pick the smaller element from each sorted half
   while (i < L.length && j < R.length)
     res.push(L[i] <= R[j] ? L[i++] : R[j++]);
+  // Append any remaining elements from either half
   return [...res, ...L.slice(i), ...R.slice(j)];
 }`,
       python: `def merge_sort(arr):
@@ -137,17 +146,22 @@ void mergeSort(vector<int>& a, int l, int r) {
     code: {
       javascript: `function quickSort(arr, lo=0, hi=arr.length-1) {
   if (lo < hi) {
+    // Partition around pivot; p is pivot's final sorted position
     const p = partition(arr, lo, hi);
+    // Recursively sort elements before and after pivot
     quickSort(arr, lo, p-1); quickSort(arr, p+1, hi);
   }
   return arr;
 }
 function partition(arr, lo, hi) {
-  const pivot = arr[hi]; let i = lo-1;
+  const pivot = arr[hi]; // Choose last element as pivot
+  let i = lo-1; // i tracks the boundary of elements <= pivot
   for (let j=lo; j<hi; j++)
+    // If current element is <= pivot, move it to the left partition
     if (arr[j]<=pivot) { i++; [arr[i],arr[j]]=[arr[j],arr[i]]; }
+  // Place pivot in its correct sorted position
   [arr[i+1],arr[hi]]=[arr[hi],arr[i+1]];
-  return i+1;
+  return i+1; // Return pivot's final index
 }`,
       python: `def quick_sort(arr, lo=0, hi=None):
     if hi is None: hi = len(arr)-1
@@ -196,10 +210,13 @@ void quickSort(int[] a, int lo, int hi) {
     useCases: 'Small arrays, nearly sorted data, online sorting (streaming)',
     code: {
       javascript: `function insertionSort(arr) {
+  // Start from index 1; element at index 0 is trivially sorted
   for (let i = 1; i < arr.length; i++) {
-    const key = arr[i]; let j = i-1;
+    const key = arr[i]; // Element to insert into sorted portion
+    let j = i-1;
+    // Shift elements right until we find the correct position for key
     while (j >= 0 && arr[j] > key) { arr[j+1] = arr[j]; j--; }
-    arr[j+1] = key;
+    arr[j+1] = key; // Insert key at the correct position
   }
   return arr;
 }`,
@@ -242,10 +259,13 @@ void quickSort(int[] a, int lo, int hi) {
     useCases: 'Small datasets, minimizing swaps, educational purposes',
     code: {
       javascript: `function selectionSort(arr) {
+  // For each position, find the minimum in the unsorted portion
   for (let i = 0; i < arr.length-1; i++) {
-    let min = i;
+    let min = i; // Assume current position holds the minimum
+    // Scan the rest of the array for a smaller element
     for (let j = i+1; j < arr.length; j++)
       if (arr[j] < arr[min]) min = j;
+    // Swap the found minimum with the element at position i
     if (min !== i) [arr[i], arr[min]] = [arr[min], arr[i]];
   }
   return arr;
@@ -290,17 +310,22 @@ void quickSort(int[] a, int lo, int hi) {
     code: {
       javascript: `function heapSort(arr) {
   const n = arr.length;
+  // Phase 1: Build a max-heap from the array (bottom-up)
   for (let i = Math.floor(n/2)-1; i >= 0; i--) heapify(arr, n, i);
+  // Phase 2: Extract max one by one, placing it at the end
   for (let i = n-1; i > 0; i--) {
-    [arr[0], arr[i]] = [arr[i], arr[0]];
-    heapify(arr, i, 0);
+    [arr[0], arr[i]] = [arr[i], arr[0]]; // Move current max to end
+    heapify(arr, i, 0); // Restore heap property on reduced heap
   }
 }
 function heapify(arr, n, i) {
-  let lg = i, l = 2*i+1, r = 2*i+2;
-  if (l < n && arr[l] > arr[lg]) lg = l;
-  if (r < n && arr[r] > arr[lg]) lg = r;
-  if (lg !== i) { [arr[i], arr[lg]] = [arr[lg], arr[i]]; heapify(arr, n, lg); }
+  let lg = i, l = 2*i+1, r = 2*i+2; // Parent, left child, right child
+  if (l < n && arr[l] > arr[lg]) lg = l; // Left child is larger
+  if (r < n && arr[r] > arr[lg]) lg = r; // Right child is larger
+  if (lg !== i) { // If largest is not the parent, swap and recurse
+    [arr[i], arr[lg]] = [arr[lg], arr[i]];
+    heapify(arr, n, lg);
+  }
 }`,
       python: `def heap_sort(arr):
     n = len(arr)
@@ -355,9 +380,10 @@ void heapify(int[] a, int n, int i) {
     useCases: 'Unsorted arrays, small datasets, single search on a list',
     code: {
       javascript: `function linearSearch(arr, target) {
+  // Check each element one by one from start to end
   for (let i = 0; i < arr.length; i++)
-    if (arr[i] === target) return i;
-  return -1;
+    if (arr[i] === target) return i; // Found! Return the index
+  return -1; // Target not found in the array
 }`,
       python: `def linear_search(arr, target):
     for i, val in enumerate(arr):
@@ -392,13 +418,14 @@ void heapify(int[] a, int n, int i) {
     code: {
       javascript: `function binarySearch(arr, target) {
   let left = 0, right = arr.length - 1;
+  // Keep halving the search space until found or exhausted
   while (left <= right) {
     const mid = Math.floor((left + right) / 2);
-    if (arr[mid] === target) return mid;
-    if (arr[mid] < target) left = mid + 1;
-    else right = mid - 1;
+    if (arr[mid] === target) return mid; // Found at mid!
+    if (arr[mid] < target) left = mid + 1; // Target is in right half
+    else right = mid - 1; // Target is in left half
   }
-  return -1;
+  return -1; // Target not in array
 }`,
       python: `def binary_search(arr, target):
     left, right = 0, len(arr) - 1
@@ -446,15 +473,16 @@ void heapify(int[] a, int n, int i) {
     useCases: 'Shortest path in unweighted graphs, level-order traversal, social networks',
     code: {
       javascript: `function bfs(graph, start) {
-  const visited = new Set([start]);
-  const queue = [start], order = [];
+  const visited = new Set([start]); // Track visited vertices
+  const queue = [start], order = []; // FIFO queue for BFS
   while (queue.length > 0) {
-    const v = queue.shift();
-    order.push(v);
+    const v = queue.shift(); // Dequeue the front vertex
+    order.push(v); // Record visit order
+    // Explore all unvisited neighbors
     for (const nb of graph[v] || [])
       if (!visited.has(nb)) { visited.add(nb); queue.push(nb); }
   }
-  return order;
+  return order; // Return vertices in BFS visit order
 }`,
       python: `from collections import deque
 def bfs(graph, start):
@@ -505,13 +533,14 @@ def bfs(graph, start):
       javascript: `function dfs(graph, start) {
   const visited = new Set(), stack = [start], order = [];
   while (stack.length > 0) {
-    const v = stack.pop();
+    const v = stack.pop(); // Pop from top of stack (LIFO)
     if (!visited.has(v)) {
-      visited.add(v); order.push(v);
+      visited.add(v); order.push(v); // Mark as visited
+      // Push neighbors in reverse order so leftmost is visited first
       for (const nb of (graph[v]||[]).reverse()) stack.push(nb);
     }
   }
-  return order;
+  return order; // Return vertices in DFS visit order
 }`,
       python: `def dfs(graph, start):
     visited, stack, order = set(), [start], []
@@ -563,18 +592,21 @@ def bfs(graph, start):
     code: {
       javascript: `function dijkstra(graph, start) {
   const dist = {}, vis = new Set();
+  // Initialize all distances to Infinity except the source
   for (const v in graph) dist[v] = Infinity;
   dist[start] = 0;
   while (true) {
+    // Greedily pick the unvisited vertex with smallest distance
     let u = null;
     for (const v in dist)
       if (!vis.has(v) && (u===null || dist[v]<dist[u])) u = v;
-    if (!u || dist[u]===Infinity) break;
+    if (!u || dist[u]===Infinity) break; // All reachable visited
     vis.add(u);
+    // Relax edges: update neighbor distances if shorter path found
     for (const [v, w] of graph[u] || [])
       if (dist[u]+w < dist[v]) dist[v] = dist[u]+w;
   }
-  return dist;
+  return dist; // Shortest distances from start to all vertices
 }`,
       python: `import heapq
 def dijkstra(graph, start):
@@ -630,11 +662,12 @@ def dijkstra(graph, start):
     useCases: 'Introduction to DP concepts, memoization demonstration',
     code: {
       javascript: `function fibonacci(n) {
-  if (n <= 1) return n;
-  const dp = [0, 1];
+  if (n <= 1) return n; // Base cases: F(0)=0, F(1)=1
+  const dp = [0, 1]; // Tabulation array storing computed values
+  // Build up from bottom: each F(i) = F(i-1) + F(i-2)
   for (let i = 2; i <= n; i++)
     dp[i] = dp[i-1] + dp[i-2];
-  return dp[n];
+  return dp[n]; // Return the nth Fibonacci number
 }`,
       python: `def fibonacci(n):
     if n <= 1: return n
@@ -672,13 +705,15 @@ def dijkstra(graph, start):
     useCases: 'Resource allocation, budget planning, cut stock problem',
     code: {
       javascript: `function knapsack(W, wt, val, n) {
+  // dp[i][w] = max value using first i items with capacity w
   const dp = Array(n+1).fill(null).map(()=>Array(W+1).fill(0));
   for(let i=1;i<=n;i++)
     for(let w=0;w<=W;w++) {
-      dp[i][w] = dp[i-1][w];
+      dp[i][w] = dp[i-1][w]; // Skip item i
+      // Include item i if it fits and yields better value
       if(wt[i-1]<=w) dp[i][w]=Math.max(dp[i][w], val[i-1]+dp[i-1][w-wt[i-1]]);
     }
-  return dp[n][W];
+  return dp[n][W]; // Maximum value achievable
 }`,
       python: `def knapsack(W, wt, val, n):
     dp = [[0]*(W+1) for _ in range(n+1)]
@@ -726,18 +761,20 @@ def dijkstra(graph, start):
     useCases: 'Medium-sized arrays, embedded systems with limited memory, when average performance matters',
     code: {
       javascript: `function shellSort(arr) {
-  let gap = Math.floor(arr.length / 2);
+  let gap = Math.floor(arr.length / 2); // Start with a large gap
   while (gap > 0) {
+    // Perform gapped insertion sort for this gap size
     for (let i = gap; i < arr.length; i++) {
-      const temp = arr[i];
+      const temp = arr[i]; // Element to insert
       let j = i;
+      // Shift earlier gap-sorted elements up until correct location found
       while (j >= gap && arr[j - gap] > temp) {
         arr[j] = arr[j - gap];
         j -= gap;
       }
-      arr[j] = temp;
+      arr[j] = temp; // Place element at its correct position
     }
-    gap = Math.floor(gap / 2);
+    gap = Math.floor(gap / 2); // Reduce gap for next pass
   }
   return arr;
 }`,
@@ -785,12 +822,13 @@ def dijkstra(graph, start):
     useCases: 'Integer sorting with small range, stable sort needed, radix sort base, vote counting',
     code: {
       javascript: `function countingSort(arr) {
-  const max = Math.max(...arr);
-  const count = new Array(max + 1).fill(0);
-  arr.forEach(v => count[v]++);
-  // Prefix sum
+  const max = Math.max(...arr); // Find the maximum value
+  const count = new Array(max + 1).fill(0); // Count array for each value
+  arr.forEach(v => count[v]++); // Count occurrences of each element
+  // Prefix sum: count[i] now holds the position of element i in output
   for (let i = 1; i <= max; i++) count[i] += count[i-1];
   const out = new Array(arr.length);
+  // Build the output array (iterate backward for stability)
   for (let i = arr.length-1; i >= 0; i--) {
     out[--count[arr[i]]] = arr[i];
   }
@@ -842,15 +880,17 @@ def dijkstra(graph, start):
     code: {
       javascript: `function jumpSearch(arr, target) {
   const n = arr.length;
-  const step = Math.floor(Math.sqrt(n));
+  const step = Math.floor(Math.sqrt(n)); // Optimal jump size = √n
   let prev = 0, curr = step;
+  // Jump forward in blocks of √n until we overshoot the target
   while (curr < n && arr[curr] < target) {
     prev = curr; curr += step;
   }
+  // Linear search within the identified block
   for (let i = prev; i < Math.min(curr, n); i++) {
-    if (arr[i] === target) return i;
+    if (arr[i] === target) return i; // Found!
   }
-  return -1;
+  return -1; // Not found
 }`,
       python: `import math
 def jump_search(arr, target):
@@ -895,13 +935,15 @@ def jump_search(arr, target):
     useCases: 'Currency exchange, change-making, resource allocation problems',
     code: {
       javascript: `function coinChange(coins, amount) {
+  // dp[i] = minimum coins needed to make amount i
   const dp = Array(amount + 1).fill(Infinity);
-  dp[0] = 0;
+  dp[0] = 0; // Base case: 0 coins needed for amount 0
   for (let i = 1; i <= amount; i++)
     for (const c of coins)
+      // If coin fits and using it gives fewer coins, update
       if (c <= i && dp[i - c] + 1 < dp[i])
         dp[i] = dp[i - c] + 1;
-  return dp[amount] === Infinity ? -1 : dp[amount];
+  return dp[amount] === Infinity ? -1 : dp[amount]; // -1 if impossible
 }`,
       python: `def coin_change(coins, amount):
     dp = [float('inf')] * (amount + 1)
@@ -948,13 +990,14 @@ def jump_search(arr, target):
     code: {
       javascript: `function lcs(text1, text2) {
   const m = text1.length, n = text2.length;
+  // dp[i][j] = LCS length of text1[0..i-1] and text2[0..j-1]
   const dp = Array(m+1).fill(null).map(() => Array(n+1).fill(0));
   for (let i = 1; i <= m; i++)
     for (let j = 1; j <= n; j++)
       dp[i][j] = text1[i-1] === text2[j-1]
-        ? dp[i-1][j-1] + 1
-        : Math.max(dp[i-1][j], dp[i][j-1]);
-  return dp[m][n];
+        ? dp[i-1][j-1] + 1 // Characters match: extend LCS by 1
+        : Math.max(dp[i-1][j], dp[i][j-1]); // Take the longer option
+  return dp[m][n]; // Length of the longest common subsequence
 }`,
       python: `def lcs(text1, text2):
     m, n = len(text1), len(text2)
@@ -1000,15 +1043,17 @@ def jump_search(arr, target):
     useCases: 'Graphs with negative edge weights, detecting negative cycles, network routing protocols (RIP)',
     code: {
       javascript: `function bellmanFord(V, edges, src) {
+  // Initialize all distances to Infinity; source distance = 0
   const dist = Array(V).fill(Infinity);
   dist[src] = 0;
+  // Relax all edges V-1 times (shortest path has at most V-1 edges)
   for (let i = 0; i < V - 1; i++)
     for (const [u, v, w] of edges)
       if (dist[u] + w < dist[v]) dist[v] = dist[u] + w;
-  // Check for negative cycles
+  // Check for negative-weight cycles (if still relaxable, cycle exists)
   for (const [u, v, w] of edges)
-    if (dist[u] + w < dist[v]) return null; // negative cycle
-  return dist;
+    if (dist[u] + w < dist[v]) return null; // Negative cycle detected
+  return dist; // Shortest distances from source
 }`,
       python: `def bellman_ford(V, edges, src):
     dist = [float('inf')] * V
@@ -1056,18 +1101,23 @@ def jump_search(arr, target):
       javascript: `function radixSort(arr) {
   if (!arr.length) return arr;
   const max = Math.max(...arr);
+  // Process each digit position: 1s, 10s, 100s, ...
   for (let exp = 1; Math.floor(max / exp) > 0; exp *= 10)
-    countingSortByDigit(arr, exp);
+    countingSortByDigit(arr, exp); // Stable sort by current digit
   return arr;
 }
 function countingSortByDigit(arr, exp) {
   const count = Array(10).fill(0), out = Array(arr.length);
+  // Count occurrences of each digit (0-9) at current position
   for (let v of arr) count[Math.floor(v / exp) % 10]++;
+  // Convert counts to cumulative positions
   for (let i = 1; i < 10; i++) count[i] += count[i-1];
+  // Build output array (backward for stability)
   for (let i = arr.length - 1; i >= 0; i--) {
     const digit = Math.floor(arr[i] / exp) % 10;
     out[--count[digit]] = arr[i];
   }
+  // Copy output back to original array
   for (let i = 0; i < arr.length; i++) arr[i] = out[i];
 }`,
       python: `def radix_sort(arr):
@@ -1137,17 +1187,19 @@ void radixSort(int[] arr) {
     useCases: 'Unbounded arrays, when target is near the beginning of the array',
     code: {
       javascript: `function exponentialSearch(arr, target) {
-  if (arr[0] === target) return 0;
+  if (arr[0] === target) return 0; // Check first element
   let i = 1, n = arr.length;
+  // Double the index until we overshoot or find the range
   while (i < n && arr[i] <= target) i *= 2;
+  // Binary search within the found range [i/2, min(i, n-1)]
   let left = Math.floor(i / 2), right = Math.min(i, n - 1);
   while (left <= right) {
     const mid = Math.floor((left + right) / 2);
-    if (arr[mid] === target) return mid;
+    if (arr[mid] === target) return mid; // Found!
     if (arr[mid] < target) left = mid + 1;
     else right = mid - 1;
   }
-  return -1;
+  return -1; // Not found
 }`,
       python: `def exponential_search(arr, target):
     if arr[0] == target: return 0
@@ -1202,19 +1254,22 @@ void radixSort(int[] arr) {
     useCases: 'Network design (LAN, roads, pipes), clustering, traveling salesperson approximation',
     code: {
       javascript: `function primsMST(graph, V) {
+  // dist[v] = minimum edge weight connecting v to the MST
   const dist = Array(V).fill(Infinity), parent = Array(V).fill(-1);
   const inMST = new Set();
-  dist[0] = 0;
+  dist[0] = 0; // Start building MST from vertex 0
   for (let count = 0; count < V - 1; count++) {
+    // Greedily pick the nearest vertex not yet in MST
     let u = -1, min = Infinity;
     for (let v = 0; v < V; v++)
       if (!inMST.has(v) && dist[v] < min) { min = dist[v]; u = v; }
-    if (u === -1) break;
+    if (u === -1) break; // No more reachable vertices
     inMST.add(u);
+    // Update neighbors: if edge weight is less than current key, update
     for (const [v, w] of graph[u] || [])
       if (!inMST.has(v) && w < dist[v]) { dist[v] = w; parent[v] = u; }
   }
-  return parent;
+  return parent; // parent[v] = vertex that connects v to the MST
 }`,
       python: `import heapq
 def prims_mst(graph, V):
@@ -1283,15 +1338,17 @@ def prims_mst(graph, V):
     code: {
       javascript: `function lengthOfLIS(nums) {
   if (nums.length === 0) return 0;
-  const dp = new Array(nums.length).fill(1);
+  // dp[i] = length of longest increasing subsequence ending at index i
+  const dp = new Array(nums.length).fill(1); // Each element is an LIS of length 1
   let maxLIS = 1;
   for (let i = 1; i < nums.length; i++) {
+    // Check all previous elements for valid extensions
     for (let j = 0; j < i; j++) {
       if (nums[i] > nums[j]) {
-        dp[i] = Math.max(dp[i], dp[j] + 1);
+        dp[i] = Math.max(dp[i], dp[j] + 1); // Extend the subsequence
       }
     }
-    maxLIS = Math.max(maxLIS, dp[i]);
+    maxLIS = Math.max(maxLIS, dp[i]); // Track global maximum
   }
   return maxLIS;
 }`,
