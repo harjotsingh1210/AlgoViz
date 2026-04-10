@@ -138,6 +138,34 @@ const AuthAPI = {
 
   isAdmin() {
     return this.getUser()?.isAdmin === true;
+  },
+
+  async googleLogin(credential) {
+    const res = await apiFetch('/api/auth/google', {
+      method: 'POST',
+      body: { credential }
+    });
+    if (res.ok) {
+      localStorage.setItem('algoviz_token', res.token);
+      localStorage.setItem('algoviz_user', JSON.stringify(res.user));
+      localStorage.setItem('algoviz-session', JSON.stringify({
+        id: res.user.id || res.user._id,
+        name: res.user.name,
+        email: res.user.email,
+        avatar: res.user.avatar,
+        isAdmin: res.user.isAdmin || false,
+        googleId: res.user.googleId || null
+      }));
+    }
+    return res;
+  },
+
+  async deleteAccount() {
+    const res = await apiFetch('/api/auth/profile', { method: 'DELETE' });
+    if (res.ok || res.offline) {
+      this.logout();
+    }
+    return res;
   }
 };
 

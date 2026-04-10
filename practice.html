@@ -184,69 +184,30 @@
     ];
 
     const session = Auth.getSession();
-    const getExplored = () => session ? Auth.getProgress(session.id).explored : (JSON.parse(localStorage.getItem('guest_explored') || '[]'));
-    
-    window.togglePathProgress = (algoId) => {
-      if (session) {
-        const p = Auth.getProgress(session.id);
-        if (p.explored.includes(algoId)) {
-          p.explored = p.explored.filter(id => id !== algoId);
-          localStorage.setItem('algoviz_progress', JSON.stringify(p));
-          // Quick patch for old user data
-          const users = Auth.getUsers();
-          const uIdx = users.findIndex(u => u.id === session.id);
-          if (uIdx !== -1) { users[uIdx].progress = p; Auth.saveUsers(users); }
-        } else {
-          Auth.markExplored(algoId);
-          const cached = localStorage.getItem('algoviz_progress');
-          if (cached) {
-            const pNew = JSON.parse(cached);
-            const users = Auth.getUsers();
-            const uIdx = users.findIndex(u => u.id === session.id);
-            if (uIdx !== -1) { users[uIdx].progress = pNew; Auth.saveUsers(users); }
-          }
-        }
-      } else {
-        let expl = JSON.parse(localStorage.getItem('guest_explored') || '[]');
-        if (expl.includes(algoId)) expl = expl.filter(id => id !== algoId);
-        else expl.push(algoId);
-        localStorage.setItem('guest_explored', JSON.stringify(expl));
-      }
-      renderLearningPath();
-    };
+    const explored = session ? Auth.getProgress(session.id).explored : [];
 
-    function renderLearningPath() {
-      const explored = getExplored();
-      document.getElementById('learningPath').innerHTML = path.map((p,i) => {
-        const isDone = explored.includes(p.algo);
-        const statusColor = isDone ? '#22c55e' : (p.status === 'active' ? '#f97316' : '#3d3d5c');
-        const isLocked = !isDone && p.status === 'locked' && i > 0 && !explored.includes(path[i-1]?.algo);
-        return `
-          <div style="display:flex;align-items:stretch;gap:0;opacity:${isLocked ? 0.6 : 1};">
-            <!-- Line -->
-            <div style="display:flex;flex-direction:column;align-items:center;width:40px;">
-              <div style="width:32px;height:32px;border-radius:50%;background:${statusColor};display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:${isDone || p.status === 'active' ? '#fff' : '#666'};flex-shrink:0;cursor:pointer;transition:transform 0.2s;" onclick="togglePathProgress('${p.algo}')" title="Click to toggle progress" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                ${isDone ? '✓' : p.step}
-              </div>
-              ${i < path.length-1 ? `<div style="width:2px;flex:1;min-height:20px;background:${isDone ? '#22c55e' : 'var(--border-subtle)'};margin:4px 0;"></div>` : ''}
-            </div>
-            <!-- Content -->
-            <div class="path-node ${isDone ? 'completed' : (p.status === 'active' ? 'active' : '')}" style="flex:1;margin-bottom:8px;margin-left:12px;display:flex;align-items:center;padding:12px 16px;background:var(--bg-card);border:1px solid ${isDone ? 'rgba(34,197,94,0.3)' : 'var(--border-subtle)'};border-radius:var(--radius-md);">
-              <div style="flex:1;cursor:pointer;" onclick="togglePathProgress('${p.algo}')">
-                <div style="font-size:0.95rem;font-weight:700;color:${isDone ? '#22c55e' : 'var(--text-main)'};">${p.title}</div>
-                <div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px;">${p.desc}</div>
-              </div>
-              <div style="display:flex;align-items:center;gap:12px;">
-                <a href="algorithm.html?id=${p.algo}" class="btn btn-${isDone ? 'secondary' : 'primary'} btn-sm" style="${isLocked ? 'pointer-events:none;' : ''}">${isDone ? 'Review' : 'Start →'}</a>
-              </div>
-            </div>
+    document.getElementById('learningPath').innerHTML = path.map((p,i) => {
+      const isDone = explored.includes(p.algo);
+      const statusColor = isDone ? '#22c55e' : (p.status === 'active' ? '#f97316' : '#3d3d5c');
+      const isLocked = !isDone && p.status === 'locked' && i > 0 && !explored.includes(path[i-1]?.algo);
+      return `
+        <div style="display:flex;align-items:stretch;gap:0;">
+          <!-- Line -->
+          <div style="display:flex;flex-direction:column;align-items:center;width:40px;">
+            <div style="width:32px;height:32px;border-radius:50%;background:${statusColor};display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:${isDone ? '#fff' : (p.status === 'active' ? '#fff' : '#666')};flex-shrink:0;">${isDone ? '✓' : p.step}</div>
+            ${i < path.length-1 ? `<div style="width:2px;flex:1;min-height:20px;background:${isDone ? '#22c55e' : 'var(--border-subtle)'};margin:4px 0;"></div>` : ''}
           </div>
-        `;
-      }).join('');
-    }
-    
-    renderLearningPath();
-
+          <!-- Content -->
+          <div class="path-node ${isDone ? 'completed' : (p.status === 'active' ? 'active' : '')}" style="flex:1;margin-bottom:8px;margin-left:12px;${isLocked ? 'opacity:0.5;pointer-events:none;' : ''}">
+            <div style="flex:1;">
+              <div style="font-size:0.9rem;font-weight:700;">${p.title}</div>
+              <div style="font-size:0.8rem;color:var(--text-muted);">${p.desc}</div>
+            </div>
+            ${isDone ? '<span style="color:#22c55e;font-size:1.1rem;">✓</span>' : `<a href="algorithm.html?id=${p.algo}" class="btn btn-${isDone ? 'secondary' : 'primary'} btn-sm">${isDone ? 'Review' : 'Start →'}</a>`}
+          </div>
+        </div>
+      `;
+    }).join('');
 
     // Responsive quiz layout
     function handleResize() {

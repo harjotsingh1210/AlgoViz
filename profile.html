@@ -116,7 +116,7 @@
           <div class="card" style="margin-top:16px;border-color:rgba(239,68,68,0.2);">
             <h2 style="font-size:0.95rem;font-weight:700;color:#ef4444;margin-bottom:10px;">⚠️ Danger Zone</h2>
             <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:14px;">Permanently delete your account and all data.</p>
-            <button class="btn btn-sm" style="background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3);" onclick="if(confirm('Delete your account? This cannot be undone.')) { Auth.deleteUser(Auth.getSession().id); Auth.clearSession(); window.location.href='index.html'; }">Delete Account</button>
+            <button class="btn btn-sm" style="background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3);" onclick="if(confirm('Delete your account? This cannot be undone.')) { if(typeof AuthAPI !== 'undefined' && AuthAPI.isLoggedIn()) { AuthAPI.deleteAccount(); } else { Auth.deleteUser(Auth.getSession().id); Auth.clearSession(); window.location.href='index.html'; } }">Delete Account</button>
           </div>
         </div>
 
@@ -146,6 +146,7 @@
   </nav>
 
   <script src="js/theme.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/algorithms.js"></script>
   <script>
@@ -180,23 +181,40 @@
       document.getElementById('settingsName').value = session.name;
       document.getElementById('settingsEmail').value = session.email;
 
-      // Settings form
-      document.getElementById('settingsForm').addEventListener('submit', e => {
+      // Settings form — use API
+      document.getElementById('settingsForm').addEventListener('submit', async e => {
         e.preventDefault();
         const name = document.getElementById('settingsName').value.trim();
         const email = document.getElementById('settingsEmail').value.trim();
-        const res = Auth.updateProfile(session.id, { name, email, avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}` });
         const msg = document.getElementById('settingsMsg');
-        msg.style.display = 'block';
-        msg.style.background = res.ok ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)';
-        msg.style.color = res.ok ? '#22c55e' : '#ef4444';
-        msg.style.border = `1px solid ${res.ok ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)'}`;
-        msg.textContent = res.ok ? '✅ Profile updated successfully!' : res.msg;
-        if (res.ok) { document.getElementById('profileName').textContent = name; document.getElementById('profileEmail').textContent = email; }
+
+        if (typeof AuthAPI !== 'undefined' && AuthAPI.isLoggedIn()) {
+          const res = await AuthAPI.updateProfile({ name, email });
+          msg.style.display = 'block';
+          msg.style.background = res.ok ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)';
+          msg.style.color = res.ok ? '#22c55e' : '#ef4444';
+          msg.style.border = `1px solid ${res.ok ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)'}`;
+          msg.textContent = res.ok ? '✅ Profile updated successfully!' : (res.message || 'Update failed.');
+          if (res.ok) { document.getElementById('profileName').textContent = name; document.getElementById('profileEmail').textContent = email; }
+        } else {
+          const res = Auth.updateProfile(session.id, { name, email, avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}` });
+          msg.style.display = 'block';
+          msg.style.background = res.ok ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)';
+          msg.style.color = res.ok ? '#22c55e' : '#ef4444';
+          msg.style.border = `1px solid ${res.ok ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)'}`;
+          msg.textContent = res.ok ? '✅ Profile updated successfully!' : res.msg;
+          if (res.ok) { document.getElementById('profileName').textContent = name; document.getElementById('profileEmail').textContent = email; }
+        }
       });
 
-      // Password form
-      document.getElementById('pwdForm').addEventListener('submit', e => {
+      // Password form — use API for server-side bcrypt comparison
+      const isGoogleUser = session.googleId || AuthAPI?.getUser()?.googleId;
+      if (isGoogleUser) {
+        // Hide password change for Google users
+        document.querySelector('[onclick*="security"]').style.display = 'none';
+      }
+
+      document.getElementById('pwdForm').addEventListener('submit', async e => {
         e.preventDefault();
         const currentPwd = document.getElementById('currentPwd').value;
         const newPwd = document.getElementById('newPwd').value;
@@ -204,15 +222,23 @@
         const msg = document.getElementById('pwdMsg');
         msg.style.display = 'block';
 
-        if (!fullUser) { msg.style.color='#ef4444'; msg.textContent='User not found.'; return; }
-        if (fullUser.password !== currentPwd) { msg.style.color='#ef4444'; msg.textContent='Current password is incorrect.'; return; }
-        if (newPwd !== confirmPwd) { msg.style.color='#ef4444'; msg.textContent='New passwords do not match.'; return; }
+        if (newPwd !== confirmPwd) {
+          msg.style.background = 'rgba(239,68,68,0.12)'; msg.style.border = '1px solid rgba(239,68,68,0.25)'; msg.style.color = '#ef4444';
+          msg.textContent = 'New passwords do not match.';
+          return;
+        }
 
-        msg.style.background = 'rgba(239,68,68,0.12)'; msg.style.border = '1px solid rgba(239,68,68,0.25)'; msg.style.color = '#ef4444';
-        Auth.updateProfile(session.id, { password: newPwd });
-        msg.style.background = 'rgba(34,197,94,0.12)'; msg.style.border = '1px solid rgba(34,197,94,0.25)'; msg.style.color = '#22c55e';
-        msg.textContent = '✅ Password updated successfully!';
-        document.getElementById('pwdForm').reset();
+        if (typeof AuthAPI !== 'undefined' && AuthAPI.isLoggedIn()) {
+          const res = await AuthAPI.updateProfile({ currentPassword: currentPwd, newPassword: newPwd });
+          msg.style.background = res.ok ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)';
+          msg.style.border = `1px solid ${res.ok ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)'}`;
+          msg.style.color = res.ok ? '#22c55e' : '#ef4444';
+          msg.textContent = res.ok ? '✅ Password updated successfully!' : (res.message || 'Password update failed.');
+          if (res.ok) document.getElementById('pwdForm').reset();
+        } else {
+          msg.style.color = '#ef4444'; msg.style.background = 'rgba(239,68,68,0.12)'; msg.style.border = '1px solid rgba(239,68,68,0.25)';
+          msg.textContent = 'Server unavailable. Cannot update password offline.';
+        }
       });
 
       // Activity tab

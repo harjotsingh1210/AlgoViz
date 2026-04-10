@@ -203,4 +203,71 @@ router.post('/forgot-password', [
   res.json({ success: true, message: 'Password reset instructions sent to your email.' });
 });
 
+// ─────────────────────────────────────
+// @route  POST /api/auth/google
+// @desc   Login/register via Google One Tap / Sign-In
+// @access Public
+// ─────────────────────────────────────
+const { OAuth2Client } = require('google-auth-library');
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+router.post('/google', async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      return res.status(400).json({ success: false, message: 'Google credential is required.' });
+    }
+
+    // Verify Google ID token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, picture } = payload;
+
+    // Find existing user by googleId or email
+    let user = await User.findOne({ $or: [{ googleId }, { email }] });
+
+    if (user) {
+      // Link Google account if user exists by email but not yet linked
+      if (!user.googleId) {
+        user.googleId = googleId;
+        if (picture && !user.avatar.includes('dicebear')) user.avatar = picture;
+      }
+      // Check if blocked
+      if (user.isBlocked) {
+        return res.status(403).json({ success: false, message: 'Your account has been suspended.' });
+      }
+      user.lastLogin = new Date();
+      await user.save();
+    } else {
+      // Create new user (no password needed for Google users)
+      user = await User.create({
+        name,
+        email,
+        googleId,
+        avatar: picture || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}&backgroundColor=f97316`
+      });
+      await Progress.create({ userId: user._id });
+      user.lastLogin = new Date();
+      await user.save();
+    }
+
+    const token = generateToken(user._id);
+    res.json({
+      success: true,
+      message: `Welcome, ${user.name}!`,
+      token,
+      user: user.toPublic()
+    });
+  } catch (err) {
+    console.error('Google auth error:', err.message);
+    if (err.message?.includes('Token used too late') || err.message?.includes('Invalid token')) {
+      return res.status(401).json({ success: false, message: 'Google token expired or invalid. Please try again.' });
+    }
+    res.status(500).json({ success: false, message: 'Google authentication failed.' });
+  }
+});
+
 module.exports = router;

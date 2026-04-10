@@ -17,9 +17,14 @@ const UserSchema = new mongoose.Schema({
     trim: true,
     match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email']
   },
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true  // Allow multiple nulls
+  },
   password: {
     type: String,
-    required: [true, 'Password is required'],
+    required: false,  // Not required for Google OAuth users
     minlength: [6, 'Password must be at least 6 characters'],
     select: false  // Never return password in queries by default
   },
@@ -53,14 +58,14 @@ const UserSchema = new mongoose.Schema({
 
 // Hash password before saving
 UserSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
+  // Set default avatar using initials
+  if (!this.avatar) {
+    this.avatar = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(this.name)}&backgroundColor=f97316`;
+  }
+  if (!this.isModified('password') || !this.password) return next();
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
-    // Set default avatar using initials
-    if (!this.avatar) {
-      this.avatar = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(this.name)}&backgroundColor=f97316`;
-    }
     next();
   } catch (err) {
     next(err);
@@ -83,7 +88,8 @@ UserSchema.methods.toPublic = function() {
     role: this.role,
     isBlocked: this.isBlocked,
     joinedAt: this.joinedAt,
-    lastLogin: this.lastLogin
+    lastLogin: this.lastLogin,
+    googleId: this.googleId || null
   };
 };
 
