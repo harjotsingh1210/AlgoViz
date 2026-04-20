@@ -50,13 +50,11 @@
     // Only this email can access admin
     const ADMIN_EMAIL = 'a4ansh5@gmail.com';
 
-    // Redirect if already logged in as admin
-    if (AuthAPI.isLoggedIn() && AuthAPI.isAdmin()) {
+    // Auto-redirect if already logged in with admin email
+    if (AuthAPI.isLoggedIn()) {
       const u = AuthAPI.getUser();
       if (u && u.email === ADMIN_EMAIL) {
         window.location.href = 'dashboard.html';
-      } else {
-        AuthAPI.logout();
       }
     }
 

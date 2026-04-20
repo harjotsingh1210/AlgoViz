@@ -86,7 +86,8 @@
     // Guard — only a4ansh5@gmail.com can access admin
     const ADMIN_EMAIL = 'a4ansh5@gmail.com';
     const session = Auth.getSession();
-    if (!session?.isAdmin || session?.email !== ADMIN_EMAIL) window.location.href = 'login.html';
+    const userEmail = session?.email || AuthAPI?.getUser()?.email;
+    if (!userEmail || userEmail !== ADMIN_EMAIL) window.location.href = 'login.html';
 
     function loadUsers(filter = '') {
       const users = Auth.getAllUsers().filter(u => !u.isAdmin);
