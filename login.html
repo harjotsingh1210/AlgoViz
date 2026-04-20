@@ -102,6 +102,7 @@
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const ADMIN_EMAIL = 'a4ansh5@gmail.com';
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
       const btn = document.getElementById('loginBtn');
@@ -111,7 +112,8 @@
       const res = await AuthAPI.login(email, password);
       if (res.ok) {
         Toast.show('Welcome back! 🎉', 'success');
-        setTimeout(() => window.location.href = 'dashboard.html', 800);
+        const dest = email.toLowerCase() === ADMIN_EMAIL ? 'admin/dashboard.html' : 'dashboard.html';
+        setTimeout(() => window.location.href = dest, 800);
       } else {
         errEl.style.display = 'block';
         errEl.textContent = res.message || 'Login failed.';
@@ -151,6 +153,7 @@
     }
 
     async function handleGoogleCredential(response) {
+      const ADMIN_EMAIL = 'a4ansh5@gmail.com';
       const btn = document.getElementById('googleSignInBtn');
       const errEl = document.getElementById('errorMsg');
       btn.innerHTML = '⏳ Signing in with Google...';
@@ -158,7 +161,9 @@
       const res = await AuthAPI.googleLogin(response.credential);
       if (res.ok) {
         Toast.show('Welcome! 🎉', 'success');
-        setTimeout(() => window.location.href = 'dashboard.html', 800);
+        const user = AuthAPI.getUser();
+        const dest = (user && user.email === ADMIN_EMAIL) ? 'admin/dashboard.html' : 'dashboard.html';
+        setTimeout(() => window.location.href = dest, 800);
       } else {
         errEl.style.display = 'block';
         errEl.textContent = res.message || 'Google sign-in failed.';
