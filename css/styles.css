@@ -1039,6 +1039,31 @@ html { overflow-x: hidden; }
   /* Hero container — force single column */
   .hero > .container { display: flex !important; flex-direction: column !important; }
 
+  /* Navbar — prevent overflow */
+  .navbar {
+    overflow: hidden;
+    gap: 8px;
+  }
+  .navbar-actions {
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  /* Hide user area on mobile (users access profile via bottom nav) */
+  #navUserArea { display: none !important; }
+
+  /* Bottom nav — ensure all 5 items fit */
+  .bottom-nav {
+    padding: 6px 0;
+    gap: 0;
+  }
+  .bottom-nav-item {
+    padding: 4px 8px;
+    font-size: 0.6rem;
+    min-width: 0;
+  }
+  .bottom-nav-item .nav-icon { font-size: 1.1rem; }
+
   /* Navbar brand text size */
   .navbar-brand { font-size: 1rem; }
 
