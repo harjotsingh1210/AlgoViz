@@ -47,9 +47,17 @@
   <script src="../js/theme.js"></script>
   <script src="../js/api.js"></script>
   <script>
+    // Only this email can access admin
+    const ADMIN_EMAIL = 'a4ansh5@gmail.com';
+
     // Redirect if already logged in as admin
     if (AuthAPI.isLoggedIn() && AuthAPI.isAdmin()) {
-      window.location.href = 'dashboard.html';
+      const u = AuthAPI.getUser();
+      if (u && u.email === ADMIN_EMAIL) {
+        window.location.href = 'dashboard.html';
+      } else {
+        AuthAPI.logout();
+      }
     }
 
     document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
@@ -58,17 +66,24 @@
       const pass = document.getElementById('adminPassword').value;
       const btn = document.getElementById('adminLoginBtn');
       const errEl = document.getElementById('errorMsg');
+
+      // Whitelist check — block before even calling the API
+      if (email.toLowerCase() !== ADMIN_EMAIL) {
+        errEl.style.display = 'block';
+        errEl.textContent = '⛔ Access denied. You are not authorized.';
+        return;
+      }
+
       btn.innerHTML = '⏳ Verifying...'; btn.disabled = true;
 
       const res = await AuthAPI.login(email, pass);
       if (res.ok) {
-        // Check if user is actually admin on the backend
         const user = AuthAPI.getUser();
-        if (user && user.isAdmin) {
+        if (user && user.email === ADMIN_EMAIL) {
           window.location.href = 'dashboard.html';
         } else {
           errEl.style.display = 'block';
-          errEl.textContent = '⛔ Access denied. Admin privileges required.';
+          errEl.textContent = '⛔ Access denied. You are not authorized.';
           AuthAPI.logout();
         }
       } else {
