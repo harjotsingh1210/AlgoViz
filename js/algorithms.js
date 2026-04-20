@@ -47,25 +47,33 @@ const ALGORITHMS = [
       cpp: `void bubbleSort(vector<int>& arr) {
   int n = arr.size();
   // Each pass places the next largest element at the end
-  for (int i = 0; i < n-1; i++) {
+  for (int i = 0; i < n - 1; i++) {
     bool swapped = false; // Track if any swap happened
     // Compare adjacent pairs, skip already-sorted tail
-    for (int j = 0; j < n-i-1; j++)
-      if (arr[j] > arr[j+1]) { swap(arr[j], arr[j+1]); swapped = true; }
+    for (int j = 0; j < n - i - 1; j++) {
+      if (arr[j] > arr[j + 1]) {
+        swap(arr[j], arr[j + 1]);
+        swapped = true;
+      }
+    }
     if (!swapped) break; // Optimization: stop if already sorted
   }
 }`,
       java: `void bubbleSort(int[] arr) {
   int n = arr.length;
   // Each pass places the next largest element at the end
-  for (int i = 0; i < n-1; i++) {
+  for (int i = 0; i < n - 1; i++) {
     boolean swapped = false; // Track if any swap happened
     // Compare adjacent pairs
-    for (int j = 0; j < n-i-1; j++)
-      if (arr[j] > arr[j+1]) {
-        int t = arr[j]; arr[j] = arr[j+1]; arr[j+1] = t; // Swap
+    for (int j = 0; j < n - i - 1; j++) {
+      if (arr[j] > arr[j + 1]) {
+        // Swap adjacent elements
+        int t = arr[j];
+        arr[j] = arr[j + 1];
+        arr[j + 1] = t;
         swapped = true;
       }
+    }
     if (!swapped) break; // Stop early if sorted
   }
 }`
@@ -95,7 +103,8 @@ const ALGORITHMS = [
   return merge(mergeSort(arr.slice(0, mid)), mergeSort(arr.slice(mid)));
 }
 function merge(L, R) {
-  const res = []; let i = 0, j = 0;
+  const res = [];
+  let i = 0, j = 0;
   // Merge: pick the smaller element from each sorted half
   while (i < L.length && j < R.length)
     res.push(L[i] <= R[j] ? L[i++] : R[j++]);
@@ -103,15 +112,22 @@ function merge(L, R) {
   return [...res, ...L.slice(i), ...R.slice(j)];
 }`,
       python: `def merge_sort(arr):
-    if len(arr) <= 1: return arr  # Base case: already sorted
+    if len(arr) <= 1:
+        return arr  # Base case: already sorted
     mid = len(arr) // 2  # Find the middle point
     # Recursively sort each half, then merge
-    L, R = merge_sort(arr[:mid]), merge_sort(arr[mid:])
-    res, i, j = [], 0, 0
+    L = merge_sort(arr[:mid])
+    R = merge_sort(arr[mid:])
+    res = []
+    i, j = 0, 0
     # Merge: pick the smaller element from each half
     while i < len(L) and j < len(R):
-        if L[i] <= R[j]: res.append(L[i]); i += 1
-        else: res.append(R[j]); j += 1
+        if L[i] <= R[j]:
+            res.append(L[i])
+            i += 1
+        else:
+            res.append(R[j])
+            j += 1
     return res + L[i:] + R[j:]  # Append remaining elements`,
       cpp: `void merge(vector<int>& a, int l, int m, int r) {
   // Copy left and right halves into temp arrays
@@ -174,27 +190,35 @@ void mergeSort(vector<int>& a, int l, int r) {
 }
 function partition(arr, lo, hi) {
   const pivot = arr[hi]; // Choose last element as pivot
-  let i = lo-1; // i tracks the boundary of elements <= pivot
-  for (let j=lo; j<hi; j++)
+  let i = lo - 1; // i tracks the boundary of elements <= pivot
+  for (let j = lo; j < hi; j++) {
     // If current element is <= pivot, move it to the left partition
-    if (arr[j]<=pivot) { i++; [arr[i],arr[j]]=[arr[j],arr[i]]; }
+    if (arr[j] <= pivot) {
+      i++;
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  }
   // Place pivot in its correct sorted position
-  [arr[i+1],arr[hi]]=[arr[hi],arr[i+1]];
-  return i+1; // Return pivot's final index
+  [arr[i + 1], arr[hi]] = [arr[hi], arr[i + 1]];
+  return i + 1; // Return pivot's final index
 }`,
       python: `def quick_sort(arr, lo=0, hi=None):
-    if hi is None: hi = len(arr)-1
+    if hi is None:
+        hi = len(arr) - 1
     if lo < hi:
         p = partition(arr, lo, hi)  # Partition and get pivot index
-        quick_sort(arr, lo, p-1)   # Sort left of pivot
-        quick_sort(arr, p+1, hi)   # Sort right of pivot
+        quick_sort(arr, lo, p - 1)  # Sort left of pivot
+        quick_sort(arr, p + 1, hi)  # Sort right of pivot
+
 def partition(arr, lo, hi):
-    pivot, i = arr[hi], lo-1  # Pivot = last element
+    pivot = arr[hi]  # Pivot = last element
+    i = lo - 1
     for j in range(lo, hi):
         if arr[j] <= pivot:  # Move smaller elements to left
-            i += 1; arr[i], arr[j] = arr[j], arr[i]
-    arr[i+1], arr[hi] = arr[hi], arr[i+1]  # Place pivot correctly
-    return i+1  # Return pivot's final index`,
+            i += 1
+            arr[i], arr[j] = arr[j], arr[i]
+    arr[i + 1], arr[hi] = arr[hi], arr[i + 1]  # Place pivot correctly
+    return i + 1  # Return pivot's final index`,
       cpp: `int partition(vector<int>& a, int lo, int hi) {
   int pivot = a[hi], i = lo - 1;  // Pivot = last element
   for (int j = lo; j < hi; j++) {
@@ -267,11 +291,13 @@ void quickSort(int[] a, int lo, int hi) {
       python: `def insertion_sort(arr):
     # Start from index 1; first element is trivially sorted
     for i in range(1, len(arr)):
-        key, j = arr[i], i-1  # Element to insert
+        key = arr[i]  # Element to insert
+        j = i - 1
         # Shift larger elements right to make room
         while j >= 0 and arr[j] > key:
-            arr[j+1] = arr[j]; j -= 1
-        arr[j+1] = key  # Insert at correct position
+            arr[j + 1] = arr[j]
+            j -= 1
+        arr[j + 1] = key  # Insert at correct position
     return arr`,
       cpp: `void insertionSort(vector<int>& arr) {
   // Start from index 1; element 0 is trivially sorted
@@ -487,14 +513,14 @@ void heapify(int[] a, int n, int i) {
     return -1  # Not found`,
       cpp: `int linearSearch(vector<int>& arr, int target) {
   // Check each element sequentially
-  for(int i=0;i<arr.size();i++)
-    if(arr[i]==target) return i;  // Found!
+  for (int i = 0; i < arr.size(); i++)
+    if (arr[i] == target) return i;  // Found!
   return -1;  // Not found
 }`,
       java: `int linearSearch(int[] arr, int target) {
   // Check each element sequentially
-  for(int i=0;i<arr.length;i++)
-    if(arr[i]==target) return i;  // Found!
+  for (int i = 0; i < arr.length; i++)
+    if (arr[i] == target) return i;  // Found!
   return -1;  // Not found
 }`
     },
@@ -535,22 +561,28 @@ void heapify(int[] a, int n, int i) {
         else: right = mid - 1  # Search left half
     return -1  # Not found`,
       cpp: `int binarySearch(vector<int>& arr, int target) {
-  int l=0, r=arr.size()-1;
+  int l = 0, r = arr.size() - 1;
   // Keep halving the search space
-  while(l<=r) {
-    int m=l+(r-l)/2;  // Avoid overflow
-    if(arr[m]==target) return m;  // Found!
-    arr[m]<target ? l=m+1 : r=m-1;  // Narrow search
+  while (l <= r) {
+    int m = l + (r - l) / 2;  // Avoid overflow
+    if (arr[m] == target) return m;  // Found!
+    if (arr[m] < target)
+      l = m + 1;
+    else
+      r = m - 1;  // Narrow search
   }
   return -1;  // Not found
 }`,
       java: `int binarySearch(int[] arr, int target) {
-  int l=0, r=arr.length-1;
+  int l = 0, r = arr.length - 1;
   // Keep halving the search space
-  while(l<=r) {
-    int m=l+(r-l)/2;  // Avoid overflow
-    if(arr[m]==target) return m;  // Found!
-    if(arr[m]<target) l=m+1; else r=m-1;  // Narrow search
+  while (l <= r) {
+    int m = l + (r - l) / 2;  // Avoid overflow
+    if (arr[m] == target) return m;  // Found!
+    if (arr[m] < target)
+      l = m + 1;
+    else
+      r = m - 1;  // Narrow search
   }
   return -1;  // Not found
 }`
@@ -753,7 +785,8 @@ def bfs(graph, start):
       python: `import heapq
 def dijkstra(graph, start):
     dist = {v: float('inf') for v in graph}  # Init all distances to infinity
-    dist[start] = 0; pq = [(0, start)]  # Min-heap priority queue
+    dist[start] = 0
+    pq = [(0, start)]  # Min-heap priority queue
     while pq:
         d, u = heapq.heappop(pq)  # Get closest unvisited vertex
         if d > dist[u]: continue  # Skip if already found shorter
@@ -955,10 +988,12 @@ def dijkstra(graph, start):
     while gap > 0:
         # Gapped insertion sort for this gap size
         for i in range(gap, len(arr)):
-            temp, j = arr[i], i  # Element to insert
+            temp = arr[i]  # Element to insert
+            j = i
             # Shift gap-sorted elements until correct position found
             while j >= gap and arr[j - gap] > temp:
-                arr[j] = arr[j - gap]; j -= gap
+                arr[j] = arr[j - gap]
+                j -= gap
             arr[j] = temp  # Place at correct position
         gap //= 2  # Reduce gap
     return arr`,
@@ -1025,30 +1060,40 @@ def dijkstra(graph, start):
       python: `def counting_sort(arr):
     max_v = max(arr)  # Find max value
     count = [0] * (max_v + 1)  # Count array
-    for v in arr: count[v] += 1  # Count occurrences
+    for v in arr:
+        count[v] += 1  # Count occurrences
     # Prefix sum: positions in output
-    for i in range(1, max_v+1): count[i] += count[i-1]
+    for i in range(1, max_v + 1):
+        count[i] += count[i - 1]
     out = [0] * len(arr)
     # Build output (reversed for stability)
     for v in reversed(arr):
-        count[v] -= 1; out[count[v]] = v
+        count[v] -= 1
+        out[count[v]] = v
     return out`,
       cpp: `vector<int> countingSort(vector<int>& arr) {
-  int mx=*max_element(arr.begin(),arr.end());  // Find max
-  vector<int> cnt(mx+1,0), out(arr.size());
-  for(int v:arr) cnt[v]++;  // Count occurrences
-  for(int i=1;i<=mx;i++) cnt[i]+=cnt[i-1];  // Prefix sum
+  int mx = *max_element(arr.begin(), arr.end());  // Find max
+  vector<int> cnt(mx + 1, 0), out(arr.size());
+  for (int v : arr)
+    cnt[v]++;  // Count occurrences
+  for (int i = 1; i <= mx; i++)
+    cnt[i] += cnt[i - 1];  // Prefix sum
   // Build output (reversed for stability)
-  for(int i=arr.size()-1;i>=0;i--) out[--cnt[arr[i]]]=arr[i];
+  for (int i = arr.size() - 1; i >= 0; i--)
+    out[--cnt[arr[i]]] = arr[i];
   return out;
 }`,
       java: `int[] countingSort(int[] arr) {
-  int mx=Arrays.stream(arr).max().getAsInt();  // Find max
-  int[] cnt=new int[mx+1], out=new int[arr.length];
-  for(int v:arr) cnt[v]++;  // Count occurrences
-  for(int i=1;i<=mx;i++) cnt[i]+=cnt[i-1];  // Prefix sum
+  int mx = Arrays.stream(arr).max().getAsInt();  // Find max
+  int[] cnt = new int[mx + 1];
+  int[] out = new int[arr.length];
+  for (int v : arr)
+    cnt[v]++;  // Count occurrences
+  for (int i = 1; i <= mx; i++)
+    cnt[i] += cnt[i - 1];  // Prefix sum
   // Build output (reversed for stability)
-  for(int i=arr.length-1;i>=0;i--) out[--cnt[arr[i]]]=arr[i];
+  for (int i = arr.length - 1; i >= 0; i--)
+    out[--cnt[arr[i]]] = arr[i];
   return out;
 }`
     },
@@ -1217,30 +1262,40 @@ def jump_search(arr, target):
       python: `def lcs(text1, text2):
     m, n = len(text1), len(text2)
     # dp[i][j] = LCS length of text1[0..i-1] and text2[0..j-1]
-    dp = [[0]*(n+1) for _ in range(m+1)]
-    for i in range(1, m+1):
-        for j in range(1, n+1):
-            if text1[i-1] == text2[j-1]: dp[i][j] = dp[i-1][j-1]+1  # Match: extend
-            else: dp[i][j] = max(dp[i-1][j], dp[i][j-1])  # Take longer option
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if text1[i-1] == text2[j-1]:
+                dp[i][j] = dp[i-1][j-1] + 1  # Match: extend
+            else:
+                dp[i][j] = max(dp[i-1][j], dp[i][j-1])  # Take longer option
     return dp[m][n]  # Length of LCS`,
       cpp: `int lcs(string& a, string& b) {
-  int m=a.size(), n=b.size();
+  int m = a.size(), n = b.size();
   // dp[i][j] = LCS length of a[0..i-1] and b[0..j-1]
-  vector<vector<int>> dp(m+1,vector<int>(n+1,0));
-  for(int i=1;i<=m;i++)
-    for(int j=1;j<=n;j++)
-      // Match: extend by 1; else take longer option
-      dp[i][j]=a[i-1]==b[j-1]?dp[i-1][j-1]+1:max(dp[i-1][j],dp[i][j-1]);
+  vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
+  for (int i = 1; i <= m; i++) {
+    for (int j = 1; j <= n; j++) {
+      if (a[i-1] == b[j-1])
+        dp[i][j] = dp[i-1][j-1] + 1;  // Match: extend by 1
+      else
+        dp[i][j] = max(dp[i-1][j], dp[i][j-1]);  // Take longer option
+    }
+  }
   return dp[m][n];  // Length of LCS
 }`,
       java: `int lcs(String a, String b) {
-  int m=a.length(), n=b.length();
+  int m = a.length(), n = b.length();
   // dp[i][j] = LCS length of a[0..i-1] and b[0..j-1]
-  int[][] dp=new int[m+1][n+1];
-  for(int i=1;i<=m;i++)
-    for(int j=1;j<=n;j++)
-      // Match: extend by 1; else take longer option
-      dp[i][j]=a.charAt(i-1)==b.charAt(j-1)?dp[i-1][j-1]+1:Math.max(dp[i-1][j],dp[i][j-1]);
+  int[][] dp = new int[m + 1][n + 1];
+  for (int i = 1; i <= m; i++) {
+    for (int j = 1; j <= n; j++) {
+      if (a.charAt(i-1) == b.charAt(j-1))
+        dp[i][j] = dp[i-1][j-1] + 1;  // Match: extend by 1
+      else
+        dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);  // Take longer option
+    }
+  }
   return dp[m][n];  // Length of LCS
 }`
     },
@@ -1281,20 +1336,25 @@ def jump_search(arr, target):
     # Relax all edges V-1 times
     for _ in range(V - 1):
         for u, v, w in edges:
-            if dist[u] + w < dist[v]: dist[v] = dist[u] + w  # Relax
+            if dist[u] + w < dist[v]:
+                dist[v] = dist[u] + w  # Relax
     # Check for negative-weight cycles
     for u, v, w in edges:
-        if dist[u] + w < dist[v]: return None  # Negative cycle found
+        if dist[u] + w < dist[v]:
+            return None  # Negative cycle found
     return dist  # Shortest distances from source`,
       cpp: `vector<int> bellmanFord(int V, vector<tuple<int,int,int>>& edges, int src) {
-  vector<int> dist(V, INT_MAX); dist[src]=0;  // Init distances
+  vector<int> dist(V, INT_MAX);
+  dist[src] = 0;  // Init distances
   // Relax all edges V-1 times
-  for(int i=0;i<V-1;i++)
-    for(auto&[u,v,w]:edges)
-      if(dist[u]!=INT_MAX && dist[u]+w<dist[v]) dist[v]=dist[u]+w;  // Relax
+  for (int i = 0; i < V - 1; i++)
+    for (auto& [u, v, w] : edges)
+      if (dist[u] != INT_MAX && dist[u] + w < dist[v])
+        dist[v] = dist[u] + w;  // Relax
   // Check for negative-weight cycles
-  for(auto&[u,v,w]:edges)
-    if(dist[u]!=INT_MAX && dist[u]+w<dist[v]) return {};  // Neg cycle
+  for (auto& [u, v, w] : edges)
+    if (dist[u] != INT_MAX && dist[u] + w < dist[v])
+      return {};  // Neg cycle
   return dist;  // Shortest distances
 }`,
       java: `int[] bellmanFord(int V, int[][] edges, int src) {
@@ -1334,21 +1394,26 @@ def jump_search(arr, target):
   return arr;
 }
 function countingSortByDigit(arr, exp) {
-  const count = Array(10).fill(0), out = Array(arr.length);
+  const count = Array(10).fill(0);
+  const out = Array(arr.length);
   // Count occurrences of each digit (0-9) at current position
-  for (let v of arr) count[Math.floor(v / exp) % 10]++;
+  for (let v of arr)
+    count[Math.floor(v / exp) % 10]++;
   // Convert counts to cumulative positions
-  for (let i = 1; i < 10; i++) count[i] += count[i-1];
+  for (let i = 1; i < 10; i++)
+    count[i] += count[i - 1];
   // Build output array (backward for stability)
   for (let i = arr.length - 1; i >= 0; i--) {
     const digit = Math.floor(arr[i] / exp) % 10;
     out[--count[digit]] = arr[i];
   }
   // Copy output back to original array
-  for (let i = 0; i < arr.length; i++) arr[i] = out[i];
+  for (let i = 0; i < arr.length; i++)
+    arr[i] = out[i];
 }`,
       python: `def radix_sort(arr):
-    if not arr: return arr
+    if not arr:
+        return arr
     max_val = max(arr)  # Find max to know number of digits
     exp = 1
     # Process each digit: 1s, 10s, 100s, ...
@@ -1356,16 +1421,21 @@ function countingSortByDigit(arr, exp) {
         counting_sort_by_digit(arr, exp)  # Stable sort by digit
         exp *= 10
     return arr
+
 def counting_sort_by_digit(arr, exp):
-    count, out = [0] * 10, [0] * len(arr)
-    for v in arr: count[(v // exp) % 10] += 1  # Count digit occurrences
-    for i in range(1, 10): count[i] += count[i-1]  # Cumulative positions
+    count = [0] * 10
+    out = [0] * len(arr)
+    for v in arr:
+        count[(v // exp) % 10] += 1  # Count digit occurrences
+    for i in range(1, 10):
+        count[i] += count[i - 1]  # Cumulative positions
     # Build output (backward for stability)
     for v in reversed(arr):
         idx = (v // exp) % 10
         count[idx] -= 1
         out[count[idx]] = v
-    for i in range(len(arr)): arr[i] = out[i]  # Copy back`,
+    for i in range(len(arr)):
+        arr[i] = out[i]  # Copy back`,
       cpp: `void countingSortByDigit(vector<int>& arr, int exp) {
   vector<int> count(10, 0), out(arr.size());
   for (int v : arr) count[(v / exp) % 10]++;  // Count digit occurrences
@@ -1448,28 +1518,34 @@ void radixSort(int[] arr) {
         else: right = mid - 1  # Search left
     return -1  # Not found`,
       cpp: `int exponentialSearch(vector<int>& arr, int target) {
-  if(arr[0] == target) return 0;  // Check first element
+  if (arr[0] == target) return 0;  // Check first element
   int i = 1, n = arr.size();
-  while(i < n && arr[i] <= target) i *= 2;  // Double until overshoot
+  while (i < n && arr[i] <= target) i *= 2;  // Double until overshoot
   // Binary search within the found range [i/2, min(i, n-1)]
   int l = i / 2, r = min(i, n - 1);
-  while(l <= r) {
+  while (l <= r) {
     int m = l + (r - l) / 2;  // Avoid overflow
-    if(arr[m] == target) return m;  // Found!
-    arr[m] < target ? l = m + 1 : r = m - 1;  // Narrow search
+    if (arr[m] == target) return m;  // Found!
+    if (arr[m] < target)
+      l = m + 1;
+    else
+      r = m - 1;  // Narrow search
   }
   return -1;  // Not found
 }`,
       java: `int exponentialSearch(int[] arr, int target) {
-  if(arr[0] == target) return 0;  // Check first element
+  if (arr[0] == target) return 0;  // Check first element
   int i = 1, n = arr.length;
-  while(i < n && arr[i] <= target) i *= 2;  // Double until overshoot
+  while (i < n && arr[i] <= target) i *= 2;  // Double until overshoot
   // Binary search within the found range
   int l = i / 2, r = Math.min(i, n - 1);
-  while(l <= r) {
+  while (l <= r) {
     int m = l + (r - l) / 2;  // Avoid overflow
-    if(arr[m] == target) return m;  // Found!
-    if(arr[m] < target) l = m + 1; else r = m - 1;  // Narrow search
+    if (arr[m] == target) return m;  // Found!
+    if (arr[m] < target)
+      l = m + 1;
+    else
+      r = m - 1;  // Narrow search
   }
   return -1;  // Not found
 }`
@@ -1495,46 +1571,65 @@ void radixSort(int[] arr) {
   const dist = Array(V).fill(Infinity), parent = Array(V).fill(-1);
   const inMST = new Set();
   dist[0] = 0; // Start building MST from vertex 0
-  for (let count = 0; count < V - 1; count++) {
+  for (let count = 0; count < V; count++) {
     // Greedily pick the nearest vertex not yet in MST
     let u = -1, min = Infinity;
-    for (let v = 0; v < V; v++)
-      if (!inMST.has(v) && dist[v] < min) { min = dist[v]; u = v; }
+    for (let v = 0; v < V; v++) {
+      if (!inMST.has(v) && dist[v] < min) {
+        min = dist[v];
+        u = v;
+      }
+    }
     if (u === -1) break; // No more reachable vertices
     inMST.add(u);
     // Update neighbors: if edge weight is less than current key, update
-    for (const [v, w] of graph[u] || [])
-      if (!inMST.has(v) && w < dist[v]) { dist[v] = w; parent[v] = u; }
+    for (const [v, w] of graph[u] || []) {
+      if (!inMST.has(v) && w < dist[v]) {
+        dist[v] = w;
+        parent[v] = u;
+      }
+    }
   }
   return parent; // parent[v] = vertex that connects v to the MST
 }`,
       python: `import heapq
 def prims_mst(graph, V):
-    dist, parent, in_mst = [float('inf')] * V, [-1] * V, [False] * V
-    dist[0] = 0; pq = [(0, 0)]  # Start from vertex 0
+    dist = [float('inf')] * V
+    parent = [-1] * V
+    in_mst = [False] * V
+    dist[0] = 0
+    pq = [(0, 0)]  # Start from vertex 0
     while pq:
         d, u = heapq.heappop(pq)  # Get minimum weight edge
-        if in_mst[u]: continue  # Skip if already in MST
+        if in_mst[u]:
+            continue  # Skip if already in MST
         in_mst[u] = True
         for v, w in graph.get(u, []):  # Check neighbors
             if not in_mst[v] and w < dist[v]:  # Cheaper edge found
-                dist[v], parent[v] = w, u
+                dist[v] = w
+                parent[v] = u
                 heapq.heappush(pq, (w, v))
     return parent  # parent[v] = vertex connecting v to MST`,
       cpp: `vector<int> primsMST(vector<vector<pair<int,int>>>& g, int V) {
-  vector<int> key(V, INT_MAX), parent(V, -1);
+  vector<int> key(V, INT_MAX);
+  vector<int> parent(V, -1);
   vector<bool> inMST(V, false);
   // Min-heap: {weight, vertex}
   priority_queue<pair<int,int>, vector<pair<int,int>>, greater<>> pq;
-  pq.push({0,0}); key[0]=0;  // Start from vertex 0
-  while(!pq.empty()) {
-    int u = pq.top().second; pq.pop();
+  pq.push({0, 0});
+  key[0] = 0;  // Start from vertex 0
+  while (!pq.empty()) {
+    int u = pq.top().second;
+    pq.pop();
     if (inMST[u]) continue;  // Skip if already in MST
     inMST[u] = true;
-    for (auto& [v, w] : g[u])  // Check neighbors
+    for (auto& [v, w] : g[u]) {  // Check neighbors
       if (!inMST[v] && w < key[v]) {  // Cheaper edge found
-        key[v] = w; parent[v] = u; pq.push({key[v], v});
+        key[v] = w;
+        parent[v] = u;
+        pq.push({key[v], v});
       }
+    }
   }
   return parent;  // parent[v] = vertex connecting v to MST
 }`,
