@@ -500,6 +500,7 @@ canvas#vizCanvas {
 /* Custom Range Slider */
 input[type="range"] {
   -webkit-appearance: none;
+  appearance: none;
   width: 100px; height: 4px;
   background: var(--bg-elevated);
   border-radius: var(--radius-full);
@@ -949,12 +950,43 @@ footer {
 /* Divider */
 .divider { height: 1px; background: var(--border-subtle); margin: 24px 0; }
 
+/* Algorithm page main layout */
+.algo-main-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+@media (max-width: 768px) {
+  .algo-main-layout { grid-template-columns: 1fr; }
+}
+
+/* Compare page controls grid */
+.compare-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 16px;
+  align-items: end;
+}
+@media (max-width: 768px) {
+  .compare-controls { grid-template-columns: 1fr; }
+}
+
 /* ===== Responsive Design ===== */
+
+/* Prevent horizontal overflow globally */
+html { overflow-x: hidden; }
+
 @media (max-width: 1024px) {
   .sidebar { display: none; }
   .with-sidebar { padding-left: 0; }
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 28px; }
+
+  /* Admin sidebar collapse */
+  .admin-sidebar { display: none; }
+  .admin-content { margin-left: 0; }
 }
+
 @media (max-width: 768px) {
   .navbar-links { display: none; }
   .nav-toggle { display: flex; }
@@ -968,16 +1000,90 @@ footer {
   .footer-grid { grid-template-columns: 1fr; gap: 20px; }
   .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
   .hero-stats { gap: 20px; }
-  .viz-controls { justify-content: center; }
-  .speed-control { margin-left: 0; }
+  .viz-controls { justify-content: center; flex-wrap: wrap; }
+  .speed-control { margin-left: 0; width: 100%; justify-content: center; }
   .algo-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+
+  /* Content area reduced padding */
+  .content-area { padding: 16px; }
+
+  /* Code panel header — wrap language buttons */
+  .code-header { flex-wrap: wrap; gap: 8px; padding: 10px 12px; }
+
+  /* Code body — reduce padding, prevent overflow */
+  .code-body { padding: 12px; }
+  .code-body pre { font-size: 0.75rem; white-space: pre-wrap; word-break: break-word; }
+
+  /* Tabs — horizontal scroll mode on mobile */
+  .tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn { flex-shrink: 0; white-space: nowrap; }
+
+  /* Table scroll container */
+  .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Visualization container constrain */
+  .viz-container { max-width: 100%; }
+
+  /* Hero floating cards — hide on mobile to prevent overflow */
+  .floating-card { display: none; }
+
+  /* Hero visual — hide on mobile */
+  .hero-visual { display: none !important; }
+
+  /* Hero container — force single column */
+  .hero > .container { display: flex !important; flex-direction: column !important; }
+
+  /* Navbar brand text size */
+  .navbar-brand { font-size: 1rem; }
+
+  /* Toast narrower */
+  .toast { min-width: auto; max-width: calc(100vw - 48px); }
+  .toast-container { right: 12px; left: 12px; bottom: 80px; }
+
+  /* Card padding reduce on mobile */
+  .card { padding: 16px; }
+
+  /* FAQ answer */
+  .faq-item.open .faq-answer { max-height: 300px; }
+
+  /* Step panel */
+  .step-panel { padding: 14px; }
+
+  /* Stat cards */
+  .stat-card { padding: 14px; }
+  .stat-value { font-size: 1.5rem; }
 }
+
 @media (max-width: 480px) {
   .hero-actions { flex-direction: column; width: 100%; }
   .hero-actions .btn { width: 100%; justify-content: center; }
-  .algo-grid { grid-template-columns: 1fr 1fr; }
-  .tabs { flex-wrap: wrap; }
-  .tab-btn { flex: none; }
+  .algo-grid { grid-template-columns: 1fr; }
+  .grid-4 { grid-template-columns: 1fr 1fr; }
+
+  /* Even smaller code font */
+  .code-body pre { font-size: 0.7rem; }
+
+  /* Reduce section padding */
+  .section { padding: 40px 0; }
+  .container { padding: 0 12px; }
+  .content-area { padding: 12px; }
+
+  /* Reduce hero stats size */
+  .hero-stat-val { font-size: 1.4rem; }
+  .hero-stats { gap: 16px; }
+
+  /* Section header tighter */
+  .section-header { margin-bottom: 32px; }
+  .section-title { font-size: clamp(1.4rem, 5vw, 2rem); }
+
+  /* Navbar padding */
+  .navbar { padding: 0 12px; }
 }
 
 /* ===== Tooltip ===== */

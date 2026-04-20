@@ -85,7 +85,7 @@
       </div>
 
       <!-- Progress by Category -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;" id="mainGrid">
+      <div class="algo-main-layout" id="mainGrid">
         <!-- Category Progress -->
         <div class="card">
           <div style="font-weight:700;font-size:0.9rem;margin-bottom:16px;">📊 Progress by Category</div>
@@ -252,14 +252,7 @@
         });
       }
 
-      function handleResize() {
-        const g = document.getElementById('mainGrid');
-        if (g) g.style.gridTemplateColumns = window.innerWidth < 768 ? '1fr' : '1fr 1fr';
-        const q = document.querySelector('.grid-4');
-        if (q && window.innerWidth < 600) q.style.gridTemplateColumns = '1fr 1fr';
-      }
-      handleResize();
-      window.addEventListener('resize', handleResize);
+
     })();
   </script>
 </body>

@@ -55,7 +55,7 @@
 
       <!-- QUIZZES TAB -->
       <div id="tab-quizzes">
-        <div style="display:grid;grid-template-columns:1fr 2fr;gap:24px;" id="quizLayout">
+        <div class="algo-main-layout" id="quizLayout">
           <!-- Quiz selector -->
           <div>
             <h2 style="font-size:0.9rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">Choose Topic</h2>
@@ -218,13 +218,7 @@
       `;
     }).join('');
 
-    // Responsive quiz layout
-    function handleResize() {
-      const layout = document.getElementById('quizLayout');
-      if (layout) layout.style.gridTemplateColumns = window.innerWidth < 768 ? '1fr' : '1fr 2fr';
-    }
-    handleResize();
-    window.addEventListener('resize', handleResize);
+
   </script>
 </body>
 </html>
