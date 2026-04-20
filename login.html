@@ -83,18 +83,7 @@
           Sign in with Google
         </button>
 
-        <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border-subtle);">
-          <p style="font-size:0.72rem;text-align:center;color:var(--text-muted);margin-bottom:10px;">Or try as:</p>
-          <div style="display:flex;gap:8px;">
-            <button class="btn btn-secondary w-full btn-sm" onclick="demoLogin('demo@algoviz.com','demo1234')">👤 Demo User</button>
-            <button class="btn btn-secondary w-full btn-sm" onclick="demoLogin('admin@algoviz.com','admin1234','admin')">🔑 Admin</button>
-          </div>
-        </div>
       </div>
-
-      <p style="text-align:center;font-size:0.78rem;color:var(--text-muted);margin-top:16px;">
-        <a href="admin/login.html" style="color:var(--text-muted);">Admin panel →</a>
-      </p>
     </div>
   </div>
 
@@ -177,28 +166,7 @@
       }
     }
 
-    async function demoLogin(email, pass, role) {
-      document.getElementById('loginEmail').value = email;
-      document.getElementById('loginPassword').value = pass;
-      let res = await AuthAPI.login(email, pass);
-      if (!res.ok && res.status !== 403) {
-        const name = role === 'admin' ? 'Admin User' : 'Demo User';
-        await AuthAPI.signup(name, email, pass);
-        // Don't redirect on auto-created login
-        if (role === 'admin') {
-          res = await AuthAPI.login(email, pass);
-        }
-      }
-      if (res.ok) {
-        if (role === 'admin' || res.user?.isAdmin) {
-          window.location.href = 'admin/dashboard.html';
-        } else {
-          window.location.href = 'dashboard.html';
-        }
-      } else {
-        Toast.show(res.message || 'Demo login failed', 'error');
-      }
-    }
+
 
     function togglePwd(id, btn) {
       const inp = document.getElementById(id);
