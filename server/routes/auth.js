@@ -218,10 +218,14 @@ router.post('/google', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Google credential is required.' });
     }
 
-    // Verify Google ID token
+    // Verify Google ID token (accepting both old and new Client IDs to prevent sync issues)
     const ticket = await googleClient.verifyIdToken({
       idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID
+      audience: [
+        process.env.GOOGLE_CLIENT_ID,
+        '615619658013-fbdmbv87rq4v3oqanpgt32upn08dofhf.apps.googleusercontent.com', // New Web.app ID
+        '615619658013-pcgmkij39uvjppubif0sntd526vqh7na.apps.googleusercontent.com'  // Old Vercel ID
+      ].filter(Boolean)
     });
     const payload = ticket.getPayload();
     const { sub: googleId, email, name, picture } = payload;
