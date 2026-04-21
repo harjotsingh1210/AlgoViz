@@ -159,14 +159,29 @@
   <script src="js/auth.js"></script>
   <script src="js/algorithms.js"></script>
   <script>
-    const session = Auth.getSession();
-    if (!session) {
-      document.getElementById('profileContent').style.display = 'none';
-      document.getElementById('guestMsg').style.display = 'block';
-    } else {
+    (async function initProfile() {
+      const session = Auth.getSession();
+      if (!session) {
+        document.getElementById('profileContent').style.display = 'none';
+        document.getElementById('guestMsg').style.display = 'block';
+        return;
+      }
+      
       const users = Auth.getUsers();
       const fullUser = users.find(u => u.id === session.id);
-      const progress = Auth.getProgress(session.id);
+      
+      let progress = { explored: [], quizScores: {} };
+      if (typeof AuthAPI !== 'undefined' && AuthAPI.isLoggedIn()) {
+        try {
+          const res = await ProgressAPI.get();
+          if (res.ok && res.data) progress = res.data;
+        } catch (err) {
+          console.error("Failed to load backend progress:", err);
+        }
+      } else {
+        progress = Auth.getProgress(session.id) || progress;
+      }
+
 
       // Profile header
       document.getElementById('profileAvatar').innerHTML = `<img src="${session.avatar}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;" onerror="this.parentElement.textContent='${session.name[0]}'">`;
@@ -274,7 +289,7 @@
           </div>
         `;
       });
-    }
+    })();
 
     function showProfileTab(name, btn) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));

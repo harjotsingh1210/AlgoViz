@@ -187,22 +187,43 @@
       </div>
     `).join('');
 
-    // Learning path
-    const path = [
-      { step: 1, title: 'Introduction to Sorting', algo: 'bubble-sort', status: 'done', desc: 'Start with the simplest sorting algorithm' },
-      { step: 2, title: 'Insertion Sort', algo: 'insertion-sort', status: 'done', desc: 'Learn in-place insertion technique' },
-      { step: 3, title: 'Linear Search', algo: 'linear-search', status: 'active', desc: 'Basics of sequential searching' },
-      { step: 4, title: 'Binary Search', algo: 'binary-search', status: 'locked', desc: 'Divide & conquer for sorted arrays' },
-      { step: 5, title: 'Merge Sort', algo: 'merge-sort', status: 'locked', desc: 'Efficient O(n log n) sorting' },
-      { step: 6, title: 'Quick Sort', algo: 'quick-sort', status: 'locked', desc: 'Partitioning-based sorting' },
-      { step: 7, title: 'Graph - BFS', algo: 'bfs', status: 'locked', desc: 'Breadth-first graph traversal' },
-      { step: 8, title: 'Graph - DFS', algo: 'dfs', status: 'locked', desc: 'Depth-first exploration' },
-      { step: 9, title: "Dijkstra's Algorithm", algo: 'dijkstra', status: 'locked', desc: 'Shortest path in weighted graphs' },
-      { step: 10, title: 'Dynamic Programming', algo: 'fibonacci-dp', status: 'locked', desc: 'Memoization and tabulation' },
-    ];
+     // Async Progress Loading for Stats and Learning Path
+    (async function initPractice() {
+      const session = Auth.getSession();
+      let progress = { explored: [], quizScores: {} };
+      
+      if (session && typeof ProgressAPI !== 'undefined' && Auth.isLoggedIn()) {
+        try {
+          const res = await ProgressAPI.get();
+          if (res.ok && res.data) progress = res.data;
+        } catch(e) { console.error(e); }
+      } else if (session) {
+        progress = Auth.getProgress(session.id) || progress;
+      }
 
-    const session = Auth.getSession();
-    const explored = session ? Auth.getProgress(session.id).explored : [];
+      // 1. Load quiz stats
+      const scores = Object.values(progress.quizScores || {});
+      if (scores.length > 0) {
+        document.getElementById('totalQuizzesTaken').textContent = scores.length;
+        document.getElementById('avgScore').textContent = (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1);
+        document.getElementById('bestScore').textContent = Math.max(...scores);
+      }
+
+      // 2. Learning path
+      const path = [
+        { step: 1, title: 'Introduction to Sorting', algo: 'bubble-sort', status: 'done', desc: 'Start with the simplest sorting algorithm' },
+        { step: 2, title: 'Insertion Sort', algo: 'insertion-sort', status: 'done', desc: 'Learn in-place insertion technique' },
+        { step: 3, title: 'Linear Search', algo: 'linear-search', status: 'active', desc: 'Basics of sequential searching' },
+        { step: 4, title: 'Binary Search', algo: 'binary-search', status: 'locked', desc: 'Divide & conquer for sorted arrays' },
+        { step: 5, title: 'Merge Sort', algo: 'merge-sort', status: 'locked', desc: 'Efficient O(n log n) sorting' },
+        { step: 6, title: 'Quick Sort', algo: 'quick-sort', status: 'locked', desc: 'Partitioning-based sorting' },
+        { step: 7, title: 'Graph - BFS', algo: 'bfs', status: 'locked', desc: 'Breadth-first graph traversal' },
+        { step: 8, title: 'Graph - DFS', algo: 'dfs', status: 'locked', desc: 'Depth-first exploration' },
+        { step: 9, title: "Dijkstra's Algorithm", algo: 'dijkstra', status: 'locked', desc: 'Shortest path in weighted graphs' },
+        { step: 10, title: 'Dynamic Programming', algo: 'fibonacci-dp', status: 'locked', desc: 'Memoization and tabulation' },
+      ];
+
+      const explored = progress.explored || [];
 
     document.getElementById('learningPath').innerHTML = path.map((p,i) => {
       const isDone = explored.includes(p.algo);
@@ -226,7 +247,7 @@
         </div>
       `;
     }).join('');
-
+    })();
 
   </script>
 </body>

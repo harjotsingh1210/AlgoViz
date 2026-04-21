@@ -169,11 +169,14 @@
       }
 
       // Fetch progress from server (falls back to localStorage if offline)
-      let progress;
+      let progress = { explored: [], quizScores: {}, totalPoints: 0 };
       if (session && typeof ProgressAPI !== 'undefined' && AuthAPI.isLoggedIn()) {
-        progress = await ProgressAPI.fetchAndCache();
-      } else {
-        progress = session ? Auth.getProgress(session.id) : { explored: [], quizScores: {}, totalPoints: 0 };
+        try {
+          const res = await ProgressAPI.get();
+          if (res.ok && res.data) progress = res.data;
+        } catch(e) { console.error(e); }
+      } else if (session) {
+        progress = Auth.getProgress(session.id) || progress;
       }
 
       const explored = progress.explored || [];
