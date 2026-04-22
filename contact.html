@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5RJFEL6BHB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-5RJFEL6BHB');
+</script>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us – AlgoViz</title>
+  <meta name="description" content="Get in touch with the AlgoViz team. Report bugs, suggest algorithms, ask questions, or just say hello. We'd love to hear from you!">
+  <meta name="keywords" content="AlgoViz contact, algorithm visualization help, feedback, support">
+  <meta name="author" content="AlgoViz">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://algoviz.js.org/contact.html">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://algoviz.js.org/contact.html">
+  <meta property="og:title" content="Contact Us – AlgoViz">
+  <meta property="og:description" content="Get in touch with the AlgoViz team. Report bugs, suggest features, or just say hello.">
+  <meta property="og:image" content="https://algoviz.js.org/favicon.png">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ===== Contact Page Specific Styles ===== */
+    .contact-hero {
+      padding: calc(var(--navbar-h) + 60px) 0 60px;
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+    .contact-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gradient-hero);
+      pointer-events: none;
+    }
+    .contact-hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(rgba(249,115,22,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(249,115,22,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      mask-image: radial-gradient(ellipse 60% 50% at 50% 50%, black 0%, transparent 100%);
+    }
+    .contact-hero-content { position: relative; z-index: 1; }
+
+    /* Contact Grid */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 40px;
+      align-items: start;
+    }
+    @media (max-width: 768px) {
+      .contact-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Contact Info Cards */
+    .contact-info-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      transition: all var(--transition-base);
+      text-decoration: none;
+      color: inherit;
+    }
+    .contact-info-card:hover {
+      border-color: var(--border-color);
+      box-shadow: var(--shadow-orange);
+      transform: translateY(-2px);
+    }
+    .contact-info-icon {
+      width: 48px; height: 48px; flex-shrink: 0;
+      background: rgba(249,115,22,0.12);
+      border: 1px solid rgba(249,115,22,0.2);
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+    }
+    .contact-info-label {
+      font-size: 0.75rem; font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .contact-info-value {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+    .contact-info-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Contact Form */
+    .contact-form-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 36px;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+
+    .form-textarea {
+      width: 100%;
+      padding: 11px 14px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      transition: all var(--transition-fast);
+      outline: none;
+      resize: vertical;
+      min-height: 140px;
+      line-height: 1.6;
+    }
+    .form-textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(249,115,22,0.12);
+    }
+    .form-textarea::placeholder { color: var(--text-muted); }
+
+    /* Category chips for contact form */
+    .topic-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .topic-chip {
+      padding: 5px 12px;
+      border-radius: var(--radius-full);
+      font-size: 0.78rem; font-weight: 600;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      background: var(--bg-elevated);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .topic-chip:hover, .topic-chip.active {
+      background: rgba(249,115,22,0.15);
+      border-color: rgba(249,115,22,0.4);
+      color: var(--accent);
+    }
+
+    /* Success state */
+    .success-message {
+      display: none;
+      text-align: center;
+      padding: 48px 24px;
+    }
+    .success-icon {
+      width: 72px; height: 72px;
+      background: rgba(34,197,94,0.15);
+      border: 2px solid rgba(34,197,94,0.3);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      margin: 0 auto 20px;
+      animation: pulse-success 2s infinite;
+    }
+    @keyframes pulse-success {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.3); }
+      50% { box-shadow: 0 0 0 12px rgba(34,197,94,0); }
+    }
+
+    /* FAQ topics section */
+    .quick-links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .quick-link-card {
+      display: flex; align-items: center; gap: 12px;
+      padding: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      text-decoration: none; color: inherit;
+    }
+    .quick-link-card:hover {
+      border-color: var(--border-color);
+      background: var(--bg-card-hover);
+    }
+    .quick-link-card span:first-child { font-size: 1.4rem; }
+    .quick-link-text { font-size: 0.875rem; font-weight: 600; color: var(--text-primary); }
+    .quick-link-sub { font-size: 0.75rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="logo-icon">〈/〉</div>
+      <span class="logo-text">Algo<span>Viz</span></span>
+    </a>
+    <div class="navbar-links">
+      <a href="index.html">Home</a>
+      <a href="library.html">Algorithms</a>
+      <a href="compare.html">Compare</a>
+      <a href="practice.html">Practice</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="contact.html" class="active">Contact</a>
+    </div>
+    <div class="navbar-actions">
+      <button class="theme-toggle" id="themeToggle">☀️</button>
+      <div id="navUserArea" style="display:flex;gap:10px;align-items:center;"></div>
+      <button class="nav-toggle" id="navToggle">☰</button>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">🏠 Home</a>
+    <a href="library.html">📚 Algorithms</a>
+    <a href="compare.html">⚖️ Compare</a>
+    <a href="practice.html">🎯 Practice</a>
+    <a href="dashboard.html">📊 Dashboard</a>
+    <a href="contact.html">✉️ Contact</a>
+    <a href="login.html">🔑 Login</a>
+    <a href="signup.html">✨ Sign Up</a>
+  </div>
+
+  <!-- ===== HERO SECTION ===== -->
+  <section class="contact-hero">
+    <div class="container contact-hero-content">
+      <div class="section-label" style="margin-bottom:20px;">✉️ Get In Touch</div>
+      <h1 class="hero-title" style="font-size:clamp(2rem,5vw,3.5rem);margin-bottom:16px;">
+        We'd Love to <span>Hear From You</span>
+      </h1>
+      <p class="section-desc" style="font-size:1.05rem;margin-bottom:0;">
+        Have a question, found a bug, or want to suggest a new algorithm? Drop us a message — we read every single one.
+      </p>
+    </div>
+  </section>
+
+  <!-- ===== QUICK LINKS ===== -->
+  <section class="section" style="padding:40px 0;">
+    <div class="container">
+      <div class="quick-links-grid">
+        <a href="https://github.com/harjotsingh1210/AlgoViz/issues/new" target="_blank" rel="noopener" class="quick-link-card">
+          <span>🐛</span>
+          <div>
+            <div class="quick-link-text">Report a Bug</div>
+            <div class="quick-link-sub">Open a GitHub issue</div>
+          </div>
+        </a>
+        <a href="https://github.com/harjotsingh1210/AlgoViz/discussions" target="_blank" rel="noopener" class="quick-link-card">
+          <span>💡</span>
+          <div>
+            <div class="quick-link-text">Suggest a Feature</div>
+            <div class="quick-link-sub">Join the discussion</div>
+          </div>
+        </a>
+        <a href="library.html" class="quick-link-card">
+          <span>📚</span>
+          <div>
+            <div class="quick-link-text">Browse Algorithms</div>
+            <div class="quick-link-sub">23+ visualizations</div>
+          </div>
+        </a>
+        <a href="index.html#faq" class="quick-link-card">
+          <span>❓</span>
+          <div>
+            <div class="quick-link-text">Read the FAQ</div>
+            <div class="quick-link-sub">Common questions answered</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CONTACT FORM + INFO ===== -->
+  <section class="section" style="padding-top:0;padding-bottom:80px;">
+    <div class="container">
+      <div class="contact-grid">
+
+        <!-- Left: Contact Info -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div>
+            <div class="section-label" style="margin-bottom:12px;">📬 Contact Details</div>
+            <p style="font-size:0.9rem;color:var(--text-secondary);line-height:1.7;margin-bottom:24px;">
+              AlgoViz is an open-source project built by developers, for developers. Reach out through any of the channels below — we aim to respond within 48 hours.
+            </p>
+          </div>
+
+          <a href="mailto:harjot.singh.dev25@gmail.com" class="contact-info-card">
+            <div class="contact-info-icon">📧</div>
+            <div>
+              <div class="contact-info-label">Email</div>
+              <div class="contact-info-value">harjot.singh.dev25@gmail.com</div>
+              <div class="contact-info-sub">Best for general inquiries</div>
+            </div>
+          </a>
+
+          <a href="https://github.com/harjotsingh1210/AlgoViz" target="_blank" rel="noopener" class="contact-info-card">
+            <div class="contact-info-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="color:var(--accent)">
+                <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="contact-info-label">GitHub</div>
+              <div class="contact-info-value">harjotsingh1210/AlgoViz</div>
+              <div class="contact-info-sub">Issues, PRs & discussions</div>
+            </div>
+          </a>
+
+          <div class="contact-info-card" style="cursor:default;">
+            <div class="contact-info-icon">⏰</div>
+            <div>
+              <div class="contact-info-label">Response Time</div>
+              <div class="contact-info-value">Within 24–48 hours</div>
+              <div class="contact-info-sub">Mon–Sat, IST timezone</div>
+            </div>
+          </div>
+
+          <div class="contact-info-card" style="cursor:default;">
+            <div class="contact-info-icon">🌐</div>
+            <div>
+              <div class="contact-info-label">Website</div>
+              <div class="contact-info-value">algoviz.js.org</div>
+              <div class="contact-info-sub">Hosted on Firebase & js.org</div>
+            </div>
+          </div>
+
+          <!-- Built by -->
+          <div style="margin-top:8px;padding:20px;background:rgba(249,115,22,0.06);border:1px solid rgba(249,115,22,0.15);border-radius:var(--radius-lg);">
+            <div style="font-size:0.75rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">👨‍💻 Built By</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:36px;height:36px;border-radius:50%;background:var(--gradient-brand);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:0.9rem;">H</div>
+                <div>
+                  <div style="font-size:0.875rem;font-weight:600;">Harjot Singh</div>
+                  <div style="font-size:0.75rem;color:var(--text-muted);">Lead Developer</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:0.9rem;">G</div>
+                <div>
+                  <div style="font-size:0.875rem;font-weight:600;">Gagandeep Kaur</div>
+                  <div style="font-size:0.75rem;color:var(--text-muted);">Co-Developer</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Contact Form -->
+        <div class="contact-form-card">
+          <div id="contactFormWrap">
+            <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:6px;">Send us a Message</h2>
+            <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:24px;">Fill out the form below and we'll get back to you as soon as possible.</p>
+
+            <!-- Topic selector -->
+            <div class="form-group">
+              <label class="form-label">What's this about?</label>
+              <div class="topic-chips">
+                <button type="button" class="topic-chip active" id="topic-general" onclick="selectTopic(this,'General Question')">General Question</button>
+                <button type="button" class="topic-chip" id="topic-bug" onclick="selectTopic(this,'Bug Report')">🐛 Bug Report</button>
+                <button type="button" class="topic-chip" id="topic-feature" onclick="selectTopic(this,'Feature Request')">💡 Feature Request</button>
+                <button type="button" class="topic-chip" id="topic-algo" onclick="selectTopic(this,'New Algorithm')">➕ New Algorithm</button>
+                <button type="button" class="topic-chip" id="topic-collab" onclick="selectTopic(this,'Collaboration')">🤝 Collaboration</button>
+              </div>
+            </div>
+
+            <form id="contactForm" onsubmit="handleSubmit(event)">
+              <input type="hidden" id="selectedTopic" value="General Question">
+
+              <div class="form-row">
+                <div class="form-group" style="margin-bottom:0;">
+                  <label class="form-label" for="contactName">Your Name *</label>
+                  <input
+                    type="text" id="contactName" class="form-input"
+                    placeholder="e.g. Aditya Sharma"
+                    required autocomplete="name">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label class="form-label" for="contactEmail">Email Address *</label>
+                  <input
+                    type="email" id="contactEmail" class="form-input"
+                    placeholder="you@example.com"
+                    required autocomplete="email">
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-top:16px;">
+                <label class="form-label" for="contactSubject">Subject *</label>
+                <input
+                  type="text" id="contactSubject" class="form-input"
+                  placeholder="Brief description of your message"
+                  required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="contactMessage">Message *</label>
+                <textarea
+                  id="contactMessage" class="form-textarea"
+                  placeholder="Tell us more — the more detail, the better we can help!"
+                  required minlength="20"></textarea>
+              </div>
+
+              <!-- Char counter -->
+              <div style="text-align:right;font-size:0.75rem;color:var(--text-muted);margin-top:-10px;margin-bottom:16px;" id="charCount">0 / 1000</div>
+
+              <button type="submit" class="btn btn-primary" style="width:100%;padding:14px;font-size:1rem;" id="submitBtn">
+                <span id="submitBtnText">Send Message ✉️</span>
+              </button>
+
+              <p style="font-size:0.75rem;color:var(--text-muted);text-align:center;margin-top:12px;">
+                Your information is kept private and never shared with third parties.
+              </p>
+            </form>
+          </div>
+
+          <!-- Success State (hidden by default) -->
+          <div class="success-message" id="successMessage">
+            <div class="success-icon">✅</div>
+            <h3 style="font-size:1.4rem;font-weight:800;margin-bottom:10px;">Message Sent!</h3>
+            <p style="color:var(--text-secondary);margin-bottom:24px;line-height:1.6;">
+              Thanks for reaching out! We've received your message and will get back to you within 24–48 hours.
+            </p>
+            <button class="btn btn-secondary" onclick="resetForm()">Send Another Message</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="navbar-brand" style="margin-bottom:12px;">
+            <div class="logo-icon">〈/〉</div>
+            <span class="logo-text">Algo<span>Viz</span></span>
+          </div>
+          <p class="footer-brand-desc">Interactive algorithm visualization platform for students and developers. Learn DSA the visual way.</p>
+        </div>
+        <div>
+          <div class="footer-col-title">Algorithms</div>
+          <div class="footer-links">
+            <a href="library.html?cat=sorting">Sorting</a>
+            <a href="library.html?cat=searching">Searching</a>
+            <a href="library.html?cat=graph">Graph</a>
+            <a href="library.html?cat=dp">Dynamic Programming</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-title">Platform</div>
+          <div class="footer-links">
+            <a href="library.html">Algorithm Library</a>
+            <a href="compare.html">Comparison Tool</a>
+            <a href="practice.html">Practice</a>
+            <a href="dashboard.html">Dashboard</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-title">Support</div>
+          <div class="footer-links">
+            <a href="contact.html">Contact Us</a>
+            <a href="https://github.com/harjotsingh1210/AlgoViz" target="_blank" rel="noopener">GitHub</a>
+            <a href="signup.html">Sign Up</a>
+            <a href="login.html">Login</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span class="footer-copy">© 2026 AlgoViz. Made by Harjot Singh And Gagandeep Kaur 🚀</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bottom Nav (Mobile) -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav-item"><span class="nav-icon">🏠</span>Home</a>
+    <a href="library.html" class="bottom-nav-item"><span class="nav-icon">📚</span>Algorithms</a>
+    <a href="practice.html" class="bottom-nav-item"><span class="nav-icon">🎯</span>Practice</a>
+    <a href="dashboard.html" class="bottom-nav-item"><span class="nav-icon">📊</span>Dashboard</a>
+    <a href="contact.html" class="bottom-nav-item active"><span class="nav-icon">✉️</span>Contact</a>
+  </nav>
+
+  <script src="js/theme.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    // Topic chip selection
+    let currentTopic = 'General Question';
+    function selectTopic(el, topic) {
+      document.querySelectorAll('.topic-chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      currentTopic = topic;
+      document.getElementById('selectedTopic').value = topic;
+    }
+
+    // Char counter for textarea
+    const msgArea = document.getElementById('contactMessage');
+    const charCount = document.getElementById('charCount');
+    msgArea.addEventListener('input', () => {
+      const len = msgArea.value.length;
+      charCount.textContent = `${len} / 1000`;
+      if (len > 1000) { msgArea.value = msgArea.value.substring(0, 1000); }
+      charCount.style.color = len > 900 ? 'var(--warning)' : 'var(--text-muted)';
+    });
+
+    // Form submission — uses mailto as fallback since this is a static site
+    function handleSubmit(e) {
+      e.preventDefault();
+      const name    = document.getElementById('contactName').value.trim();
+      const email   = document.getElementById('contactEmail').value.trim();
+      const subject = document.getElementById('contactSubject').value.trim();
+      const message = document.getElementById('contactMessage').value.trim();
+      const topic   = currentTopic;
+
+      const btn = document.getElementById('submitBtn');
+      const btnText = document.getElementById('submitBtnText');
+      btnText.textContent = 'Sending...';
+      btn.disabled = true;
+
+      // Compose mailto link
+      const mailSubject = encodeURIComponent(`[AlgoViz] [${topic}] ${subject}`);
+      const mailBody = encodeURIComponent(
+        `Name: ${name}\nEmail: ${email}\nTopic: ${topic}\n\n${message}`
+      );
+      const mailto = `mailto:harjot.singh.dev25@gmail.com?subject=${mailSubject}&body=${mailBody}`;
+
+      // Simulate a short loading delay then open mail client + show success
+      setTimeout(() => {
+        window.location.href = mailto;
+        showSuccess();
+      }, 800);
+    }
+
+    function showSuccess() {
+      document.getElementById('contactFormWrap').style.display = 'none';
+      const sm = document.getElementById('successMessage');
+      sm.style.display = 'block';
+      sm.style.animation = 'fadeInUp 0.5s ease';
+    }
+
+    function resetForm() {
+      document.getElementById('contactForm').reset();
+      charCount.textContent = '0 / 1000';
+      document.getElementById('submitBtnText').textContent = 'Send Message ✉️';
+      document.getElementById('submitBtn').disabled = false;
+      document.getElementById('successMessage').style.display = 'none';
+      document.getElementById('contactFormWrap').style.display = 'block';
+      selectTopic(document.getElementById('topic-general'), 'General Question');
+    }
+  </script>
+</body>
+</html>
