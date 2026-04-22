@@ -33,6 +33,7 @@ app.use(cors({
       origin.includes('127.0.0.1') ||
       origin.includes('.vercel.app') ||
       origin.includes('.netlify.app') ||
+      origin.includes('.web.app') ||
       allowedOrigins.includes(origin)
     ) {
       callback(null, true);
