@@ -302,8 +302,19 @@
       return { ok:false, output: err.trim() ? err + (out?'\n'+out:'') : out || 'Exit code '+d.status };
     }
 
-    // ===== Terminal stdin handling =====
+    // ===== Interactive stdin handling =====
+    let pendingCode = null;  // code waiting for input
     let stdinLines = [];
+
+    // Detect if code needs user input
+    function needsInput(code, lang) {
+      if (lang === 'python') return /\binput\s*\(/.test(code);
+      if (lang === 'c') return /\bscanf\s*\(/.test(code) || /\bgets\s*\(/.test(code) || /\bfgets\s*\(/.test(code);
+      if (lang === 'cpp') return /\bcin\s*>>/.test(code) || /\bgetline\s*\(/.test(code) || /\bscanf\s*\(/.test(code);
+      if (lang === 'java') return /Scanner|BufferedReader|System\.in/.test(code);
+      return false;
+    }
+
     function handleStdinKey(e) {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -318,14 +329,15 @@
         body.appendChild(line);
         body.scrollTop = body.scrollHeight;
         inp.value = '';
+
+        // If we have pending code, execute now
+        if (pendingCode) {
+          const code = pendingCode;
+          pendingCode = null;
+          executeWithStdin(code, stdinLines.join('\n'));
+          stdinLines = [];
+        }
       }
-    }
-    function getStdin() {
-      const inp = document.getElementById('stdinInput');
-      // Include anything typed but not yet Enter'd
-      const lines = [...stdinLines];
-      if (inp.value.trim()) lines.push(inp.value);
-      return lines.join('\n');
     }
 
     // ===== Run =====
@@ -333,15 +345,12 @@
       const code=editor?editor.getValue():'';
       if(!code.trim()){termWrite('<span class="err">⚠ No code to run.</span>');return;}
       const btn=document.getElementById('runBtn');
-      btn.classList.add('loading');btn.disabled=true;
-      setStatus('running','Running...');
-      termWrite('<span class="dim">⏳ Executing...</span>');
-      const stdin = getStdin();
-      stdinLines = [];
-      document.getElementById('stdinInput').value = '';
 
-      // JavaScript runs locally
+      // JavaScript runs locally (no stdin needed)
       if(currentLang==='javascript'){
+        btn.classList.add('loading');btn.disabled=true;
+        setStatus('running','Running...');
+        termWrite('<span class="dim">⏳ Executing...</span>');
         try{
           const logs=[];
           const fc={log:(...a)=>logs.push(a.map(v=>typeof v==='object'?JSON.stringify(v,null,2):String(v)).join(' ')),
@@ -356,7 +365,32 @@
         btn.classList.remove('loading');btn.disabled=false;return;
       }
 
-      // Other languages: Wandbox
+      // Check if code needs input
+      if (needsInput(code, currentLang) && stdinLines.length === 0) {
+        // Phase 1: Prompt user for input
+        pendingCode = code;
+        setStatus('running','Waiting for input...');
+        termWrite('<span class="dim">📥 Program needs input. Type your values below and press <b style="color:#f97316">Enter</b> to run.</span>');
+        document.getElementById('stdinInput').focus();
+        document.getElementById('stdinInput').placeholder = 'Type input and press Enter to execute...';
+        return;
+      }
+
+      // Phase 2: Execute with collected stdin
+      btn.classList.add('loading');btn.disabled=true;
+      setStatus('running','Running...');
+      const stdin = stdinLines.join('\n');
+      stdinLines = [];
+      document.getElementById('stdinInput').value = '';
+      document.getElementById('stdinInput').placeholder = 'Type program input here (use Enter to add lines)';
+      termWrite('<span class="dim">⏳ Compiling & running...</span>');
+      await executeWithStdin(code, stdin);
+    }
+
+    async function executeWithStdin(code, stdin) {
+      const btn=document.getElementById('runBtn');
+      btn.classList.add('loading');btn.disabled=true;
+      setStatus('running','Running...');
       try {
         const result = await executeWandbox(code, currentLang, stdin);
         if (result.ok) {
@@ -371,6 +405,7 @@
         setStatus('error','API Error');
       }
       btn.classList.remove('loading');btn.disabled=false;
+      document.getElementById('stdinInput').placeholder = 'Type program input here (use Enter to add lines)';
     }
 
     function termWrite(html){document.getElementById('termBody').innerHTML=html;}
