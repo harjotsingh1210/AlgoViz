@@ -270,25 +270,75 @@
         body.scrollTop = body.scrollHeight;
         inp.value = '';
 
-        // Update placeholder to hint more inputs or Run
-        inp.placeholder = `Line ${inputLines.length} added. Enter more or click Run.`;
+        // Update placeholder
+        if (waitingForInput && expectedInputs > 0) {
+          if (inputLines.length >= expectedInputs) {
+            inp.placeholder = 'All inputs entered! Click ▶ Run to execute.';
+          } else {
+            inp.placeholder = 'Enter value ' + (inputLines.length + 1) + ' of ' + expectedInputs + '...';
+          }
+        } else {
+          inp.placeholder = `${inputLines.length} line(s) added. Enter more or click Run.`;
+        }
       }
     }
+
+    // ===== Detect if code needs input =====
+    function needsInput(code, lang) {
+      if (lang === 'python') return /\binput\s*\(/.test(code);
+      if (lang === 'c') return /\bscanf\s*\(/.test(code) || /\bgets\s*\(/.test(code) || /\bfgets\s*\(/.test(code);
+      if (lang === 'cpp') return /\bcin\s*>>/.test(code) || /\bgetline\s*\(/.test(code) || /\bscanf\s*\(/.test(code);
+      if (lang === 'java') return /Scanner|BufferedReader|System\.in/.test(code);
+      return false;
+    }
+
+    // Count how many input calls the code has
+    function countInputs(code, lang) {
+      let re;
+      if (lang === 'python') re = /\binput\s*\(/g;
+      else if (lang === 'c') re = /\b(scanf|gets|fgets)\s*\(/g;
+      else if (lang === 'cpp') re = /(\bcin\s*>>|\bgetline\s*\(|\bscanf\s*\()/g;
+      else if (lang === 'java') re = /\.(nextInt|nextLine|nextDouble|nextFloat|next|readLine)\s*\(/g;
+      else return 0;
+      return (code.match(re) || []).length;
+    }
+
+    let waitingForInput = false;
+    let expectedInputs = 0;
 
     // ===== Run =====
     async function runCode() {
       const code = editor ? editor.getValue() : '';
       if (!code.trim()) { writeOutput('<span class="err">⚠ No code to run.</span>'); return; }
 
+      const inp = document.getElementById('termInput');
+
+      // Phase 1: If code needs input and we haven't collected any yet
+      if (needsInput(code, currentLang) && inputLines.length === 0 && !waitingForInput) {
+        expectedInputs = countInputs(code, currentLang);
+        waitingForInput = true;
+        setStatus('input', 'Input');
+        writeOutput(
+          '<span class="dim">📥 Program requires <b style="color:#f97316">' + expectedInputs + ' input' + (expectedInputs > 1 ? 's' : '') + '</b>.</span>\n' +
+          '<span class="dim">Type each value below and press <b style="color:#22c55e">Enter</b> after each one.</span>\n' +
+          '<span class="dim">Then click <b style="color:#f97316">▶ Run</b> again to execute.</span>'
+        );
+        inp.focus();
+        inp.placeholder = 'Enter value ' + (inputLines.length + 1) + ' of ' + expectedInputs + '...';
+        return;
+      }
+
+      // Phase 2: Execute
+      waitingForInput = false;
       const btn = document.getElementById('runBtn');
       btn.classList.add('loading'); btn.disabled = true;
       setStatus('running', 'Running');
 
-      // Collect all input lines
-      const inp = document.getElementById('termInput');
+      // Grab any remaining text in input field
       if (inp.value.trim()) { inputLines.push(inp.value); inp.value = ''; }
       const stdin = inputLines.join('\n');
       inputLines = [];
+      expectedInputs = 0;
       inp.placeholder = "Type input here, press Enter to add lines, then click Run";
 
       writeOutput('<span class="dim">⏳ Compiling & running...</span>');
