@@ -155,7 +155,7 @@
         <span class="spinner"></span>
         Run Code
       </button>
-      <button class="btn btn-secondary btn-sm" onclick="resetCode()" title="Reset to template">↺ Reset</button>
+      <button class="btn btn-secondary btn-sm" onclick="clearEditor()" title="Clear editor">↺ Clear</button>
       <div class="editor-info">
         <span id="cursorPos">Ln 1, Col 1</span>
         <span id="langLabel">JavaScript</span>
@@ -196,142 +196,29 @@
   <!-- Monaco Editor CDN -->
   <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
   <script>
-    // ===== Language Templates =====
-    const TEMPLATES = {
-      javascript: `// JavaScript — AlgoViz Code Editor
-// Try writing a sorting algorithm!
-
-function bubbleSort(arr) {
-  const n = arr.length;
-  for (let i = 0; i < n - 1; i++) {
-    for (let j = 0; j < n - i - 1; j++) {
-      if (arr[j] > arr[j + 1]) {
-        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
-      }
-    }
-  }
-  return arr;
-}
-
-const data = [64, 34, 25, 12, 22, 11, 90];
-console.log("Original:", data);
-console.log("Sorted:", bubbleSort([...data]));
-`,
-      python: `# Python — AlgoViz Code Editor
-# Try writing a sorting algorithm!
-
-def bubble_sort(arr):
-    n = len(arr)
-    for i in range(n - 1):
-        for j in range(n - i - 1):
-            if arr[j] > arr[j + 1]:
-                arr[j], arr[j + 1] = arr[j + 1], arr[j]
-    return arr
-
-data = [64, 34, 25, 12, 22, 11, 90]
-print("Original:", data)
-print("Sorted:", bubble_sort(data[:]))
-`,
-      c: `// C — AlgoViz Code Editor
-#include <stdio.h>
-
-void bubbleSort(int arr[], int n) {
-    for (int i = 0; i < n - 1; i++) {
-        for (int j = 0; j < n - i - 1; j++) {
-            if (arr[j] > arr[j + 1]) {
-                int temp = arr[j];
-                arr[j] = arr[j + 1];
-                arr[j + 1] = temp;
-            }
-        }
-    }
-}
-
-int main() {
-    int arr[] = {64, 34, 25, 12, 22, 11, 90};
-    int n = sizeof(arr) / sizeof(arr[0]);
-
-    printf("Original: ");
-    for (int i = 0; i < n; i++) printf("%d ", arr[i]);
-    printf("\\n");
-
-    bubbleSort(arr, n);
-
-    printf("Sorted: ");
-    for (int i = 0; i < n; i++) printf("%d ", arr[i]);
-    printf("\\n");
-
-    return 0;
-}
-`,
-      cpp: `// C++ — AlgoViz Code Editor
-#include <iostream>
-#include <vector>
-#include <algorithm>
-using namespace std;
-
-void bubbleSort(vector<int>& arr) {
-    int n = arr.size();
-    for (int i = 0; i < n - 1; i++) {
-        for (int j = 0; j < n - i - 1; j++) {
-            if (arr[j] > arr[j + 1]) {
-                swap(arr[j], arr[j + 1]);
-            }
-        }
-    }
-}
-
-int main() {
-    vector<int> arr = {64, 34, 25, 12, 22, 11, 90};
-
-    cout << "Original: ";
-    for (int x : arr) cout << x << " ";
-    cout << endl;
-
-    bubbleSort(arr);
-
-    cout << "Sorted: ";
-    for (int x : arr) cout << x << " ";
-    cout << endl;
-
-    return 0;
-}
-`,
-      java: `// Java — AlgoViz Code Editor
-import java.util.Arrays;
-
-public class Main {
-    static void bubbleSort(int[] arr) {
-        int n = arr.length;
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = 0; j < n - i - 1; j++) {
-                if (arr[j] > arr[j + 1]) {
-                    int temp = arr[j];
-                    arr[j] = arr[j + 1];
-                    arr[j + 1] = temp;
-                }
-            }
-        }
-    }
-
-    public static void main(String[] args) {
-        int[] arr = {64, 34, 25, 12, 22, 11, 90};
-        System.out.println("Original: " + Arrays.toString(arr));
-        bubbleSort(arr);
-        System.out.println("Sorted: " + Arrays.toString(arr));
-    }
-}
-`
-    };
-
-    // ===== Monaco to Piston language mapping =====
+    // ===== Piston language mapping (versions fetched dynamically) =====
     const PISTON_LANG = {
-      javascript: { language: 'javascript', version: '18.15.0' },
-      python:     { language: 'python',     version: '3.10.0' },
-      c:          { language: 'c',          version: '10.2.0' },
-      cpp:        { language: 'c++',        version: '10.2.0' },
-      java:       { language: 'java',       version: '15.0.2' }
+      javascript: { language: 'javascript', version: '*' },
+      python:     { language: 'python',     version: '*' },
+      c:          { language: 'c',          version: '*' },
+      cpp:        { language: 'c++',        version: '*' },
+      java:       { language: 'java',       version: '*' }
     };
+
+    // Fetch available runtimes and set correct versions
+    (async function fetchRuntimes() {
+      try {
+        const res = await fetch('https://emkc.org/api/v2/piston/runtimes');
+        const runtimes = await res.json();
+        for (const rt of runtimes) {
+          if (rt.language === 'javascript') PISTON_LANG.javascript.version = rt.version;
+          if (rt.language === 'python') PISTON_LANG.python.version = rt.version;
+          if (rt.language === 'c') PISTON_LANG.c.version = rt.version;
+          if (rt.language === 'c++') PISTON_LANG.cpp.version = rt.version;
+          if (rt.language === 'java') PISTON_LANG.java.version = rt.version;
+        }
+      } catch(e) { console.warn('Could not fetch Piston runtimes, using defaults'); }
+    })();
 
     const MONACO_LANG = {
       javascript: 'javascript',
@@ -371,7 +258,7 @@ public class Main {
       });
 
       editor = monaco.editor.create(document.getElementById('editorContainer'), {
-        value: TEMPLATES[currentLang],
+        value: '',
         language: MONACO_LANG[currentLang],
         theme: 'algoviz-dark',
         fontSize: 14,
@@ -433,15 +320,14 @@ public class Main {
       if (editor) {
         const model = editor.getModel();
         monaco.editor.setModelLanguage(model, MONACO_LANG[lang]);
-        editor.setValue(TEMPLATES[lang]);
       }
       document.getElementById('langLabel').textContent = {
         javascript: 'JavaScript', python: 'Python', c: 'C', cpp: 'C++', java: 'Java'
       }[lang];
     }
 
-    function resetCode() {
-      if (editor) editor.setValue(TEMPLATES[currentLang]);
+    function clearEditor() {
+      if (editor) editor.setValue('');
       clearOutput();
     }
 
