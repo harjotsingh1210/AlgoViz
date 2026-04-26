@@ -1,119 +1,84 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-5RJFEL6BHB"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-5RJFEL6BHB');</script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-5RJFEL6BHB"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-5RJFEL6BHB');</script>
   <meta charset="UTF-8">
   <link rel="icon" type="image/png" href="/favicon.png">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Code Editor – Write & Run Code | AlgoViz</title>
-  <meta name="description" content="Write and run code in JavaScript, Python, C, C++, and Java directly in your browser.">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Code Editor – Write &amp; Run Code | AlgoViz</title>
+  <meta name="description" content="Write and run code in JavaScript, Python, C, C++, and Java directly in your browser with AlgoViz's online code editor.">
   <link rel="stylesheet" href="css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    .editor-page { padding-top: var(--navbar-h); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    /* ===== Layout ===== */
+    .editor-page{padding-top:var(--navbar-h);height:100vh;display:flex;flex-direction:column;overflow:hidden;background:var(--bg-primary)}
 
     /* Toolbar */
-    .editor-toolbar {
-      display: flex; align-items: center; gap: 10px; padding: 8px 16px;
-      background: var(--bg-secondary); border-bottom: 1px solid var(--border-subtle); flex-shrink: 0; flex-wrap: wrap;
-    }
-    .lang-select {
-      padding: 7px 30px 7px 12px; background: var(--bg-elevated); border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.85rem;
-      font-weight: 600; cursor: pointer; outline: none; font-family: var(--font-sans);
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 8px center; background-size: 14px;
-    }
-    .run-btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 7px 20px; background: var(--gradient-brand); color: #fff;
-      border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 700;
-      border: none; cursor: pointer; box-shadow: 0 4px 16px rgba(249,115,22,0.35); transition: all 150ms;
-    }
-    .run-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(249,115,22,0.5); }
-    .run-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    .run-btn .spinner { display: none; width: 13px; height: 13px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.5s linear infinite; }
-    .run-btn.loading .spinner { display: inline-block; }
-    .run-btn.loading .play-icon { display: none; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .clear-btn { background: none; border: 1px solid var(--border-subtle); color: var(--text-muted); padding: 7px 14px; border-radius: var(--radius-sm); font-size: 0.82rem; cursor: pointer; transition: all .15s; }
-    .clear-btn:hover { color: var(--text-primary); border-color: var(--text-muted); }
-    .editor-info { margin-left: auto; font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-mono); }
+    .ed-toolbar{display:flex;align-items:center;gap:10px;padding:6px 14px;background:var(--bg-secondary);border-bottom:1px solid var(--border-subtle);flex-shrink:0;flex-wrap:wrap}
+    .ed-toolbar select{padding:6px 28px 6px 10px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:6px;color:var(--text-primary);font-size:.82rem;font-weight:600;cursor:pointer;outline:none;font-family:var(--font-sans);appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23888'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;background-size:13px}
+    .run-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 18px;background:var(--gradient-brand);color:#fff;border-radius:6px;font-size:.82rem;font-weight:700;border:none;cursor:pointer;box-shadow:0 3px 12px rgba(249,115,22,.3);transition:all .15s}
+    .run-btn:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(249,115,22,.45)}
+    .run-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    .run-btn .spin{display:none;width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .5s linear infinite}
+    .run-btn.loading .spin{display:inline-block}
+    .run-btn.loading .ico{display:none}
+    @keyframes sp{to{transform:rotate(360deg)}}
+    .clr-btn{background:none;border:1px solid var(--border-subtle);color:var(--text-muted);padding:6px 12px;border-radius:6px;font-size:.8rem;cursor:pointer;transition:all .15s}
+    .clr-btn:hover{border-color:var(--text-muted);color:var(--text-primary)}
+    .ed-info{margin-left:auto;font-size:.75rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace}
 
-    /* Editor + Output layout */
-    .editor-body { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-    .editor-pane { flex: 1; min-height: 0; position: relative; }
+    /* Main body */
+    .ed-body{flex:1;display:flex;flex-direction:column;min-height:0}
+    .ed-pane{flex:1;min-height:0;position:relative}
 
-    /* Output / Terminal */
-    .output-pane {
-      height: 220px; min-height: 100px; background: #0d0d14;
-      border-top: 2px solid var(--border-subtle); display: flex; flex-direction: column; flex-shrink: 0;
-    }
-    [data-theme="light"] .output-pane { background: #1a1a2e; }
-    .output-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 8px 16px; border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .output-title { font-size: 0.78rem; font-weight: 700; color: #888; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.5px; }
-    .output-actions { display: flex; gap: 8px; align-items: center; }
-    .output-actions button { background: none; border: none; color: #666; font-size: 0.75rem; cursor: pointer; padding: 3px 8px; border-radius: 3px; }
-    .output-actions button:hover { color: #ccc; background: rgba(255,255,255,0.06); }
-    .status-pill { padding: 2px 10px; border-radius: 20px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; }
-    .status-pill.ready { background: rgba(100,100,100,0.15); color: #888; }
-    .status-pill.running { background: rgba(249,115,22,0.15); color: #f97316; }
-    .status-pill.done { background: rgba(34,197,94,0.15); color: #22c55e; }
-    .status-pill.error { background: rgba(239,68,68,0.15); color: #ef4444; }
-    .status-pill.input { background: rgba(139,233,253,0.15); color: #8be9fd; }
+    /* Terminal */
+    .term{height:220px;min-height:80px;background:#0a0a12;border-top:2px solid var(--border-subtle);display:flex;flex-direction:column;flex-shrink:0}
+    [data-theme="light"] .term{background:#1e1e2e}
+    .term-head{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;border-bottom:1px solid rgba(255,255,255,.05)}
+    .term-title{font-size:.72rem;font-weight:700;color:#666;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.6px}
+    .term-acts{display:flex;gap:6px;align-items:center}
+    .term-acts button{background:none;border:none;color:#555;font-size:.72rem;cursor:pointer;padding:2px 8px;border-radius:3px;font-family:'JetBrains Mono',monospace}
+    .term-acts button:hover{color:#ccc;background:rgba(255,255,255,.05)}
+    .pill{padding:2px 10px;border-radius:20px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+    .pill.ready{background:rgba(100,100,100,.12);color:#777}
+    .pill.running{background:rgba(249,115,22,.12);color:#f97316;animation:pulse 1.2s infinite}
+    .pill.done{background:rgba(34,197,94,.12);color:#22c55e}
+    .pill.error{background:rgba(239,68,68,.12);color:#ef4444}
+    .pill.input{background:rgba(139,233,253,.12);color:#8be9fd}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 
-    .output-body {
-      flex: 1; padding: 12px 16px; overflow-y: auto;
-      font-family: var(--font-mono); font-size: 0.84rem; line-height: 1.7;
-      color: #e2e8f0; white-space: pre-wrap; word-break: break-word;
-    }
-    .output-body .err { color: #ef4444; }
-    .output-body .ok { color: #22c55e; }
-    .output-body .dim { color: #555; font-style: italic; }
-    .output-body .input-line { color: #8be9fd; }
+    .term-body{flex:1;padding:10px 14px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.7;color:#d4d4d8;white-space:pre-wrap;word-break:break-word}
+    .term-body .e{color:#ef4444}
+    .term-body .s{color:#22c55e}
+    .term-body .d{color:#444;font-style:italic}
+    .term-body .i{color:#8be9fd}
+    .term-body .w{color:#f59e0b}
 
-    /* Terminal input */
-    .term-input-row {
-      display: flex; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); background: rgba(0,0,0,0.3);
-    }
-    .term-input-row .prompt { padding: 8px 6px 8px 14px; color: #22c55e; font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700; }
-    .term-input-row input {
-      flex: 1; background: transparent; border: none; padding: 8px 10px;
-      color: #e2e8f0; font-family: var(--font-mono); font-size: 0.84rem; outline: none; caret-color: #22c55e;
-    }
-    .term-input-row input::placeholder { color: #3a3a4a; }
+    /* Input row */
+    .term-in{display:flex;align-items:center;border-top:1px solid rgba(255,255,255,.05);background:rgba(0,0,0,.25)}
+    .term-in .p{padding:7px 4px 7px 12px;color:#22c55e;font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;user-select:none}
+    .term-in input{flex:1;background:0 0;border:none;padding:7px 10px;color:#e2e8f0;font-family:'JetBrains Mono',monospace;font-size:.82rem;outline:none;caret-color:#22c55e}
+    .term-in input::placeholder{color:#333}
 
-    /* Resize handle */
-    .resize-handle { height: 5px; cursor: ns-resize; background: transparent; display: flex; align-items: center; justify-content: center; }
-    .resize-handle::after { content: ''; width: 40px; height: 3px; border-radius: 2px; background: rgba(255,255,255,0.1); }
-    .resize-handle:hover::after { background: var(--accent); }
+    /* Resize */
+    .resize-h{height:4px;cursor:ns-resize;background:0 0;flex-shrink:0}
+    .resize-h:hover{background:var(--accent)}
 
-    @media (max-width: 768px) {
-      .output-pane { height: 180px; }
-      .editor-info { display: none; }
-    }
+    @media(max-width:768px){.term{height:170px}.ed-info{display:none}}
   </style>
 </head>
 <body>
-  <!-- Navbar -->
   <nav class="navbar">
     <a href="index.html" class="navbar-brand"><div class="logo-icon">〈/〉</div><span class="logo-text">Algo<span>Viz</span></span></a>
     <div class="navbar-links">
-      <a href="index.html">Home</a>
-      <a href="library.html">Algorithms</a>
-      <a href="compare.html">Compare</a>
-      <a href="practice.html">Practice</a>
-      <a href="editor.html" class="active">Code Editor</a>
-      <a href="dashboard.html">Dashboard</a>
-      <a href="contact.html">Contact</a>
+      <a href="index.html">Home</a><a href="library.html">Algorithms</a><a href="compare.html">Compare</a>
+      <a href="practice.html">Practice</a><a href="editor.html" class="active">Code Editor</a>
+      <a href="dashboard.html">Dashboard</a><a href="contact.html">Contact</a>
     </div>
     <div class="navbar-actions">
       <button class="theme-toggle">☀️</button>
-      <div id="navUserArea" style="display:flex;gap:10px;align-items:center;"></div>
+      <div id="navUserArea" style="display:flex;gap:10px;align-items:center"></div>
       <button class="nav-toggle" id="navToggle">☰</button>
     </div>
   </nav>
@@ -124,45 +89,40 @@
   </div>
 
   <div class="editor-page">
-    <!-- Toolbar -->
-    <div class="editor-toolbar">
-      <select class="lang-select" id="langSelect" onchange="changeLang(this.value)">
-        <option value="javascript">JavaScript</option>
-        <option value="python">Python</option>
-        <option value="c">C</option>
+    <div class="ed-toolbar">
+      <select id="langSel" onchange="setLang(this.value)">
         <option value="cpp">C++</option>
+        <option value="c">C</option>
+        <option value="python">Python</option>
         <option value="java">Java</option>
+        <option value="javascript">JavaScript</option>
       </select>
-      <button class="run-btn" id="runBtn" onclick="runCode()">
-        <span class="play-icon">▶</span><span class="spinner"></span> Run
-      </button>
-      <button class="clear-btn" onclick="clearAll()">Clear</button>
-      <span class="editor-info" id="cursorInfo">Ln 1, Col 1</span>
+      <button class="run-btn" id="runBtn" onclick="run()"><span class="ico">▶</span><span class="spin"></span> Run</button>
+      <button class="clr-btn" onclick="clearAll()">Clear</button>
+      <span class="ed-info" id="info">Ln 1, Col 1 · C++</span>
     </div>
-
-    <!-- Editor + Output -->
-    <div class="editor-body">
-      <div class="editor-pane" id="editorContainer"></div>
-      <div class="resize-handle" id="resizeHandle"></div>
-      <div class="output-pane" id="outputPane">
-        <div class="output-header">
-          <span class="output-title">Terminal</span>
-          <div class="output-actions">
-            <span class="status-pill ready" id="statusPill">Ready</span>
-            <button onclick="clearOutput()">Clear</button>
+    <div class="ed-body">
+      <div class="ed-pane" id="editorEl"></div>
+      <div class="resize-h" id="rh"></div>
+      <div class="term" id="termEl">
+        <div class="term-head">
+          <span class="term-title">Output</span>
+          <div class="term-acts">
+            <span class="pill ready" id="pill">Ready</span>
+            <button onclick="clearTerm()">Clear</button>
           </div>
         </div>
-        <div class="output-body" id="outputBody"><span class="dim">Click "Run" or press Ctrl+Enter to execute your code.</span></div>
-        <div class="term-input-row">
-          <span class="prompt">❯</span>
-          <input type="text" id="termInput" placeholder="Type input here, press Enter to add lines, then click Run"
-                 onkeydown="handleInput(event)">
+        <div class="term-body" id="out">
+          <span class="d">Press ▶ Run or Ctrl+Enter to execute your code.</span>
+        </div>
+        <div class="term-in">
+          <span class="p">❯</span>
+          <input id="inp" placeholder="Type input here, press Enter for each line, then click Run" onkeydown="onKey(event)">
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Bottom Nav -->
   <nav class="bottom-nav">
     <a href="index.html" class="bottom-nav-item"><span class="nav-icon">🏠</span>Home</a>
     <a href="library.html" class="bottom-nav-item"><span class="nav-icon">📚</span>Algorithms</a>
@@ -175,250 +135,192 @@
   <script src="js/auth.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
   <script>
-    // ===== Wandbox compilers =====
-    const WANDBOX = {
-      python: 'cpython-3.12.7', c: 'gcc-13.2.0-c', cpp: 'gcc-13.2.0',
-      java: 'openjdk-jdk-22+36', javascript: 'nodejs-20.17.0'
-    };
-    const MONACO_LANG = { javascript:'javascript', python:'python', c:'c', cpp:'cpp', java:'java' };
-    const LANG_LABEL = { javascript:'JavaScript', python:'Python', c:'C', cpp:'C++', java:'Java' };
+  // ===== Config =====
+  const COMPILER={cpp:'gcc-13.2.0',c:'gcc-13.2.0-c',python:'cpython-3.12.7',java:'openjdk-jdk-22+36',javascript:'nodejs-20.17.0'};
+  const MLANG={cpp:'cpp',c:'c',python:'python',java:'java',javascript:'javascript'};
+  const LABEL={cpp:'C++',c:'C',python:'Python',java:'Java',javascript:'JavaScript'};
 
-    let editor = null, currentLang = 'javascript';
-    let inputLines = [];  // collected stdin lines
+  let ed=null, lang='cpp', lines=[], waiting=false, expected=0;
 
-    // ===== Monaco Editor =====
-    require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' }});
-    require(['vs/editor/editor.main'], function() {
-      monaco.editor.defineTheme('algoviz-dark', {
-        base: 'vs-dark', inherit: true,
-        rules: [
-          { token: 'comment', foreground: '546e7a', fontStyle: 'italic' },
-          { token: 'keyword', foreground: 'c792ea' },
-          { token: 'string', foreground: 'c3e88d' },
-          { token: 'number', foreground: 'f78c6c' },
-        ],
-        colors: {
-          'editor.background': '#0d0d14',
-          'editor.foreground': '#e2e8f0',
-          'editor.lineHighlightBackground': '#1a1a28',
-          'editor.selectionBackground': '#f9731640',
-          'editorCursor.foreground': '#f97316',
-          'editorLineNumber.foreground': '#3d3d5c',
-          'editorLineNumber.activeForeground': '#f97316',
-        }
-      });
-      editor = monaco.editor.create(document.getElementById('editorContainer'), {
-        value: '', language: 'javascript', theme: 'algoviz-dark',
-        fontSize: 14, fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-        minimap: { enabled: false }, scrollBeyondLastLine: false,
-        padding: { top: 14, bottom: 14 }, lineNumbers: 'on',
-        renderLineHighlight: 'all', tabSize: 4, wordWrap: 'on',
-        automaticLayout: true, suggestOnTriggerCharacters: true,
-        quickSuggestions: true, bracketPairColorization: { enabled: true },
-        smoothScrolling: true, cursorBlinking: 'smooth',
-      });
-      editor.onDidChangeCursorPosition(e => {
-        document.getElementById('cursorInfo').textContent =
-          `Ln ${e.position.lineNumber}, Col ${e.position.column}  ${LANG_LABEL[currentLang]}`;
-      });
-      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, runCode);
-      syncTheme();
-      new MutationObserver(syncTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  // ===== Monaco =====
+  require.config({paths:{vs:'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs'}});
+  require(['vs/editor/editor.main'],function(){
+    monaco.editor.defineTheme('av',{base:'vs-dark',inherit:true,
+      rules:[{token:'comment',foreground:'546e7a',fontStyle:'italic'},{token:'keyword',foreground:'c792ea'},{token:'string',foreground:'c3e88d'},{token:'number',foreground:'f78c6c'}],
+      colors:{'editor.background':'#0d0d14','editor.foreground':'#e2e8f0','editor.lineHighlightBackground':'#151520','editor.selectionBackground':'#f9731635','editorCursor.foreground':'#f97316','editorLineNumber.foreground':'#2e2e44','editorLineNumber.activeForeground':'#f97316'}
     });
-
-    function syncTheme() {
-      if (!editor) return;
-      const light = document.documentElement.getAttribute('data-theme') === 'light';
-      if (light) {
-        monaco.editor.defineTheme('algoviz-light', {
-          base: 'vs', inherit: true, rules: [],
-          colors: { 'editor.background': '#fafafa', 'editorCursor.foreground': '#f97316', 'editorLineNumber.activeForeground': '#f97316' }
-        });
-        monaco.editor.setTheme('algoviz-light');
-      } else {
-        monaco.editor.setTheme('algoviz-dark');
-      }
-    }
-
-    // ===== Language switch =====
-    function changeLang(lang) {
-      currentLang = lang;
-      if (editor) monaco.editor.setModelLanguage(editor.getModel(), MONACO_LANG[lang]);
-    }
-
-    function clearAll() {
-      if (editor) { editor.setValue(''); editor.focus(); }
-      clearOutput();
-    }
-
-    // ===== Terminal input handling =====
-    // Enter = add a line to the input buffer (shown in terminal)
-    // Does NOT auto-execute. User must click Run.
-    function handleInput(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        const inp = document.getElementById('termInput');
-        const val = inp.value;
-        inputLines.push(val);
-
-        // Show the line in terminal output
-        const body = document.getElementById('outputBody');
-        const div = document.createElement('div');
-        div.className = 'input-line';
-        div.textContent = '❯ ' + val;
-        body.appendChild(div);
-        body.scrollTop = body.scrollHeight;
-        inp.value = '';
-
-        // Update placeholder
-        if (waitingForInput && expectedInputs > 0) {
-          if (inputLines.length >= expectedInputs) {
-            inp.placeholder = 'All inputs entered! Click ▶ Run to execute.';
-          } else {
-            inp.placeholder = 'Enter value ' + (inputLines.length + 1) + ' of ' + expectedInputs + '...';
-          }
-        } else {
-          inp.placeholder = `${inputLines.length} line(s) added. Enter more or click Run.`;
-        }
-      }
-    }
-
-    // ===== Detect if code needs input =====
-    function needsInput(code, lang) {
-      if (lang === 'python') return /\binput\s*\(/.test(code);
-      if (lang === 'c') return /\bscanf\s*\(/.test(code) || /\bgets\s*\(/.test(code) || /\bfgets\s*\(/.test(code);
-      if (lang === 'cpp') return /\bcin\s*>>/.test(code) || /\bgetline\s*\(/.test(code) || /\bscanf\s*\(/.test(code);
-      if (lang === 'java') return /Scanner|BufferedReader|System\.in/.test(code);
-      return false;
-    }
-
-    // Count how many input calls the code has
-    function countInputs(code, lang) {
-      let re;
-      if (lang === 'python') re = /\binput\s*\(/g;
-      else if (lang === 'c') re = /\b(scanf|gets|fgets)\s*\(/g;
-      else if (lang === 'cpp') re = /(\bcin\s*>>|\bgetline\s*\(|\bscanf\s*\()/g;
-      else if (lang === 'java') re = /\.(nextInt|nextLine|nextDouble|nextFloat|next|readLine)\s*\(/g;
-      else return 0;
-      return (code.match(re) || []).length;
-    }
-
-    let waitingForInput = false;
-    let expectedInputs = 0;
-
-    // ===== Run =====
-    async function runCode() {
-      const code = editor ? editor.getValue() : '';
-      if (!code.trim()) { writeOutput('<span class="err">⚠ No code to run.</span>'); return; }
-
-      const inp = document.getElementById('termInput');
-
-      // Phase 1: If code needs input and we haven't collected any yet
-      if (needsInput(code, currentLang) && inputLines.length === 0 && !waitingForInput) {
-        expectedInputs = countInputs(code, currentLang);
-        waitingForInput = true;
-        setStatus('input', 'Input');
-        writeOutput(
-          '<span class="dim">📥 Program requires <b style="color:#f97316">' + expectedInputs + ' input' + (expectedInputs > 1 ? 's' : '') + '</b>.</span>\n' +
-          '<span class="dim">Type each value below and press <b style="color:#22c55e">Enter</b> after each one.</span>\n' +
-          '<span class="dim">Then click <b style="color:#f97316">▶ Run</b> again to execute.</span>'
-        );
-        inp.focus();
-        inp.placeholder = 'Enter value ' + (inputLines.length + 1) + ' of ' + expectedInputs + '...';
-        return;
-      }
-
-      // Phase 2: Execute
-      waitingForInput = false;
-      const btn = document.getElementById('runBtn');
-      btn.classList.add('loading'); btn.disabled = true;
-      setStatus('running', 'Running');
-
-      // Grab any remaining text in input field
-      if (inp.value.trim()) { inputLines.push(inp.value); inp.value = ''; }
-      const stdin = inputLines.join('\n');
-      inputLines = [];
-      expectedInputs = 0;
-      inp.placeholder = "Type input here, press Enter to add lines, then click Run";
-
-      writeOutput('<span class="dim">⏳ Compiling & running...</span>');
-
-      // JavaScript: local execution
-      if (currentLang === 'javascript') {
-        try {
-          const logs = [];
-          const fc = {
-            log: (...a) => logs.push(a.map(v => typeof v === 'object' ? JSON.stringify(v, null, 2) : String(v)).join(' ')),
-            error: (...a) => logs.push('❌ ' + a.map(String).join(' ')),
-            warn: (...a) => logs.push('⚠️ ' + a.map(String).join(' ')),
-            info: (...a) => logs.push('ℹ️ ' + a.map(String).join(' ')),
-            table: (d) => logs.push(JSON.stringify(d, null, 2))
-          };
-          new Function('console', code)(fc);
-          writeOutput(logs.length ? '<span class="ok">' + esc(logs.join('\n')) + '</span>' : '<span class="dim">✅ Finished — no output.</span>');
-          setStatus('done', 'Done');
-        } catch (e) {
-          writeOutput('<span class="err">❌ ' + esc(e.toString()) + '</span>');
-          setStatus('error', 'Error');
-        }
-        btn.classList.remove('loading'); btn.disabled = false;
-        return;
-      }
-
-      // Other languages: Wandbox API
-      try {
-        const res = await fetch('https://wandbox.org/api/compile.json', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ compiler: WANDBOX[currentLang], code, stdin })
-        });
-        if (!res.ok) throw new Error('Server returned ' + res.status);
-        const d = await res.json();
-        const out = d.program_output || '';
-        const err = d.compiler_error || d.program_error || d.compiler_message || '';
-
-        if (String(d.status) === '0') {
-          writeOutput(out.trim() ? '<span class="ok">' + esc(out) + '</span>' : '<span class="dim">✅ Finished — no output.</span>');
-          setStatus('done', 'Done');
-        } else {
-          writeOutput('<span class="err">' + esc(err.trim() ? err + (out ? '\n' + out : '') : out || 'Exit code ' + d.status) + '</span>');
-          setStatus('error', 'Error');
-        }
-      } catch (e) {
-        writeOutput('<span class="err">❌ ' + esc(e.message) + '</span>');
-        setStatus('error', 'API Error');
-      }
-      btn.classList.remove('loading'); btn.disabled = false;
-    }
-
-    // ===== Helpers =====
-    function writeOutput(html) { document.getElementById('outputBody').innerHTML = html; }
-    function clearOutput() {
-      document.getElementById('outputBody').innerHTML = '<span class="dim">Click "Run" or press Ctrl+Enter to execute your code.</span>';
-      setStatus('ready', 'Ready');
-      inputLines = [];
-      document.getElementById('termInput').value = '';
-      document.getElementById('termInput').placeholder = "Type input here, press Enter to add lines, then click Run";
-    }
-    function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-    function setStatus(type, text) {
-      const pill = document.getElementById('statusPill');
-      pill.textContent = text;
-      pill.className = 'status-pill ' + type;
-    }
-
-    // ===== Resize handle =====
-    const handle = document.getElementById('resizeHandle');
-    const outputPane = document.getElementById('outputPane');
-    let isResizing = false;
-    handle.addEventListener('mousedown', e => { isResizing = true; e.preventDefault(); });
-    document.addEventListener('mousemove', e => {
-      if (!isResizing) return;
-      const rect = document.querySelector('.editor-body').getBoundingClientRect();
-      const newH = rect.bottom - e.clientY;
-      if (newH > 80 && newH < rect.height - 120) outputPane.style.height = newH + 'px';
+    ed=monaco.editor.create(document.getElementById('editorEl'),{
+      value:'',language:'cpp',theme:'av',fontSize:14,
+      fontFamily:"'JetBrains Mono','Fira Code',monospace",
+      minimap:{enabled:false},scrollBeyondLastLine:false,padding:{top:14,bottom:14},
+      lineNumbers:'on',renderLineHighlight:'all',tabSize:4,wordWrap:'on',
+      automaticLayout:true,suggestOnTriggerCharacters:true,quickSuggestions:true,
+      bracketPairColorization:{enabled:true},smoothScrolling:true,cursorBlinking:'smooth',
+      cursorSmoothCaretAnimation:'on',renderWhitespace:'selection',
     });
-    document.addEventListener('mouseup', () => { isResizing = false; });
+    ed.onDidChangeCursorPosition(e=>{
+      document.getElementById('info').textContent='Ln '+e.position.lineNumber+', Col '+e.position.column+' · '+LABEL[lang];
+    });
+    ed.addCommand(monaco.KeyMod.CtrlCmd|monaco.KeyCode.Enter,run);
+    themeSync();
+    new MutationObserver(themeSync).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+  });
+
+  function themeSync(){
+    if(!ed)return;
+    if(document.documentElement.getAttribute('data-theme')==='light'){
+      monaco.editor.defineTheme('avl',{base:'vs',inherit:true,rules:[],colors:{'editor.background':'#fafafa','editorCursor.foreground':'#f97316','editorLineNumber.activeForeground':'#f97316'}});
+      monaco.editor.setTheme('avl');
+    }else monaco.editor.setTheme('av');
+  }
+
+  function setLang(l){lang=l;if(ed)monaco.editor.setModelLanguage(ed.getModel(),MLANG[l]);}
+  function clearAll(){if(ed){ed.setValue('');ed.focus();}clearTerm();}
+
+  // ===== Input detection =====
+  function hasInput(code,l){
+    if(l==='python')return /\binput\s*\(/.test(code);
+    if(l==='c')return /\b(scanf|gets|fgets)\s*\(/.test(code);
+    if(l==='cpp')return /\bcin\s*>>|\bgetline\s*\(|\bscanf\s*\(/.test(code);
+    if(l==='java')return /Scanner|BufferedReader|System\.in/.test(code);
+    return false;
+  }
+  function countIn(code,l){
+    let r;
+    if(l==='python')r=/\binput\s*\(/g;
+    else if(l==='c')r=/\b(scanf|gets|fgets)\s*\(/g;
+    else if(l==='cpp'){
+      let count=0;
+      const lines=code.split('\n');
+      for(const line of lines){
+        if(/\bcin\b/.test(line)){
+          count+=(line.match(/>>/g)||[]).length;
+        }
+      }
+      return count||1;
+    }
+    else if(l==='java')r=/\.(nextInt|nextLine|nextDouble|nextFloat|next|readLine)\s*\(/g;
+    else return 0;
+    return(code.match(r)||[]).length;
+  }
+
+  // ===== Terminal input =====
+  function onKey(e){
+    if(e.key!=='Enter')return;
+    e.preventDefault();
+    const el=document.getElementById('inp');
+    const v=el.value;
+    lines.push(v);
+    appendOut('<span class="i">❯ '+esc(v)+'</span>');
+    el.value='';
+    if(waiting&&expected>0){
+      if(lines.length>=expected)el.placeholder='All '+expected+' inputs entered! Click ▶ Run to execute.';
+      else el.placeholder='Enter value '+(lines.length+1)+' of '+expected+'...';
+    }else{
+      el.placeholder=lines.length+' line(s) added. Enter more or click Run.';
+    }
+  }
+
+  // ===== Run =====
+  async function run(){
+    const code=ed?ed.getValue():'';
+    if(!code.trim()){setOut('<span class="e">⚠ Write some code first.</span>');return;}
+    const el=document.getElementById('inp');
+
+    // JS: run locally, no stdin needed
+    if(lang==='javascript'){
+      setBtnLoading(true);setPill('running','Running');
+      setOut('<span class="d">⏳ Running...</span>');
+      try{
+        const logs=[];
+        const c={
+          log:(...a)=>logs.push(a.map(v=>typeof v==='object'?JSON.stringify(v,null,2):String(v)).join(' ')),
+          error:(...a)=>logs.push('❌ '+a.map(String).join(' ')),
+          warn:(...a)=>logs.push('⚠️ '+a.map(String).join(' ')),
+          info:(...a)=>logs.push('ℹ️ '+a.map(String).join(' ')),
+          clear:()=>{},table:d=>logs.push(JSON.stringify(d,null,2))
+        };
+        new Function('console',code)(c);
+        setOut(logs.length?'<span class="s">'+esc(logs.join('\n'))+'</span>':'<span class="d">✅ No output.</span>');
+        setPill('done','Done');
+      }catch(e){setOut('<span class="e">❌ '+esc(e.toString())+'</span>');setPill('error','Error');}
+      setBtnLoading(false);return;
+    }
+
+    // Phase 1: prompt for input if needed
+    if(hasInput(code,lang)&&lines.length===0&&!waiting){
+      expected=countIn(code,lang);
+      if(expected<1)expected=1;
+      waiting=true;
+      setPill('input','Input');
+      setOut(
+        '<span class="d">📥 Program needs <b style="color:#f97316">'+expected+' input'+(expected>1?'s':'')+'</b></span>\n'+
+        '<span class="d">Type each value below, press <b style="color:#22c55e">Enter</b> after each.</span>\n'+
+        '<span class="d">Then click <b style="color:#f97316">▶ Run</b> again to execute.</span>'
+      );
+      el.focus();
+      el.placeholder='Enter value 1 of '+expected+'...';
+      return;
+    }
+
+    // Phase 2: execute with stdin
+    waiting=false;
+    if(el.value.trim()){lines.push(el.value);el.value='';}
+    const stdin=lines.join('\n');
+    lines=[];expected=0;
+    el.placeholder='Type input here, press Enter for each line, then click Run';
+
+    setBtnLoading(true);setPill('running','Running');
+    setOut('<span class="d">⏳ Compiling & running...</span>');
+
+    try{
+      const res=await fetch('https://wandbox.org/api/compile.json',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({compiler:COMPILER[lang],code,stdin})
+      });
+      if(!res.ok)throw new Error('Server error '+res.status);
+      const d=await res.json();
+      const stdout=d.program_output||'';
+      const stderr=d.compiler_error||d.program_error||d.compiler_message||'';
+
+      if(String(d.status)==='0'){
+        setOut(stdout.trim()?'<span class="s">'+esc(stdout)+'</span>':'<span class="d">✅ No output.</span>');
+        setPill('done','Done');
+      }else{
+        let msg=stderr.trim()?stderr:'';
+        if(stdout.trim())msg+=(msg?'\n':'')+stdout;
+        if(!msg.trim())msg='Exit code '+d.status;
+        setOut('<span class="e">'+esc(msg)+'</span>');
+        setPill('error','Error');
+      }
+    }catch(e){
+      setOut('<span class="e">❌ '+esc(e.message)+'</span>');
+      setPill('error','API Error');
+    }
+    setBtnLoading(false);
+  }
+
+  // ===== Helpers =====
+  function setOut(h){document.getElementById('out').innerHTML=h;}
+  function appendOut(h){const o=document.getElementById('out');o.innerHTML+='\n'+h;o.scrollTop=o.scrollHeight;}
+  function clearTerm(){setOut('<span class="d">Press ▶ Run or Ctrl+Enter to execute your code.</span>');setPill('ready','Ready');lines=[];waiting=false;expected=0;const el=document.getElementById('inp');el.value='';el.placeholder='Type input here, press Enter for each line, then click Run';}
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function setPill(t,s){const p=document.getElementById('pill');p.textContent=s;p.className='pill '+t;}
+  function setBtnLoading(b){const btn=document.getElementById('runBtn');if(b){btn.classList.add('loading');btn.disabled=true;}else{btn.classList.remove('loading');btn.disabled=false;}}
+
+  // ===== Resize =====
+  (function(){
+    const h=document.getElementById('rh'),t=document.getElementById('termEl');
+    let drag=false;
+    h.addEventListener('mousedown',e=>{drag=true;e.preventDefault();});
+    document.addEventListener('mousemove',e=>{
+      if(!drag)return;
+      const r=document.querySelector('.ed-body').getBoundingClientRect();
+      const n=r.bottom-e.clientY;
+      if(n>80&&n<r.height-100)t.style.height=n+'px';
+    });
+    document.addEventListener('mouseup',()=>drag=false);
+  })();
   </script>
 </body>
 </html>
