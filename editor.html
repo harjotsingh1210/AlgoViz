@@ -202,21 +202,11 @@
       java:       { name:'Main.java',  icon:'☕', monacoLang:'java',       label:'Java' }
     };
 
-    // Piston runtimes — fetched dynamically
-    let RUNTIMES = {};
-    (async()=>{
-      try {
-        const r = await fetch('https://emkc.org/api/v2/piston/runtimes');
-        const all = await r.json();
-        for(const rt of all){
-          if(rt.language==='javascript') RUNTIMES.javascript=rt;
-          if(rt.language==='python') RUNTIMES.python=rt;
-          if(rt.language==='c') RUNTIMES.c=rt;
-          if(rt.language==='c++') RUNTIMES.cpp=rt;
-          if(rt.language==='java') RUNTIMES.java=rt;
-        }
-      } catch(e){ console.warn('Piston runtimes fetch failed',e); }
-    })();
+    // ===== Code Execution — Wandbox API (free, no auth) =====
+    const WANDBOX = {
+      python:'cpython-3.12.7', c:'gcc-13.2.0-c', cpp:'gcc-13.2.0',
+      java:'openjdk-jdk-22+36', javascript:'nodejs-20.17.0'
+    };
 
     let editor=null, currentLang='javascript';
     const fileContents = { javascript:'', python:'', c:'', cpp:'', java:'' };
@@ -288,7 +278,6 @@
         document.getElementById('posDisplay').textContent=t;
       });
       editor.addCommand(monaco.KeyMod.CtrlCmd|monaco.KeyCode.Enter,runCode);
-      // Theme sync
       const syncTheme=()=>{
         const light=document.documentElement.getAttribute('data-theme')==='light';
         if(light){monaco.editor.defineTheme('avlight',{base:'vs',inherit:true,rules:[],colors:{'editor.background':'#fafafa','editorCursor.foreground':'#f97316','editorLineNumber.activeForeground':'#f97316'}});monaco.editor.setTheme('avlight');}
@@ -298,6 +287,21 @@
       new MutationObserver(syncTheme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
       renderSidebar(); renderTabs();
     });
+
+    // ===== Execute via Wandbox =====
+    async function executeWandbox(code, lang, stdin) {
+      const res = await fetch('https://wandbox.org/api/compile.json', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ compiler: WANDBOX[lang], code, stdin: stdin||'' })
+      });
+      if (!res.ok) throw new Error('Wandbox returned ' + res.status);
+      const d = await res.json();
+      const out = d.program_output || '';
+      const err = d.compiler_error || d.program_error || d.compiler_message || '';
+      if (String(d.status)==='0') return { ok:true, output: out };
+      return { ok:false, output: err.trim() ? err + (out?'\n'+out:'') : out || 'Exit code '+d.status };
+    }
 
     // ===== Run =====
     async function runCode(){
@@ -309,6 +313,7 @@
       termWrite('<span class="dim">⏳ Executing...</span>');
       const stdin=(document.getElementById('stdinInput').value||'').replace(/\\n/g,'\n');
 
+      // JavaScript runs locally
       if(currentLang==='javascript'){
         try{
           const logs=[];
@@ -324,44 +329,20 @@
         btn.classList.remove('loading');btn.disabled=false;return;
       }
 
-      // Piston API
-      try{
-        const rt=RUNTIMES[currentLang];
-        if(!rt){termWrite('<span class="err">❌ Runtime not available. Retrying fetch...</span>');
-          // Try fetching runtimes again
-          try{
-            const r=await fetch('https://emkc.org/api/v2/piston/runtimes');
-            const all=await r.json();
-            for(const x of all){
-              if(x.language==='javascript')RUNTIMES.javascript=x;
-              if(x.language==='python')RUNTIMES.python=x;
-              if(x.language==='c')RUNTIMES.c=x;
-              if(x.language==='c++')RUNTIMES.cpp=x;
-              if(x.language==='java')RUNTIMES.java=x;
-            }
-          }catch(e2){}
-          const rt2=RUNTIMES[currentLang];
-          if(!rt2){termWrite('<span class="err">❌ Could not load runtime for '+FILES[currentLang].label+'. API may be temporarily unavailable.</span>');setStatus('error','Error');btn.classList.remove('loading');btn.disabled=false;return;}
+      // Other languages: Wandbox
+      try {
+        const result = await executeWandbox(code, currentLang, stdin);
+        if (result.ok) {
+          termWrite(result.output.trim()?'<span class="ok">'+esc(result.output)+'</span>':'<span class="dim">✅ Finished — no output.</span>');
+          setStatus('done','Done');
+        } else {
+          termWrite('<span class="err">❌ '+esc(result.output)+'</span>');
+          setStatus('error','Error');
         }
-        const runtime=RUNTIMES[currentLang];
-        const res=await fetch('https://emkc.org/api/v2/piston/execute',{
-          method:'POST',headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({language:runtime.language,version:runtime.version,
-            files:[{name:FILES[currentLang].name,content:code}],
-            stdin:stdin||'',args:[],compile_timeout:10000,run_timeout:10000})
-        });
-        if(!res.ok){termWrite('<span class="err">❌ Server returned '+res.status+'. Try again later.</span>');setStatus('error','Error');btn.classList.remove('loading');btn.disabled=false;return;}
-        const data=await res.json();
-        if(data.message){termWrite('<span class="err">❌ '+esc(data.message)+'</span>');setStatus('error','Error');}
-        else if(data.compile&&data.compile.stderr){termWrite('<span class="err">❌ Compile Error:\n'+esc(data.compile.stderr)+'</span>');setStatus('error','Compile Error');}
-        else if(data.run){
-          let out='';
-          if(data.run.stdout)out+='<span class="ok">'+esc(data.run.stdout)+'</span>';
-          if(data.run.stderr)out+=(out?'\n':'')+'<span class="err">'+esc(data.run.stderr)+'</span>';
-          termWrite(out||'<span class="dim">✅ Finished — no output.</span>');
-          setStatus(data.run.stderr?'error':'done',data.run.stderr?'Runtime Error':'Done');
-        }else{termWrite('<span class="err">❌ Unexpected API response:\n'+esc(JSON.stringify(data,null,2))+'</span>');setStatus('error','Error');}
-      }catch(e){termWrite('<span class="err">❌ Network error: '+esc(e.message)+'</span>');setStatus('error','Network Error');}
+      } catch(e) {
+        termWrite('<span class="err">❌ '+esc(e.message)+'</span>');
+        setStatus('error','API Error');
+      }
       btn.classList.remove('loading');btn.disabled=false;
     }
 
