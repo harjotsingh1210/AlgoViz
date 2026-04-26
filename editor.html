@@ -61,10 +61,10 @@
     [data-theme="light"] .terminal-panel{background:#1e1e2e}
 
     /* Input area for stdin */
-    .stdin-row{display:flex;align-items:center;gap:8px;padding:6px 12px;border-top:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.2)}
-    .stdin-row label{font-size:.72rem;font-weight:600;color:var(--text-muted);font-family:var(--font-mono)}
-    .stdin-row input{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:5px 10px;color:#e2e8f0;font-family:var(--font-mono);font-size:.8rem;outline:none}
-    .stdin-row input:focus{border-color:var(--accent)}
+    .stdin-row{display:flex;align-items:center;gap:0;padding:0;border-top:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.25)}
+    .stdin-row .prompt{padding:6px 8px 6px 12px;font-size:.78rem;font-weight:700;color:#22c55e;font-family:var(--font-mono);white-space:nowrap;user-select:none}
+    .stdin-row input{flex:1;background:transparent;border:none;padding:6px 10px;color:#e2e8f0;font-family:var(--font-mono);font-size:.8rem;outline:none;caret-color:#22c55e}
+    .stdin-row input::placeholder{color:#444}
 
     /* Status bar */
     .status-bar{display:flex;align-items:center;height:24px;background:#16161f;border-top:1px solid var(--border-subtle);padding:0 12px;font-size:.7rem;font-family:var(--font-mono);color:var(--text-muted);gap:16px;flex-shrink:0}
@@ -155,15 +155,14 @@
         <div class="terminal-panel" id="termPanel">
           <div class="terminal-tabs">
             <div class="terminal-tab active">Terminal</div>
-            <div class="terminal-tab" onclick="document.getElementById('stdinRow').style.display=document.getElementById('stdinRow').style.display==='none'?'flex':'none'">Input</div>
             <div class="terminal-actions">
               <button onclick="clearTerminal()">🗑 Clear</button>
             </div>
           </div>
           <div class="terminal-body" id="termBody"><span class="dim">Press ▶ Run or Ctrl+Enter to execute your code...</span></div>
-          <div class="stdin-row" id="stdinRow" style="display:none">
-            <label>stdin:</label>
-            <input type="text" id="stdinInput" placeholder="Program input (one value per line, use \\n)">
+          <div class="stdin-row">
+            <span class="prompt">❯</span>
+            <input type="text" id="stdinInput" placeholder="Type program input here (use Enter to add lines)" onkeydown="handleStdinKey(event)">
           </div>
         </div>
       </div>
@@ -303,6 +302,32 @@
       return { ok:false, output: err.trim() ? err + (out?'\n'+out:'') : out || 'Exit code '+d.status };
     }
 
+    // ===== Terminal stdin handling =====
+    let stdinLines = [];
+    function handleStdinKey(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const inp = document.getElementById('stdinInput');
+        const val = inp.value;
+        stdinLines.push(val);
+        // Show the entered line in terminal
+        const body = document.getElementById('termBody');
+        const line = document.createElement('div');
+        line.style.color = '#8be9fd';
+        line.textContent = '❯ ' + val;
+        body.appendChild(line);
+        body.scrollTop = body.scrollHeight;
+        inp.value = '';
+      }
+    }
+    function getStdin() {
+      const inp = document.getElementById('stdinInput');
+      // Include anything typed but not yet Enter'd
+      const lines = [...stdinLines];
+      if (inp.value.trim()) lines.push(inp.value);
+      return lines.join('\n');
+    }
+
     // ===== Run =====
     async function runCode(){
       const code=editor?editor.getValue():'';
@@ -311,7 +336,9 @@
       btn.classList.add('loading');btn.disabled=true;
       setStatus('running','Running...');
       termWrite('<span class="dim">⏳ Executing...</span>');
-      const stdin=(document.getElementById('stdinInput').value||'').replace(/\\n/g,'\n');
+      const stdin = getStdin();
+      stdinLines = [];
+      document.getElementById('stdinInput').value = '';
 
       // JavaScript runs locally
       if(currentLang==='javascript'){
